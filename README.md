@@ -160,6 +160,7 @@ type KmsSignerKey =
 #### Creating order
 
 ```ts
+import { Token } from "@zynk/fastlane/sdk/stubs/base";
 import { CreateOrderRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
 
 const createOrderRequest: CreateOrderRequest = {
@@ -181,6 +182,7 @@ console.log("Tx signature :", response.txId);
 #### Replenishing order
 
 ```ts
+import { Token } from "@zynk/fastlane/sdk/stubs/base";
 import { ReplenishRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
 
 const replenishRequest: ReplenishRequest = {
