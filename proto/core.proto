@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package core;
+
+import "base.proto";
+
+service Core {
+  rpc DomainSeparator (DomainSeparatorRequest) returns (DomainSeparatorResponse);
+  rpc GetPdv (GetPdvRequest) returns (PdvResponse);
+  
+  rpc CreateOrder (CreateOrderRequest) returns (TxResponse);
+  rpc Replenish (ReplenishRequest) returns (TxResponse);
+  rpc Transfer (TransferRequest) returns (TxResponse);
+  rpc AttestOrder (AttestOrderRequest) returns (TxResponse);
+}
+
+message DomainSeparatorRequest {}
+message DomainSeparatorResponse {
+  int64 domain_separator = 1;
+}
+
+message GetPdvRequest {
+  optional string partner_id = 1;
+}
+
+message PdvResponse {
+  string pdv = 1;
+}
+
+message MetaArg {
+  string key = 1;
+  string value = 2;
+}
+
+message CreateOrderRequest {
+  string request_id = 1;
+  string partner_id = 2;
+  string beneficiary = 3;
+  base.Token token = 4;
+  string amount = 5;
+  optional bool pull = 6;
+  repeated MetaArg meta = 7;
+}
+
+message ReplenishRequest {
+  string request_id = 1;
+  string order_tracker = 2;
+  base.Token token = 3;
+  string amount = 4;
+  optional bool do_not_close = 5;
+  optional string kamino_amount = 6;
+  repeated MetaArg meta = 7;
+}
+
+message TransferRequest {
+  string request_id = 1;
+  string from = 2;
+  string to = 3;
+  string amount = 4;
+  base.Token token = 5;
+  optional base.Token to_token = 6;
+  optional base.Ed25519Pair ed25519_pair = 7;
+  repeated MetaArg meta = 8;
+}
+
+message AttestOrderRequest {
+  string order_id = 1;
+  base.Token token = 2;
+  string amount = 3;
+  repeated MetaArg meta = 4;
+}
+
+message TxResponse {
+  string request_id = 1;
+  string order_tracker = 2;
+  string tx_id = 3;
+  int64 position = 4;
+  map<string, string> meta = 5;
+}

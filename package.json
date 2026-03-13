@@ -1,0 +1,29 @@
+{
+  "name": "@zynk/fastlane",
+  "version": "0.1.0",
+  "description": "",
+  "homepage": "https://github.com/Zynklabs/fastlane-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/Zynklabs/fastlane-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zynklabs/fastlane-sdk.git"
+  },
+  "license": "ISC",
+  "author": "roy@zynk.money",
+  "main": "sdk/index.ts",
+  "scripts": {
+    "proto:gen": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=sdk/stubs --ts_proto_opt=outputServices=nice-grpc,outputServices=generic-definitions,env=node,useOptionals=messages,snakeToCamel=true -I ./proto proto/*.proto"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "ts-proto": "^2.11.5",
+    "tsc": "^2.0.4",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.3",
+    "nice-grpc": "^2.1.14"
+  }
+}

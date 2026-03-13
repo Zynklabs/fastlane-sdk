@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package base;
+
+enum Token {
+  USDC = 0;
+  USDT = 1;
+  PYUSD = 2;
+  USD1 = 3;
+  RLUSD = 4;
+}
+
+enum Denom {
+  LAMPORTS = 0;
+  SOL = 1;
+}
+
+service Base {
+  rpc GenerateHashedArray (GenerateHashedArrayRequest) returns (GenerateHashedArrayResponse);
+
+  rpc BuildEd25519Ix (BuildEd25519IxRequest) returns (Ed25519Pair);
+
+  rpc GetAccountInfo (GetAccountInfoRequest) returns (GetAccountInfoResponse);
+  rpc GetOwner (GetOwnerRequest) returns (GetOwnerResponse);
+  rpc GetTokenAccountOwner (GetTokenAccountOwnerRequest) returns (GetTokenAccountOwnerResponse);
+
+  rpc GetAtaAddress (GetAtaAddressRequest) returns (GetAtaAddressResponse);
+  rpc GetOrCreateAta (GetOrCreateAtaRequest) returns (GetOrCreateAtaResponse);
+
+  rpc ExecuteTx (ExecuteTxRequest) returns (ExecuteTxResponse);
+
+  rpc GetTxStatus (GetTxStatusRequest) returns (TxStatus);
+  rpc GetTxDetails (GetTxDetailsRequest) returns (TxDetails);
+  rpc GetTxCost (GetTxCostRequest) returns (TxCost);
+}
+
+
+message TxIxAccount {
+  string pubkey = 1;
+  bool is_signer = 2;
+  bool is_writable = 3;
+}
+
+message TxIx {
+  string program_id = 1;
+  bytes data = 2;
+  repeated TxIxAccount keys = 3;
+}
+
+message GenerateHashedArrayRequest {
+  string input = 1;
+}
+
+message GenerateHashedArrayResponse {
+  bytes hashed = 1;
+}
+
+message BuildEd25519IxRequest {
+  string message = 1;
+  string signer = 2;
+}
+
+message Ed25519Pair {
+  bytes ed25519_sig = 1;
+  TxIx ed25519_ix = 2;
+}
+
+message GetAccountInfoRequest {
+  string address = 1;
+}
+
+message GetAccountInfoResponse {
+  optional string owner = 1;
+  optional uint64 lamports = 2;
+  optional bytes data = 3;
+  optional bool executable = 4;
+}
+
+message GetOwnerRequest {
+  string address = 1;
+}
+
+message GetOwnerResponse {
+  string owner = 1;
+}
+
+message GetTokenAccountOwnerRequest {
+  string address = 1;
+}
+
+message GetTokenAccountOwnerResponse {
+  string owner = 1;
+}
+
+message GetAtaAddressRequest {
+  Token token = 1;
+  string owner = 2;
+}
+
+message GetAtaAddressResponse {
+  string ata = 1;
+}
+
+message GetOrCreateAtaRequest {
+  Token token = 1;
+  string owner = 2;
+  optional uint32 max_attempts = 3;
+}
+
+message GetOrCreateAtaResponse {
+  string ata = 1;
+  GetAccountInfoResponse token_account = 2;
+  optional string tx_id = 3;
+}
+
+message ExecuteTxRequest {
+  string request_id = 1;
+  repeated TxIx ixs = 2;
+  repeated string signers = 3;
+}
+
+message ExecuteTxResponse {
+  string request_id = 1;
+  string tx_id = 2;
+}
+
+message GetTxStatusRequest {
+  string tx_id = 1;
+  optional string confirmation = 2;
+}
+
+message TxStatus {
+  string status = 1;
+  uint64 slot = 2;
+}
+
+message GetTxDetailsRequest {
+  string tx_id = 1;
+  optional string commitment = 2;
+}
+
+message TxDetails {
+  string stringified = 1;
+}
+
+message GetTxCostRequest {
+  string tx_id = 1;
+  optional Denom denom = 2;
+}
+
+message TxCost {
+  double tx_cost = 1;
+  string denom = 2;
+}
