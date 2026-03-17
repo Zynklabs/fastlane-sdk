@@ -65,15 +65,23 @@ message TransferRequest {
 
 message AttestOrderRequest {
   string order_id = 1;
-  base.Token token = 2;
-  string amount = 3;
-  repeated MetaArg meta = 4;
+  string origin_chain = 2;
+  string target_chain = 3;
+  string origin = 4;
+  string proxy = 5;
+  string target = 6;
+  string txn = 7;
+  base.Token asset = 8;
+  string amount = 9;
+  optional string proxy_txn = 10;
+  optional base.Token proxy_asset = 11;
+  repeated MetaArg meta = 12;
 }
 
 message TxResponse {
   string request_id = 1;
   string order_tracker = 2;
-  string tx_id = 3;
+  string signature = 3;
   int64 position = 4;
   map<string, string> meta = 5;
 }

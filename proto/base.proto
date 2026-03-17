@@ -16,15 +16,18 @@ enum Denom {
 }
 
 service Base {
-  rpc GenerateHashedArray (GenerateHashedArrayRequest) returns (GenerateHashedArrayResponse);
+  rpc GenerateHashedArray (GenerateHashedArrayRequest) returns (HashedArrayResponse);
 
   rpc BuildEd25519Ix (BuildEd25519IxRequest) returns (Ed25519Pair);
 
-  rpc GetAccountInfo (GetAccountInfoRequest) returns (GetAccountInfoResponse);
-  rpc GetOwner (GetOwnerRequest) returns (GetOwnerResponse);
-  rpc GetTokenAccountOwner (GetTokenAccountOwnerRequest) returns (GetTokenAccountOwnerResponse);
+  rpc GetBalance (GetBalanceRequest) returns (Balance);
+  rpc GetBalances (GetBalancesRequest) returns (Balances);
 
-  rpc GetAtaAddress (GetAtaAddressRequest) returns (GetAtaAddressResponse);
+  rpc GetAccountInfo (GetAccountInfoRequest) returns (AccountInfoResponse);
+  rpc GetOwner (GetOwnerRequest) returns (GetOwnerResponse);
+  rpc GetTokenAccountOwner (GetTokenAccountOwnerRequest) returns (TokenAccountOwnerResponse);
+
+  rpc GetAtaAddress (GetAtaAddressRequest) returns (AtaAddressResponse);
   rpc GetOrCreateAta (GetOrCreateAtaRequest) returns (GetOrCreateAtaResponse);
 
   rpc ExecuteTx (ExecuteTxRequest) returns (ExecuteTxResponse);
@@ -51,7 +54,7 @@ message GenerateHashedArrayRequest {
   string input = 1;
 }
 
-message GenerateHashedArrayResponse {
+message HashedArrayResponse {
   bytes hashed = 1;
 }
 
@@ -65,11 +68,33 @@ message Ed25519Pair {
   TxIx ed25519_ix = 2;
 }
 
+message GetBalanceRequest {
+  string of = 1;
+  optional Token token = 2;
+}
+
+message GetBalancesRequest {
+  repeated string of = 1;
+  optional Token token = 2;
+}
+
+message Balance {
+  string amount = 1;
+  string ui_amount = 2;
+  optional string of = 3;
+  optional string address = 4;
+  optional Token token = 5;
+}
+
+message Balances {
+  repeated Balance balances = 1;
+}
+
 message GetAccountInfoRequest {
   string address = 1;
 }
 
-message GetAccountInfoResponse {
+message AccountInfoResponse {
   optional string owner = 1;
   optional uint64 lamports = 2;
   optional bytes data = 3;
@@ -88,7 +113,7 @@ message GetTokenAccountOwnerRequest {
   string address = 1;
 }
 
-message GetTokenAccountOwnerResponse {
+message TokenAccountOwnerResponse {
   string owner = 1;
 }
 
@@ -97,7 +122,7 @@ message GetAtaAddressRequest {
   string owner = 2;
 }
 
-message GetAtaAddressResponse {
+message AtaAddressResponse {
   string ata = 1;
 }
 
@@ -109,8 +134,8 @@ message GetOrCreateAtaRequest {
 
 message GetOrCreateAtaResponse {
   string ata = 1;
-  GetAccountInfoResponse token_account = 2;
-  optional string tx_id = 3;
+  AccountInfoResponse token_account = 2;
+  optional string signature = 3;
 }
 
 message ExecuteTxRequest {
@@ -121,11 +146,11 @@ message ExecuteTxRequest {
 
 message ExecuteTxResponse {
   string request_id = 1;
-  string tx_id = 2;
+  string signature = 2;
 }
 
 message GetTxStatusRequest {
-  string tx_id = 1;
+  string signature = 1;
   optional string confirmation = 2;
 }
 
@@ -135,7 +160,7 @@ message TxStatus {
 }
 
 message GetTxDetailsRequest {
-  string tx_id = 1;
+  string signature = 1;
   optional string commitment = 2;
 }
 
@@ -144,7 +169,7 @@ message TxDetails {
 }
 
 message GetTxCostRequest {
-  string tx_id = 1;
+  string signature = 1;
   optional Denom denom = 2;
 }
 

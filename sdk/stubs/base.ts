@@ -110,7 +110,7 @@ export interface GenerateHashedArrayRequest {
   input: string;
 }
 
-export interface GenerateHashedArrayResponse {
+export interface HashedArrayResponse {
   hashed: Buffer;
 }
 
@@ -124,11 +124,33 @@ export interface Ed25519Pair {
   ed25519Ix?: TxIx | undefined;
 }
 
+export interface GetBalanceRequest {
+  of: string;
+  token?: Token | undefined;
+}
+
+export interface GetBalancesRequest {
+  of: string[];
+  token?: Token | undefined;
+}
+
+export interface Balance {
+  amount: string;
+  uiAmount: string;
+  of?: string | undefined;
+  address?: string | undefined;
+  token?: Token | undefined;
+}
+
+export interface Balances {
+  balances: Balance[];
+}
+
 export interface GetAccountInfoRequest {
   address: string;
 }
 
-export interface GetAccountInfoResponse {
+export interface AccountInfoResponse {
   owner?: string | undefined;
   lamports?: number | undefined;
   data?: Buffer | undefined;
@@ -147,7 +169,7 @@ export interface GetTokenAccountOwnerRequest {
   address: string;
 }
 
-export interface GetTokenAccountOwnerResponse {
+export interface TokenAccountOwnerResponse {
   owner: string;
 }
 
@@ -156,7 +178,7 @@ export interface GetAtaAddressRequest {
   owner: string;
 }
 
-export interface GetAtaAddressResponse {
+export interface AtaAddressResponse {
   ata: string;
 }
 
@@ -168,8 +190,8 @@ export interface GetOrCreateAtaRequest {
 
 export interface GetOrCreateAtaResponse {
   ata: string;
-  tokenAccount?: GetAccountInfoResponse | undefined;
-  txId?: string | undefined;
+  tokenAccount?: AccountInfoResponse | undefined;
+  signature?: string | undefined;
 }
 
 export interface ExecuteTxRequest {
@@ -180,11 +202,11 @@ export interface ExecuteTxRequest {
 
 export interface ExecuteTxResponse {
   requestId: string;
-  txId: string;
+  signature: string;
 }
 
 export interface GetTxStatusRequest {
-  txId: string;
+  signature: string;
   confirmation?: string | undefined;
 }
 
@@ -194,7 +216,7 @@ export interface TxStatus {
 }
 
 export interface GetTxDetailsRequest {
-  txId: string;
+  signature: string;
   commitment?: string | undefined;
 }
 
@@ -203,7 +225,7 @@ export interface TxDetails {
 }
 
 export interface GetTxCostRequest {
-  txId: string;
+  signature: string;
   denom?: Denom | undefined;
 }
 
@@ -466,22 +488,22 @@ export const GenerateHashedArrayRequest: MessageFns<GenerateHashedArrayRequest> 
   },
 };
 
-function createBaseGenerateHashedArrayResponse(): GenerateHashedArrayResponse {
+function createBaseHashedArrayResponse(): HashedArrayResponse {
   return { hashed: Buffer.alloc(0) };
 }
 
-export const GenerateHashedArrayResponse: MessageFns<GenerateHashedArrayResponse> = {
-  encode(message: GenerateHashedArrayResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const HashedArrayResponse: MessageFns<HashedArrayResponse> = {
+  encode(message: HashedArrayResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.hashed.length !== 0) {
       writer.uint32(10).bytes(message.hashed);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GenerateHashedArrayResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): HashedArrayResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGenerateHashedArrayResponse();
+    const message = createBaseHashedArrayResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -502,11 +524,11 @@ export const GenerateHashedArrayResponse: MessageFns<GenerateHashedArrayResponse
     return message;
   },
 
-  fromJSON(object: any): GenerateHashedArrayResponse {
+  fromJSON(object: any): HashedArrayResponse {
     return { hashed: isSet(object.hashed) ? Buffer.from(bytesFromBase64(object.hashed)) : Buffer.alloc(0) };
   },
 
-  toJSON(message: GenerateHashedArrayResponse): unknown {
+  toJSON(message: HashedArrayResponse): unknown {
     const obj: any = {};
     if (message.hashed.length !== 0) {
       obj.hashed = base64FromBytes(message.hashed);
@@ -514,11 +536,11 @@ export const GenerateHashedArrayResponse: MessageFns<GenerateHashedArrayResponse
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GenerateHashedArrayResponse>, I>>(base?: I): GenerateHashedArrayResponse {
-    return GenerateHashedArrayResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<HashedArrayResponse>, I>>(base?: I): HashedArrayResponse {
+    return HashedArrayResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GenerateHashedArrayResponse>, I>>(object: I): GenerateHashedArrayResponse {
-    const message = createBaseGenerateHashedArrayResponse();
+  fromPartial<I extends Exact<DeepPartial<HashedArrayResponse>, I>>(object: I): HashedArrayResponse {
+    const message = createBaseHashedArrayResponse();
     message.hashed = object.hashed ?? Buffer.alloc(0);
     return message;
   },
@@ -686,6 +708,346 @@ export const Ed25519Pair: MessageFns<Ed25519Pair> = {
   },
 };
 
+function createBaseGetBalanceRequest(): GetBalanceRequest {
+  return { of: "", token: undefined };
+}
+
+export const GetBalanceRequest: MessageFns<GetBalanceRequest> = {
+  encode(message: GetBalanceRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.of !== "") {
+      writer.uint32(10).string(message.of);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(16).int32(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBalanceRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBalanceRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.of = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBalanceRequest {
+    return {
+      of: isSet(object.of) ? globalThis.String(object.of) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+    };
+  },
+
+  toJSON(message: GetBalanceRequest): unknown {
+    const obj: any = {};
+    if (message.of !== "") {
+      obj.of = message.of;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBalanceRequest>, I>>(base?: I): GetBalanceRequest {
+    return GetBalanceRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBalanceRequest>, I>>(object: I): GetBalanceRequest {
+    const message = createBaseGetBalanceRequest();
+    message.of = object.of ?? "";
+    message.token = object.token ?? undefined;
+    return message;
+  },
+};
+
+function createBaseGetBalancesRequest(): GetBalancesRequest {
+  return { of: [], token: undefined };
+}
+
+export const GetBalancesRequest: MessageFns<GetBalancesRequest> = {
+  encode(message: GetBalancesRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.of) {
+      writer.uint32(10).string(v!);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(16).int32(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBalancesRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBalancesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.of.push(reader.string());
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBalancesRequest {
+    return {
+      of: globalThis.Array.isArray(object?.of) ? object.of.map((e: any) => globalThis.String(e)) : [],
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+    };
+  },
+
+  toJSON(message: GetBalancesRequest): unknown {
+    const obj: any = {};
+    if (message.of?.length) {
+      obj.of = message.of;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBalancesRequest>, I>>(base?: I): GetBalancesRequest {
+    return GetBalancesRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBalancesRequest>, I>>(object: I): GetBalancesRequest {
+    const message = createBaseGetBalancesRequest();
+    message.of = object.of?.map((e) => e) || [];
+    message.token = object.token ?? undefined;
+    return message;
+  },
+};
+
+function createBaseBalance(): Balance {
+  return { amount: "", uiAmount: "", of: undefined, address: undefined, token: undefined };
+}
+
+export const Balance: MessageFns<Balance> = {
+  encode(message: Balance, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.amount !== "") {
+      writer.uint32(10).string(message.amount);
+    }
+    if (message.uiAmount !== "") {
+      writer.uint32(18).string(message.uiAmount);
+    }
+    if (message.of !== undefined) {
+      writer.uint32(26).string(message.of);
+    }
+    if (message.address !== undefined) {
+      writer.uint32(34).string(message.address);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(40).int32(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Balance {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBalance();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.uiAmount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.of = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Balance {
+    return {
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      uiAmount: isSet(object.uiAmount)
+        ? globalThis.String(object.uiAmount)
+        : isSet(object.ui_amount)
+        ? globalThis.String(object.ui_amount)
+        : "",
+      of: isSet(object.of) ? globalThis.String(object.of) : undefined,
+      address: isSet(object.address) ? globalThis.String(object.address) : undefined,
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+    };
+  },
+
+  toJSON(message: Balance): unknown {
+    const obj: any = {};
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.uiAmount !== "") {
+      obj.uiAmount = message.uiAmount;
+    }
+    if (message.of !== undefined) {
+      obj.of = message.of;
+    }
+    if (message.address !== undefined) {
+      obj.address = message.address;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Balance>, I>>(base?: I): Balance {
+    return Balance.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Balance>, I>>(object: I): Balance {
+    const message = createBaseBalance();
+    message.amount = object.amount ?? "";
+    message.uiAmount = object.uiAmount ?? "";
+    message.of = object.of ?? undefined;
+    message.address = object.address ?? undefined;
+    message.token = object.token ?? undefined;
+    return message;
+  },
+};
+
+function createBaseBalances(): Balances {
+  return { balances: [] };
+}
+
+export const Balances: MessageFns<Balances> = {
+  encode(message: Balances, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.balances) {
+      Balance.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Balances {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBalances();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.balances.push(Balance.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Balances {
+    return {
+      balances: globalThis.Array.isArray(object?.balances) ? object.balances.map((e: any) => Balance.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: Balances): unknown {
+    const obj: any = {};
+    if (message.balances?.length) {
+      obj.balances = message.balances.map((e) => Balance.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Balances>, I>>(base?: I): Balances {
+    return Balances.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Balances>, I>>(object: I): Balances {
+    const message = createBaseBalances();
+    message.balances = object.balances?.map((e) => Balance.fromPartial(e)) || [];
+    return message;
+  },
+};
+
 function createBaseGetAccountInfoRequest(): GetAccountInfoRequest {
   return { address: "" };
 }
@@ -744,12 +1106,12 @@ export const GetAccountInfoRequest: MessageFns<GetAccountInfoRequest> = {
   },
 };
 
-function createBaseGetAccountInfoResponse(): GetAccountInfoResponse {
+function createBaseAccountInfoResponse(): AccountInfoResponse {
   return { owner: undefined, lamports: undefined, data: undefined, executable: undefined };
 }
 
-export const GetAccountInfoResponse: MessageFns<GetAccountInfoResponse> = {
-  encode(message: GetAccountInfoResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const AccountInfoResponse: MessageFns<AccountInfoResponse> = {
+  encode(message: AccountInfoResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.owner !== undefined) {
       writer.uint32(10).string(message.owner);
     }
@@ -765,10 +1127,10 @@ export const GetAccountInfoResponse: MessageFns<GetAccountInfoResponse> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetAccountInfoResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): AccountInfoResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetAccountInfoResponse();
+    const message = createBaseAccountInfoResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -813,7 +1175,7 @@ export const GetAccountInfoResponse: MessageFns<GetAccountInfoResponse> = {
     return message;
   },
 
-  fromJSON(object: any): GetAccountInfoResponse {
+  fromJSON(object: any): AccountInfoResponse {
     return {
       owner: isSet(object.owner) ? globalThis.String(object.owner) : undefined,
       lamports: isSet(object.lamports) ? globalThis.Number(object.lamports) : undefined,
@@ -822,7 +1184,7 @@ export const GetAccountInfoResponse: MessageFns<GetAccountInfoResponse> = {
     };
   },
 
-  toJSON(message: GetAccountInfoResponse): unknown {
+  toJSON(message: AccountInfoResponse): unknown {
     const obj: any = {};
     if (message.owner !== undefined) {
       obj.owner = message.owner;
@@ -839,11 +1201,11 @@ export const GetAccountInfoResponse: MessageFns<GetAccountInfoResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetAccountInfoResponse>, I>>(base?: I): GetAccountInfoResponse {
-    return GetAccountInfoResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<AccountInfoResponse>, I>>(base?: I): AccountInfoResponse {
+    return AccountInfoResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetAccountInfoResponse>, I>>(object: I): GetAccountInfoResponse {
-    const message = createBaseGetAccountInfoResponse();
+  fromPartial<I extends Exact<DeepPartial<AccountInfoResponse>, I>>(object: I): AccountInfoResponse {
+    const message = createBaseAccountInfoResponse();
     message.owner = object.owner ?? undefined;
     message.lamports = object.lamports ?? undefined;
     message.data = object.data ?? undefined;
@@ -1026,22 +1388,22 @@ export const GetTokenAccountOwnerRequest: MessageFns<GetTokenAccountOwnerRequest
   },
 };
 
-function createBaseGetTokenAccountOwnerResponse(): GetTokenAccountOwnerResponse {
+function createBaseTokenAccountOwnerResponse(): TokenAccountOwnerResponse {
   return { owner: "" };
 }
 
-export const GetTokenAccountOwnerResponse: MessageFns<GetTokenAccountOwnerResponse> = {
-  encode(message: GetTokenAccountOwnerResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const TokenAccountOwnerResponse: MessageFns<TokenAccountOwnerResponse> = {
+  encode(message: TokenAccountOwnerResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.owner !== "") {
       writer.uint32(10).string(message.owner);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetTokenAccountOwnerResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): TokenAccountOwnerResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetTokenAccountOwnerResponse();
+    const message = createBaseTokenAccountOwnerResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1062,11 +1424,11 @@ export const GetTokenAccountOwnerResponse: MessageFns<GetTokenAccountOwnerRespon
     return message;
   },
 
-  fromJSON(object: any): GetTokenAccountOwnerResponse {
+  fromJSON(object: any): TokenAccountOwnerResponse {
     return { owner: isSet(object.owner) ? globalThis.String(object.owner) : "" };
   },
 
-  toJSON(message: GetTokenAccountOwnerResponse): unknown {
+  toJSON(message: TokenAccountOwnerResponse): unknown {
     const obj: any = {};
     if (message.owner !== "") {
       obj.owner = message.owner;
@@ -1074,11 +1436,11 @@ export const GetTokenAccountOwnerResponse: MessageFns<GetTokenAccountOwnerRespon
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetTokenAccountOwnerResponse>, I>>(base?: I): GetTokenAccountOwnerResponse {
-    return GetTokenAccountOwnerResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<TokenAccountOwnerResponse>, I>>(base?: I): TokenAccountOwnerResponse {
+    return TokenAccountOwnerResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetTokenAccountOwnerResponse>, I>>(object: I): GetTokenAccountOwnerResponse {
-    const message = createBaseGetTokenAccountOwnerResponse();
+  fromPartial<I extends Exact<DeepPartial<TokenAccountOwnerResponse>, I>>(object: I): TokenAccountOwnerResponse {
+    const message = createBaseTokenAccountOwnerResponse();
     message.owner = object.owner ?? "";
     return message;
   },
@@ -1160,22 +1522,22 @@ export const GetAtaAddressRequest: MessageFns<GetAtaAddressRequest> = {
   },
 };
 
-function createBaseGetAtaAddressResponse(): GetAtaAddressResponse {
+function createBaseAtaAddressResponse(): AtaAddressResponse {
   return { ata: "" };
 }
 
-export const GetAtaAddressResponse: MessageFns<GetAtaAddressResponse> = {
-  encode(message: GetAtaAddressResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const AtaAddressResponse: MessageFns<AtaAddressResponse> = {
+  encode(message: AtaAddressResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.ata !== "") {
       writer.uint32(10).string(message.ata);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetAtaAddressResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): AtaAddressResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetAtaAddressResponse();
+    const message = createBaseAtaAddressResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1196,11 +1558,11 @@ export const GetAtaAddressResponse: MessageFns<GetAtaAddressResponse> = {
     return message;
   },
 
-  fromJSON(object: any): GetAtaAddressResponse {
+  fromJSON(object: any): AtaAddressResponse {
     return { ata: isSet(object.ata) ? globalThis.String(object.ata) : "" };
   },
 
-  toJSON(message: GetAtaAddressResponse): unknown {
+  toJSON(message: AtaAddressResponse): unknown {
     const obj: any = {};
     if (message.ata !== "") {
       obj.ata = message.ata;
@@ -1208,11 +1570,11 @@ export const GetAtaAddressResponse: MessageFns<GetAtaAddressResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetAtaAddressResponse>, I>>(base?: I): GetAtaAddressResponse {
-    return GetAtaAddressResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<AtaAddressResponse>, I>>(base?: I): AtaAddressResponse {
+    return AtaAddressResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetAtaAddressResponse>, I>>(object: I): GetAtaAddressResponse {
-    const message = createBaseGetAtaAddressResponse();
+  fromPartial<I extends Exact<DeepPartial<AtaAddressResponse>, I>>(object: I): AtaAddressResponse {
+    const message = createBaseAtaAddressResponse();
     message.ata = object.ata ?? "";
     return message;
   },
@@ -1315,7 +1677,7 @@ export const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest> = {
 };
 
 function createBaseGetOrCreateAtaResponse(): GetOrCreateAtaResponse {
-  return { ata: "", tokenAccount: undefined, txId: undefined };
+  return { ata: "", tokenAccount: undefined, signature: undefined };
 }
 
 export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
@@ -1324,10 +1686,10 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
       writer.uint32(10).string(message.ata);
     }
     if (message.tokenAccount !== undefined) {
-      GetAccountInfoResponse.encode(message.tokenAccount, writer.uint32(18).fork()).join();
+      AccountInfoResponse.encode(message.tokenAccount, writer.uint32(18).fork()).join();
     }
-    if (message.txId !== undefined) {
-      writer.uint32(26).string(message.txId);
+    if (message.signature !== undefined) {
+      writer.uint32(26).string(message.signature);
     }
     return writer;
   },
@@ -1352,7 +1714,7 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
             break;
           }
 
-          message.tokenAccount = GetAccountInfoResponse.decode(reader, reader.uint32());
+          message.tokenAccount = AccountInfoResponse.decode(reader, reader.uint32());
           continue;
         }
         case 3: {
@@ -1360,7 +1722,7 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
             break;
           }
 
-          message.txId = reader.string();
+          message.signature = reader.string();
           continue;
         }
       }
@@ -1376,15 +1738,11 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
     return {
       ata: isSet(object.ata) ? globalThis.String(object.ata) : "",
       tokenAccount: isSet(object.tokenAccount)
-        ? GetAccountInfoResponse.fromJSON(object.tokenAccount)
+        ? AccountInfoResponse.fromJSON(object.tokenAccount)
         : isSet(object.token_account)
-        ? GetAccountInfoResponse.fromJSON(object.token_account)
+        ? AccountInfoResponse.fromJSON(object.token_account)
         : undefined,
-      txId: isSet(object.txId)
-        ? globalThis.String(object.txId)
-        : isSet(object.tx_id)
-        ? globalThis.String(object.tx_id)
-        : undefined,
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : undefined,
     };
   },
 
@@ -1394,10 +1752,10 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
       obj.ata = message.ata;
     }
     if (message.tokenAccount !== undefined) {
-      obj.tokenAccount = GetAccountInfoResponse.toJSON(message.tokenAccount);
+      obj.tokenAccount = AccountInfoResponse.toJSON(message.tokenAccount);
     }
-    if (message.txId !== undefined) {
-      obj.txId = message.txId;
+    if (message.signature !== undefined) {
+      obj.signature = message.signature;
     }
     return obj;
   },
@@ -1409,9 +1767,9 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
     const message = createBaseGetOrCreateAtaResponse();
     message.ata = object.ata ?? "";
     message.tokenAccount = (object.tokenAccount !== undefined && object.tokenAccount !== null)
-      ? GetAccountInfoResponse.fromPartial(object.tokenAccount)
+      ? AccountInfoResponse.fromPartial(object.tokenAccount)
       : undefined;
-    message.txId = object.txId ?? undefined;
+    message.signature = object.signature ?? undefined;
     return message;
   },
 };
@@ -1513,7 +1871,7 @@ export const ExecuteTxRequest: MessageFns<ExecuteTxRequest> = {
 };
 
 function createBaseExecuteTxResponse(): ExecuteTxResponse {
-  return { requestId: "", txId: "" };
+  return { requestId: "", signature: "" };
 }
 
 export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
@@ -1521,8 +1879,8 @@ export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
     if (message.requestId !== "") {
       writer.uint32(10).string(message.requestId);
     }
-    if (message.txId !== "") {
-      writer.uint32(18).string(message.txId);
+    if (message.signature !== "") {
+      writer.uint32(18).string(message.signature);
     }
     return writer;
   },
@@ -1547,7 +1905,7 @@ export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
             break;
           }
 
-          message.txId = reader.string();
+          message.signature = reader.string();
           continue;
         }
       }
@@ -1566,11 +1924,7 @@ export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
         : isSet(object.request_id)
         ? globalThis.String(object.request_id)
         : "",
-      txId: isSet(object.txId)
-        ? globalThis.String(object.txId)
-        : isSet(object.tx_id)
-        ? globalThis.String(object.tx_id)
-        : "",
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
     };
   },
 
@@ -1579,8 +1933,8 @@ export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
     if (message.requestId !== "") {
       obj.requestId = message.requestId;
     }
-    if (message.txId !== "") {
-      obj.txId = message.txId;
+    if (message.signature !== "") {
+      obj.signature = message.signature;
     }
     return obj;
   },
@@ -1591,19 +1945,19 @@ export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
   fromPartial<I extends Exact<DeepPartial<ExecuteTxResponse>, I>>(object: I): ExecuteTxResponse {
     const message = createBaseExecuteTxResponse();
     message.requestId = object.requestId ?? "";
-    message.txId = object.txId ?? "";
+    message.signature = object.signature ?? "";
     return message;
   },
 };
 
 function createBaseGetTxStatusRequest(): GetTxStatusRequest {
-  return { txId: "", confirmation: undefined };
+  return { signature: "", confirmation: undefined };
 }
 
 export const GetTxStatusRequest: MessageFns<GetTxStatusRequest> = {
   encode(message: GetTxStatusRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.txId !== "") {
-      writer.uint32(10).string(message.txId);
+    if (message.signature !== "") {
+      writer.uint32(10).string(message.signature);
     }
     if (message.confirmation !== undefined) {
       writer.uint32(18).string(message.confirmation);
@@ -1623,7 +1977,7 @@ export const GetTxStatusRequest: MessageFns<GetTxStatusRequest> = {
             break;
           }
 
-          message.txId = reader.string();
+          message.signature = reader.string();
           continue;
         }
         case 2: {
@@ -1645,19 +1999,15 @@ export const GetTxStatusRequest: MessageFns<GetTxStatusRequest> = {
 
   fromJSON(object: any): GetTxStatusRequest {
     return {
-      txId: isSet(object.txId)
-        ? globalThis.String(object.txId)
-        : isSet(object.tx_id)
-        ? globalThis.String(object.tx_id)
-        : "",
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
       confirmation: isSet(object.confirmation) ? globalThis.String(object.confirmation) : undefined,
     };
   },
 
   toJSON(message: GetTxStatusRequest): unknown {
     const obj: any = {};
-    if (message.txId !== "") {
-      obj.txId = message.txId;
+    if (message.signature !== "") {
+      obj.signature = message.signature;
     }
     if (message.confirmation !== undefined) {
       obj.confirmation = message.confirmation;
@@ -1670,7 +2020,7 @@ export const GetTxStatusRequest: MessageFns<GetTxStatusRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetTxStatusRequest>, I>>(object: I): GetTxStatusRequest {
     const message = createBaseGetTxStatusRequest();
-    message.txId = object.txId ?? "";
+    message.signature = object.signature ?? "";
     message.confirmation = object.confirmation ?? undefined;
     return message;
   },
@@ -1753,13 +2103,13 @@ export const TxStatus: MessageFns<TxStatus> = {
 };
 
 function createBaseGetTxDetailsRequest(): GetTxDetailsRequest {
-  return { txId: "", commitment: undefined };
+  return { signature: "", commitment: undefined };
 }
 
 export const GetTxDetailsRequest: MessageFns<GetTxDetailsRequest> = {
   encode(message: GetTxDetailsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.txId !== "") {
-      writer.uint32(10).string(message.txId);
+    if (message.signature !== "") {
+      writer.uint32(10).string(message.signature);
     }
     if (message.commitment !== undefined) {
       writer.uint32(18).string(message.commitment);
@@ -1779,7 +2129,7 @@ export const GetTxDetailsRequest: MessageFns<GetTxDetailsRequest> = {
             break;
           }
 
-          message.txId = reader.string();
+          message.signature = reader.string();
           continue;
         }
         case 2: {
@@ -1801,19 +2151,15 @@ export const GetTxDetailsRequest: MessageFns<GetTxDetailsRequest> = {
 
   fromJSON(object: any): GetTxDetailsRequest {
     return {
-      txId: isSet(object.txId)
-        ? globalThis.String(object.txId)
-        : isSet(object.tx_id)
-        ? globalThis.String(object.tx_id)
-        : "",
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
       commitment: isSet(object.commitment) ? globalThis.String(object.commitment) : undefined,
     };
   },
 
   toJSON(message: GetTxDetailsRequest): unknown {
     const obj: any = {};
-    if (message.txId !== "") {
-      obj.txId = message.txId;
+    if (message.signature !== "") {
+      obj.signature = message.signature;
     }
     if (message.commitment !== undefined) {
       obj.commitment = message.commitment;
@@ -1826,7 +2172,7 @@ export const GetTxDetailsRequest: MessageFns<GetTxDetailsRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetTxDetailsRequest>, I>>(object: I): GetTxDetailsRequest {
     const message = createBaseGetTxDetailsRequest();
-    message.txId = object.txId ?? "";
+    message.signature = object.signature ?? "";
     message.commitment = object.commitment ?? undefined;
     return message;
   },
@@ -1891,13 +2237,13 @@ export const TxDetails: MessageFns<TxDetails> = {
 };
 
 function createBaseGetTxCostRequest(): GetTxCostRequest {
-  return { txId: "", denom: undefined };
+  return { signature: "", denom: undefined };
 }
 
 export const GetTxCostRequest: MessageFns<GetTxCostRequest> = {
   encode(message: GetTxCostRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.txId !== "") {
-      writer.uint32(10).string(message.txId);
+    if (message.signature !== "") {
+      writer.uint32(10).string(message.signature);
     }
     if (message.denom !== undefined) {
       writer.uint32(16).int32(message.denom);
@@ -1917,7 +2263,7 @@ export const GetTxCostRequest: MessageFns<GetTxCostRequest> = {
             break;
           }
 
-          message.txId = reader.string();
+          message.signature = reader.string();
           continue;
         }
         case 2: {
@@ -1939,19 +2285,15 @@ export const GetTxCostRequest: MessageFns<GetTxCostRequest> = {
 
   fromJSON(object: any): GetTxCostRequest {
     return {
-      txId: isSet(object.txId)
-        ? globalThis.String(object.txId)
-        : isSet(object.tx_id)
-        ? globalThis.String(object.tx_id)
-        : "",
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
       denom: isSet(object.denom) ? denomFromJSON(object.denom) : undefined,
     };
   },
 
   toJSON(message: GetTxCostRequest): unknown {
     const obj: any = {};
-    if (message.txId !== "") {
-      obj.txId = message.txId;
+    if (message.signature !== "") {
+      obj.signature = message.signature;
     }
     if (message.denom !== undefined) {
       obj.denom = denomToJSON(message.denom);
@@ -1964,7 +2306,7 @@ export const GetTxCostRequest: MessageFns<GetTxCostRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetTxCostRequest>, I>>(object: I): GetTxCostRequest {
     const message = createBaseGetTxCostRequest();
-    message.txId = object.txId ?? "";
+    message.signature = object.signature ?? "";
     message.denom = object.denom ?? undefined;
     return message;
   },
@@ -2059,7 +2401,7 @@ export const BaseDefinition = {
       name: "GenerateHashedArray",
       requestType: GenerateHashedArrayRequest as typeof GenerateHashedArrayRequest,
       requestStream: false,
-      responseType: GenerateHashedArrayResponse as typeof GenerateHashedArrayResponse,
+      responseType: HashedArrayResponse as typeof HashedArrayResponse,
       responseStream: false,
       options: {},
     },
@@ -2071,11 +2413,27 @@ export const BaseDefinition = {
       responseStream: false,
       options: {},
     },
+    getBalance: {
+      name: "GetBalance",
+      requestType: GetBalanceRequest as typeof GetBalanceRequest,
+      requestStream: false,
+      responseType: Balance as typeof Balance,
+      responseStream: false,
+      options: {},
+    },
+    getBalances: {
+      name: "GetBalances",
+      requestType: GetBalancesRequest as typeof GetBalancesRequest,
+      requestStream: false,
+      responseType: Balances as typeof Balances,
+      responseStream: false,
+      options: {},
+    },
     getAccountInfo: {
       name: "GetAccountInfo",
       requestType: GetAccountInfoRequest as typeof GetAccountInfoRequest,
       requestStream: false,
-      responseType: GetAccountInfoResponse as typeof GetAccountInfoResponse,
+      responseType: AccountInfoResponse as typeof AccountInfoResponse,
       responseStream: false,
       options: {},
     },
@@ -2091,7 +2449,7 @@ export const BaseDefinition = {
       name: "GetTokenAccountOwner",
       requestType: GetTokenAccountOwnerRequest as typeof GetTokenAccountOwnerRequest,
       requestStream: false,
-      responseType: GetTokenAccountOwnerResponse as typeof GetTokenAccountOwnerResponse,
+      responseType: TokenAccountOwnerResponse as typeof TokenAccountOwnerResponse,
       responseStream: false,
       options: {},
     },
@@ -2099,7 +2457,7 @@ export const BaseDefinition = {
       name: "GetAtaAddress",
       requestType: GetAtaAddressRequest as typeof GetAtaAddressRequest,
       requestStream: false,
-      responseType: GetAtaAddressResponse as typeof GetAtaAddressResponse,
+      responseType: AtaAddressResponse as typeof AtaAddressResponse,
       responseStream: false,
       options: {},
     },
@@ -2150,24 +2508,26 @@ export interface BaseServiceImplementation<CallContextExt = {}> {
   generateHashedArray(
     request: GenerateHashedArrayRequest,
     context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<GenerateHashedArrayResponse>>;
+  ): Promise<DeepPartial<HashedArrayResponse>>;
   buildEd25519Ix(
     request: BuildEd25519IxRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<Ed25519Pair>>;
+  getBalance(request: GetBalanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balance>>;
+  getBalances(request: GetBalancesRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balances>>;
   getAccountInfo(
     request: GetAccountInfoRequest,
     context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<GetAccountInfoResponse>>;
+  ): Promise<DeepPartial<AccountInfoResponse>>;
   getOwner(request: GetOwnerRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GetOwnerResponse>>;
   getTokenAccountOwner(
     request: GetTokenAccountOwnerRequest,
     context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<GetTokenAccountOwnerResponse>>;
+  ): Promise<DeepPartial<TokenAccountOwnerResponse>>;
   getAtaAddress(
     request: GetAtaAddressRequest,
     context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<GetAtaAddressResponse>>;
+  ): Promise<DeepPartial<AtaAddressResponse>>;
   getOrCreateAta(
     request: GetOrCreateAtaRequest,
     context: CallContext & CallContextExt,
@@ -2182,24 +2542,26 @@ export interface BaseClient<CallOptionsExt = {}> {
   generateHashedArray(
     request: DeepPartial<GenerateHashedArrayRequest>,
     options?: CallOptions & CallOptionsExt,
-  ): Promise<GenerateHashedArrayResponse>;
+  ): Promise<HashedArrayResponse>;
   buildEd25519Ix(
     request: DeepPartial<BuildEd25519IxRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<Ed25519Pair>;
+  getBalance(request: DeepPartial<GetBalanceRequest>, options?: CallOptions & CallOptionsExt): Promise<Balance>;
+  getBalances(request: DeepPartial<GetBalancesRequest>, options?: CallOptions & CallOptionsExt): Promise<Balances>;
   getAccountInfo(
     request: DeepPartial<GetAccountInfoRequest>,
     options?: CallOptions & CallOptionsExt,
-  ): Promise<GetAccountInfoResponse>;
+  ): Promise<AccountInfoResponse>;
   getOwner(request: DeepPartial<GetOwnerRequest>, options?: CallOptions & CallOptionsExt): Promise<GetOwnerResponse>;
   getTokenAccountOwner(
     request: DeepPartial<GetTokenAccountOwnerRequest>,
     options?: CallOptions & CallOptionsExt,
-  ): Promise<GetTokenAccountOwnerResponse>;
+  ): Promise<TokenAccountOwnerResponse>;
   getAtaAddress(
     request: DeepPartial<GetAtaAddressRequest>,
     options?: CallOptions & CallOptionsExt,
-  ): Promise<GetAtaAddressResponse>;
+  ): Promise<AtaAddressResponse>;
   getOrCreateAta(
     request: DeepPartial<GetOrCreateAtaRequest>,
     options?: CallOptions & CallOptionsExt,

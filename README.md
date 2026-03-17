@@ -55,10 +55,10 @@ const sdk = Fastlane(<endpoint>);
 
 The returned object exposes these primary namespaces:
 
-sdk.base — for general blockchain operations, token management, and transaction utilities.
-sdk.core — for zynk-core operations like creating orders, replenishing orders, closing order and one-time transfers (transient orders), along with other peripherals.
-sdk.orbit — for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
-sdk.kamino — for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
+- sdk.base: for general blockchain operations, token management, and transaction utilities.
+- sdk.core: for zynk-core operations like creating orders, replenishing orders, closing order and one-time transfers (transient orders), along with other peripherals.
+- sdk.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
+- sdk.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
 
 ### Quick Start
 
@@ -69,7 +69,7 @@ const sdk = Fastlane(<endpoint>);
 
 try {
     const status = await sdk.base.getTxStatus({
-        txId: "5ujeMEWV9PZCSEepZCHUec8QtckwunRgic3YgKXGixP9HpZbLoQmYbtfGrBTsUaxBikeRwhH49F1pHezHn9sgVaY",
+        signature: "5ujeMEWV9PZCSEepZCHUec8QtckwunRgic3YgKXGixP9HpZbLoQmYbtfGrBTsUaxBikeRwhH49F1pHezHn9sgVaY",
     });
 
     console.log("Status :", status.status);
@@ -102,17 +102,14 @@ Fastlane(<endpoint>)
 │   ├─ getBorrowCapacity()
 │   ├─ getCumulativeBorrowRate()
 │   ├─ estimateYield()
-│   ├─ staleCheck()
 │   ├─ borrow()
 │   ├─ repay()
 │   ├─ withdraw()
 │   ├─ deposit()
-│   └─ transact()
+│   └─ depositCollateral()
 └─ base
     ├─ generateHashedArray()
     ├─ buildEd25519Ix()
-    ├─ getBalance()
-    ├─ getBalances()
     ├─ getAccountInfo()
     ├─ getOwner()
     ├─ getTokenAccountOwner()
@@ -176,7 +173,7 @@ const createOrderRequest: CreateOrderRequest = {
 const response: TxResponse = await sdk.core.createOrder(createOrderRequest);
 
 console.log("Order tracker:", response.orderTracker);
-console.log("Tx signature :", response.txId);
+console.log("Tx signature :", response.signature);
 ```
 
 #### Replenishing order
@@ -197,7 +194,7 @@ const replenishRequest: ReplenishRequest = {
 const response: TxResponse = await sdk.core.replenish(replenishRequest);
 
 console.log("Order tracker:", response.orderTracker);
-console.log("Tx signature :", response.txId);
+console.log("Tx signature :", response.signature);
 ```
 
 #### Transfer from ZOW => Beneficiary (incl. PDVs) - transient order
@@ -240,7 +237,119 @@ const transferRequest = {
 const response: TxResponse = await sdk.core.transfer(transferRequest);
 
 console.log("Order tracker:", response.orderTracker);
-console.log("Tx signature :", response.txId);
+console.log("Tx signature :", response.signature);
+```
+
+#### Transfer from PDV => Beneficiary (incl. PDVs) - multi asset swap
+
+```ts
+import {
+  BuildEd25519IxRequest,
+  Ed25519Pair,
+  Token,
+} from "@zynk/fastlane/sdk/stubs/base";
+import {
+  DomainSeparatorResponse,
+  PdvResponse,
+  TxResponse,
+} from "@zynk/fastlane/sdk/stubs/core";
+
+const from = "partner-1";
+const to = "partner-2"; // can accept partnerId or any bs58 address
+
+const dsResult: DomainSeparatorResponse = await sdk.core.domainSeparator({});
+const pdvFromResult: PdvResponse = await sdk.core.getPdv({ partnerId: from });
+const pdvToResult: PdvResponse = await sdk.core.getPdv({ partnerId: to });
+
+const ed25519Request: BuildEd25519IxRequest = {
+  message: `${dsResult.domainSeparator}::${pdvToResult.pdv}::${pdvFromResult.pdv}`,
+  signer: "manager",
+};
+
+const ed25519Pair: Ed25519Pair = await sdk.base.buildEd25519Ix(ed25519Request);
+
+const transferRequest = {
+  requestId: "trans-multi-123456",
+  from,
+  to,
+  token: Token.USDC,
+  token: Token.USDT,
+  amount: "1000000",
+  ed25519Pair,
+  meta: [],
+};
+
+const response: TxResponse = await sdk.core.transfer(transferRequest);
+
+console.log("Order tracker:", response.orderTracker);
+console.log("Tx signature :", response.signature);
+```
+
+#### Attest Order - Solana ZOW => Arbitrum Beneficiary
+
+```ts
+import { Token } from "@zynk/fastlane/sdk/stubs/base";
+import { AttestOrderRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
+
+const attestOrderRequest: AttestOrderRequest = {
+  orderId: "sol-arb-12345";
+  originChain: "Solana";
+  targetChain: "Arbitrum";
+  origin: "<SOLANA_ZOW>";
+  proxy: "<ARB_ZOW>";
+  target: "<ARB_Beneficiary>";
+  txn: "0x821y03n12u294324......";
+  asset: Token.USDC;
+  amount: "2000000";
+  proxyTxn: "<CCTP_Sig>"; // Bridge transaction hash/signature (if applicable)
+  proxyAsset: Token.USDT; // asset used during bridging (if different)
+  meta: []
+};
+
+const response: TxResponse = await sdk.core.attestOrder(attestOrderRequest);
+
+console.log("Order tracker:", response.orderTracker);
+console.log("Tx signature :", response.signature);
+```
+
+#### Any arbitrary instructions requiring Zynk signers
+
+```ts
+import {
+  PublicKey,
+  SystemProgram,
+  TransactionInstruction,
+} from "@solana/web3.js";
+import {
+  ExecuteTxRequest,
+  ExecuteTxResponse,
+} from "@zynk/fastlane/sdk/stubs/base";
+
+const transferIx = SystemProgram.transfer({
+  fromPubkey: new PublicKey("3r7r8dgdcnd8U3HNXxGvS81JXZntJWNk1pJKrN2JiuDR"), // Solana Devnet ZOW
+  toPubkey: new PublicKey("Royzy1HKXwHpFEnKZRyqSq8S56speHvFD1VnyxXioDe"),
+  lamports: 1_000_000, // 0.001 SOL
+});
+
+export const TransactionInstructionToTxIx = (ix: TransactionInstruction) => ({
+  programId: ix.programId.toBase58(),
+  data: new Uint8Array(ix.data),
+  keys: ix.keys.map((k) => ({
+    ...k,
+    pubkey: k.pubkey.toBase58(),
+  })),
+});
+
+const ex_request: ExecuteTxRequest = {
+  requestId: "execute-tx-1",
+  ixs: [TransactionInstructionToTxIx(transferIx)],
+  signers: ["ZOW"],
+};
+
+const response: ExecuteTxResponse = await sdk.base.executeIx(ex_request);
+
+console.log("Order tracker:", response.requestId);
+console.log("Tx signature :", response.signature);
 ```
 
 ## Protobuf Reference
@@ -249,6 +358,7 @@ The SDK is based on the following proto services:
 
 - Base Service ([proto/base.proto](./proto/base.proto)): Account utilities, token account management, transaction execution, and status queries.
 - Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, and attestation.
+- Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
 
 ## Development
 

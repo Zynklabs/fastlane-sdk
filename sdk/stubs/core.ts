@@ -64,15 +64,23 @@ export interface TransferRequest {
 
 export interface AttestOrderRequest {
   orderId: string;
-  token: Token;
+  originChain: string;
+  targetChain: string;
+  origin: string;
+  proxy: string;
+  target: string;
+  txn: string;
+  asset: Token;
   amount: string;
+  proxyTxn?: string | undefined;
+  proxyAsset?: Token | undefined;
   meta: MetaArg[];
 }
 
 export interface TxResponse {
   requestId: string;
   orderTracker: string;
-  txId: string;
+  signature: string;
   position: number;
   meta: { [key: string]: string };
 }
@@ -931,7 +939,20 @@ export const TransferRequest: MessageFns<TransferRequest> = {
 };
 
 function createBaseAttestOrderRequest(): AttestOrderRequest {
-  return { orderId: "", token: 0, amount: "", meta: [] };
+  return {
+    orderId: "",
+    originChain: "",
+    targetChain: "",
+    origin: "",
+    proxy: "",
+    target: "",
+    txn: "",
+    asset: 0,
+    amount: "",
+    proxyTxn: undefined,
+    proxyAsset: undefined,
+    meta: [],
+  };
 }
 
 export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
@@ -939,14 +960,38 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
     if (message.orderId !== "") {
       writer.uint32(10).string(message.orderId);
     }
-    if (message.token !== 0) {
-      writer.uint32(16).int32(message.token);
+    if (message.originChain !== "") {
+      writer.uint32(18).string(message.originChain);
+    }
+    if (message.targetChain !== "") {
+      writer.uint32(26).string(message.targetChain);
+    }
+    if (message.origin !== "") {
+      writer.uint32(34).string(message.origin);
+    }
+    if (message.proxy !== "") {
+      writer.uint32(42).string(message.proxy);
+    }
+    if (message.target !== "") {
+      writer.uint32(50).string(message.target);
+    }
+    if (message.txn !== "") {
+      writer.uint32(58).string(message.txn);
+    }
+    if (message.asset !== 0) {
+      writer.uint32(64).int32(message.asset);
     }
     if (message.amount !== "") {
-      writer.uint32(26).string(message.amount);
+      writer.uint32(74).string(message.amount);
+    }
+    if (message.proxyTxn !== undefined) {
+      writer.uint32(82).string(message.proxyTxn);
+    }
+    if (message.proxyAsset !== undefined) {
+      writer.uint32(88).int32(message.proxyAsset);
     }
     for (const v of message.meta) {
-      MetaArg.encode(v!, writer.uint32(34).fork()).join();
+      MetaArg.encode(v!, writer.uint32(98).fork()).join();
     }
     return writer;
   },
@@ -967,11 +1012,11 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
           continue;
         }
         case 2: {
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.token = reader.int32() as any;
+          message.originChain = reader.string();
           continue;
         }
         case 3: {
@@ -979,11 +1024,75 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
             break;
           }
 
-          message.amount = reader.string();
+          message.targetChain = reader.string();
           continue;
         }
         case 4: {
           if (tag !== 34) {
+            break;
+          }
+
+          message.origin = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.proxy = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.target = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.txn = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 64) {
+            break;
+          }
+
+          message.asset = reader.int32() as any;
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.proxyTxn = reader.string();
+          continue;
+        }
+        case 11: {
+          if (tag !== 88) {
+            break;
+          }
+
+          message.proxyAsset = reader.int32() as any;
+          continue;
+        }
+        case 12: {
+          if (tag !== 98) {
             break;
           }
 
@@ -1006,9 +1115,35 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
         : isSet(object.order_id)
         ? globalThis.String(object.order_id)
         : "",
-      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      originChain: isSet(object.originChain)
+        ? globalThis.String(object.originChain)
+        : isSet(object.origin_chain)
+        ? globalThis.String(object.origin_chain)
+        : "",
+      targetChain: isSet(object.targetChain)
+        ? globalThis.String(object.targetChain)
+        : isSet(object.target_chain)
+        ? globalThis.String(object.target_chain)
+        : "",
+      origin: isSet(object.origin) ? globalThis.String(object.origin) : "",
+      proxy: isSet(object.proxy) ? globalThis.String(object.proxy) : "",
+      target: isSet(object.target) ? globalThis.String(object.target) : "",
+      txn: isSet(object.txn) ? globalThis.String(object.txn) : "",
+      asset: isSet(object.asset) ? tokenFromJSON(object.asset) : 0,
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
-      meta: globalThis.Array.isArray(object?.meta) ? object.meta.map((e: any) => MetaArg.fromJSON(e)) : [],
+      proxyTxn: isSet(object.proxyTxn)
+        ? globalThis.String(object.proxyTxn)
+        : isSet(object.proxy_txn)
+        ? globalThis.String(object.proxy_txn)
+        : undefined,
+      proxyAsset: isSet(object.proxyAsset)
+        ? tokenFromJSON(object.proxyAsset)
+        : isSet(object.proxy_asset)
+        ? tokenFromJSON(object.proxy_asset)
+        : undefined,
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
     };
   },
 
@@ -1017,11 +1152,35 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
     if (message.orderId !== "") {
       obj.orderId = message.orderId;
     }
-    if (message.token !== 0) {
-      obj.token = tokenToJSON(message.token);
+    if (message.originChain !== "") {
+      obj.originChain = message.originChain;
+    }
+    if (message.targetChain !== "") {
+      obj.targetChain = message.targetChain;
+    }
+    if (message.origin !== "") {
+      obj.origin = message.origin;
+    }
+    if (message.proxy !== "") {
+      obj.proxy = message.proxy;
+    }
+    if (message.target !== "") {
+      obj.target = message.target;
+    }
+    if (message.txn !== "") {
+      obj.txn = message.txn;
+    }
+    if (message.asset !== 0) {
+      obj.asset = tokenToJSON(message.asset);
     }
     if (message.amount !== "") {
       obj.amount = message.amount;
+    }
+    if (message.proxyTxn !== undefined) {
+      obj.proxyTxn = message.proxyTxn;
+    }
+    if (message.proxyAsset !== undefined) {
+      obj.proxyAsset = tokenToJSON(message.proxyAsset);
     }
     if (message.meta?.length) {
       obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
@@ -1035,15 +1194,23 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
   fromPartial<I extends Exact<DeepPartial<AttestOrderRequest>, I>>(object: I): AttestOrderRequest {
     const message = createBaseAttestOrderRequest();
     message.orderId = object.orderId ?? "";
-    message.token = object.token ?? 0;
+    message.originChain = object.originChain ?? "";
+    message.targetChain = object.targetChain ?? "";
+    message.origin = object.origin ?? "";
+    message.proxy = object.proxy ?? "";
+    message.target = object.target ?? "";
+    message.txn = object.txn ?? "";
+    message.asset = object.asset ?? 0;
     message.amount = object.amount ?? "";
+    message.proxyTxn = object.proxyTxn ?? undefined;
+    message.proxyAsset = object.proxyAsset ?? undefined;
     message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
     return message;
   },
 };
 
 function createBaseTxResponse(): TxResponse {
-  return { requestId: "", orderTracker: "", txId: "", position: 0, meta: {} };
+  return { requestId: "", orderTracker: "", signature: "", position: 0, meta: {} };
 }
 
 export const TxResponse: MessageFns<TxResponse> = {
@@ -1054,8 +1221,8 @@ export const TxResponse: MessageFns<TxResponse> = {
     if (message.orderTracker !== "") {
       writer.uint32(18).string(message.orderTracker);
     }
-    if (message.txId !== "") {
-      writer.uint32(26).string(message.txId);
+    if (message.signature !== "") {
+      writer.uint32(26).string(message.signature);
     }
     if (message.position !== 0) {
       writer.uint32(32).int64(message.position);
@@ -1094,7 +1261,7 @@ export const TxResponse: MessageFns<TxResponse> = {
             break;
           }
 
-          message.txId = reader.string();
+          message.signature = reader.string();
           continue;
         }
         case 4: {
@@ -1137,11 +1304,7 @@ export const TxResponse: MessageFns<TxResponse> = {
         : isSet(object.order_tracker)
         ? globalThis.String(object.order_tracker)
         : "",
-      txId: isSet(object.txId)
-        ? globalThis.String(object.txId)
-        : isSet(object.tx_id)
-        ? globalThis.String(object.tx_id)
-        : "",
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
       position: isSet(object.position) ? globalThis.Number(object.position) : 0,
       meta: isObject(object.meta)
         ? (globalThis.Object.entries(object.meta) as [string, any][]).reduce(
@@ -1163,8 +1326,8 @@ export const TxResponse: MessageFns<TxResponse> = {
     if (message.orderTracker !== "") {
       obj.orderTracker = message.orderTracker;
     }
-    if (message.txId !== "") {
-      obj.txId = message.txId;
+    if (message.signature !== "") {
+      obj.signature = message.signature;
     }
     if (message.position !== 0) {
       obj.position = Math.round(message.position);
@@ -1188,7 +1351,7 @@ export const TxResponse: MessageFns<TxResponse> = {
     const message = createBaseTxResponse();
     message.requestId = object.requestId ?? "";
     message.orderTracker = object.orderTracker ?? "";
-    message.txId = object.txId ?? "";
+    message.signature = object.signature ?? "";
     message.position = object.position ?? 0;
     message.meta = (globalThis.Object.entries(object.meta ?? {}) as [string, string][]).reduce(
       (acc: { [key: string]: string }, [key, value]: [string, string]) => {
