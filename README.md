@@ -16,9 +16,14 @@ Built with [nice-grpc](https://github.com/deeplay-io/nice-grpc) — modern, type
 - [Supported Tokens](#supported-tokens)
 - [Available Signers](#available-signers)
 - [Usage Examples](#usage-examples)
-  - [Creating order](#creating-order)
-  - [Replenishing order](#replenishing-order)
-  - [Transfer from ZOW](#transfer-from-zow)
+  - [Create order](#create-order)
+  - [Replenish order](#replenish-order)
+  - [Transfers](#transfers)
+    - From ZOW => Beneficiary (incl. PDVs) - transient order
+    - From PDV => Beneficiary (incl. PDVs) - multi asset swap
+  - [Attest order](#attest-order)
+    - Solana ZOW => Arbitrum Beneficiary
+  - [Arbitrary](#any-arbitrary-instructions-requiring-zynk-signers)
 - [Protobuf Reference](#protobuf-reference)
 - [Development](#development)
 - [Error Handling](#error-handling)
@@ -154,7 +159,7 @@ type KmsSignerKey =
 
 ### Usage Examples
 
-#### Creating order
+#### Create order
 
 ```ts
 import { Token } from "@zynk/fastlane/sdk/stubs/base";
@@ -176,7 +181,7 @@ console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
 ```
 
-#### Replenishing order
+#### Replenish order
 
 ```ts
 import { Token } from "@zynk/fastlane/sdk/stubs/base";
@@ -197,7 +202,9 @@ console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
 ```
 
-#### Transfer from ZOW => Beneficiary (incl. PDVs) - transient order
+#### Transfers
+
+##### From ZOW => Beneficiary (incl. PDVs) - transient order
 
 ```ts
 import {
@@ -240,7 +247,7 @@ console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
 ```
 
-#### Transfer from PDV => Beneficiary (incl. PDVs) - multi asset swap
+##### From PDV => Beneficiary (incl. PDVs) - multi asset swap
 
 ```ts
 import {
@@ -285,25 +292,27 @@ console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
 ```
 
-#### Attest Order - Solana ZOW => Arbitrum Beneficiary
+#### Attest order
+
+##### Solana ZOW => Arbitrum Beneficiary
 
 ```ts
 import { Token } from "@zynk/fastlane/sdk/stubs/base";
 import { AttestOrderRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
 
 const attestOrderRequest: AttestOrderRequest = {
-  orderId: "sol-arb-12345";
-  originChain: "Solana";
-  targetChain: "Arbitrum";
-  origin: "<SOLANA_ZOW>";
-  proxy: "<ARB_ZOW>";
-  target: "<ARB_Beneficiary>";
-  txn: "0x821y03n12u294324......";
-  asset: Token.USDC;
-  amount: "2000000";
-  proxyTxn: "<CCTP_Sig>"; // Bridge transaction hash/signature (if applicable)
-  proxyAsset: Token.USDT; // asset used during bridging (if different)
-  meta: []
+  orderId: "sol-arb-12345",
+  originChain: "Solana",
+  targetChain: "Arbitrum",
+  origin: "<SOLANA_ZOW>",
+  proxy: "<ARB_ZOW>",
+  target: "<ARB_Beneficiary>",
+  txn: "0x821y03n12u294324......",
+  asset: Token.USDC,
+  amount: "2000000",
+  proxyTxn: "<CCTP_Sig>", // Bridge transaction hash/signature (if applicable)
+  proxyAsset: Token.USDT, // asset used during bridging (if different)
+  meta: [],
 };
 
 const response: TxResponse = await sdk.core.attestOrder(attestOrderRequest);
