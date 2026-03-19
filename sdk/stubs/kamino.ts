@@ -49,7 +49,7 @@ export interface CbrResponse {
 
 export interface EstimateYieldRequest {
   amount: string;
-  pcbr: string;
+  prevCumulativeBorrowRate: string;
   token?: Token | undefined;
 }
 
@@ -90,6 +90,7 @@ export interface KaminoTx {
   signature: string;
   txCost: number;
   timeStamp: number;
+  requestId?: string | undefined;
 }
 
 function createBaseBorrowCapacityRequest(): BorrowCapacityRequest {
@@ -676,7 +677,7 @@ export const CbrResponse: MessageFns<CbrResponse> = {
 };
 
 function createBaseEstimateYieldRequest(): EstimateYieldRequest {
-  return { amount: "", pcbr: "", token: undefined };
+  return { amount: "", prevCumulativeBorrowRate: "", token: undefined };
 }
 
 export const EstimateYieldRequest: MessageFns<EstimateYieldRequest> = {
@@ -684,8 +685,8 @@ export const EstimateYieldRequest: MessageFns<EstimateYieldRequest> = {
     if (message.amount !== "") {
       writer.uint32(10).string(message.amount);
     }
-    if (message.pcbr !== "") {
-      writer.uint32(18).string(message.pcbr);
+    if (message.prevCumulativeBorrowRate !== "") {
+      writer.uint32(18).string(message.prevCumulativeBorrowRate);
     }
     if (message.token !== undefined) {
       writer.uint32(24).int32(message.token);
@@ -713,7 +714,7 @@ export const EstimateYieldRequest: MessageFns<EstimateYieldRequest> = {
             break;
           }
 
-          message.pcbr = reader.string();
+          message.prevCumulativeBorrowRate = reader.string();
           continue;
         }
         case 3: {
@@ -736,7 +737,11 @@ export const EstimateYieldRequest: MessageFns<EstimateYieldRequest> = {
   fromJSON(object: any): EstimateYieldRequest {
     return {
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
-      pcbr: isSet(object.pcbr) ? globalThis.String(object.pcbr) : "",
+      prevCumulativeBorrowRate: isSet(object.prevCumulativeBorrowRate)
+        ? globalThis.String(object.prevCumulativeBorrowRate)
+        : isSet(object.prev_cumulative_borrow_rate)
+        ? globalThis.String(object.prev_cumulative_borrow_rate)
+        : "",
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
     };
   },
@@ -746,8 +751,8 @@ export const EstimateYieldRequest: MessageFns<EstimateYieldRequest> = {
     if (message.amount !== "") {
       obj.amount = message.amount;
     }
-    if (message.pcbr !== "") {
-      obj.pcbr = message.pcbr;
+    if (message.prevCumulativeBorrowRate !== "") {
+      obj.prevCumulativeBorrowRate = message.prevCumulativeBorrowRate;
     }
     if (message.token !== undefined) {
       obj.token = tokenToJSON(message.token);
@@ -761,7 +766,7 @@ export const EstimateYieldRequest: MessageFns<EstimateYieldRequest> = {
   fromPartial<I extends Exact<DeepPartial<EstimateYieldRequest>, I>>(object: I): EstimateYieldRequest {
     const message = createBaseEstimateYieldRequest();
     message.amount = object.amount ?? "";
-    message.pcbr = object.pcbr ?? "";
+    message.prevCumulativeBorrowRate = object.prevCumulativeBorrowRate ?? "";
     message.token = object.token ?? undefined;
     return message;
   },
@@ -1234,7 +1239,7 @@ export const DepositCollateralRequest: MessageFns<DepositCollateralRequest> = {
 };
 
 function createBaseKaminoTx(): KaminoTx {
-  return { amount: "", asset: "", txType: "", signature: "", txCost: 0, timeStamp: 0 };
+  return { amount: "", asset: "", txType: "", signature: "", txCost: 0, timeStamp: 0, requestId: undefined };
 }
 
 export const KaminoTx: MessageFns<KaminoTx> = {
@@ -1256,6 +1261,9 @@ export const KaminoTx: MessageFns<KaminoTx> = {
     }
     if (message.timeStamp !== 0) {
       writer.uint32(48).int64(message.timeStamp);
+    }
+    if (message.requestId !== undefined) {
+      writer.uint32(58).string(message.requestId);
     }
     return writer;
   },
@@ -1315,6 +1323,14 @@ export const KaminoTx: MessageFns<KaminoTx> = {
           message.timeStamp = longToNumber(reader.int64());
           continue;
         }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1344,6 +1360,11 @@ export const KaminoTx: MessageFns<KaminoTx> = {
         : isSet(object.time_stamp)
         ? globalThis.Number(object.time_stamp)
         : 0,
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : undefined,
     };
   },
 
@@ -1367,6 +1388,9 @@ export const KaminoTx: MessageFns<KaminoTx> = {
     if (message.timeStamp !== 0) {
       obj.timeStamp = Math.round(message.timeStamp);
     }
+    if (message.requestId !== undefined) {
+      obj.requestId = message.requestId;
+    }
     return obj;
   },
 
@@ -1381,6 +1405,7 @@ export const KaminoTx: MessageFns<KaminoTx> = {
     message.signature = object.signature ?? "";
     message.txCost = object.txCost ?? 0;
     message.timeStamp = object.timeStamp ?? 0;
+    message.requestId = object.requestId ?? undefined;
     return message;
   },
 };
