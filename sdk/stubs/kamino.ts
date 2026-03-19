@@ -22,6 +22,9 @@ export interface BorrowCapacityResponse {
 export interface GetStatsRequest {
 }
 
+export interface RefreshStatsRequest {
+}
+
 export interface StatsResponse {
   collateralDeposited: number;
   borrowLimit: number;
@@ -60,11 +63,13 @@ export interface DepositRequest {
 }
 
 export interface BorrowRequest {
+  requestId: string;
   amount: string;
   token?: Token | undefined;
 }
 
 export interface RepayRequest {
+  requestId: string;
   amount: string;
   token?: Token | undefined;
 }
@@ -233,6 +238,49 @@ export const GetStatsRequest: MessageFns<GetStatsRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetStatsRequest>, I>>(_: I): GetStatsRequest {
     const message = createBaseGetStatsRequest();
+    return message;
+  },
+};
+
+function createBaseRefreshStatsRequest(): RefreshStatsRequest {
+  return {};
+}
+
+export const RefreshStatsRequest: MessageFns<RefreshStatsRequest> = {
+  encode(_: RefreshStatsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RefreshStatsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRefreshStatsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): RefreshStatsRequest {
+    return {};
+  },
+
+  toJSON(_: RefreshStatsRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RefreshStatsRequest>, I>>(base?: I): RefreshStatsRequest {
+    return RefreshStatsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RefreshStatsRequest>, I>>(_: I): RefreshStatsRequest {
+    const message = createBaseRefreshStatsRequest();
     return message;
   },
 };
@@ -860,16 +908,19 @@ export const DepositRequest: MessageFns<DepositRequest> = {
 };
 
 function createBaseBorrowRequest(): BorrowRequest {
-  return { amount: "", token: undefined };
+  return { requestId: "", amount: "", token: undefined };
 }
 
 export const BorrowRequest: MessageFns<BorrowRequest> = {
   encode(message: BorrowRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
     if (message.amount !== "") {
-      writer.uint32(10).string(message.amount);
+      writer.uint32(18).string(message.amount);
     }
     if (message.token !== undefined) {
-      writer.uint32(16).int32(message.token);
+      writer.uint32(24).int32(message.token);
     }
     return writer;
   },
@@ -886,11 +937,19 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
             break;
           }
 
-          message.amount = reader.string();
+          message.requestId = reader.string();
           continue;
         }
         case 2: {
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
             break;
           }
 
@@ -908,6 +967,11 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
 
   fromJSON(object: any): BorrowRequest {
     return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
     };
@@ -915,6 +979,9 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
 
   toJSON(message: BorrowRequest): unknown {
     const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
     if (message.amount !== "") {
       obj.amount = message.amount;
     }
@@ -929,6 +996,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<BorrowRequest>, I>>(object: I): BorrowRequest {
     const message = createBaseBorrowRequest();
+    message.requestId = object.requestId ?? "";
     message.amount = object.amount ?? "";
     message.token = object.token ?? undefined;
     return message;
@@ -936,16 +1004,19 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
 };
 
 function createBaseRepayRequest(): RepayRequest {
-  return { amount: "", token: undefined };
+  return { requestId: "", amount: "", token: undefined };
 }
 
 export const RepayRequest: MessageFns<RepayRequest> = {
   encode(message: RepayRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
     if (message.amount !== "") {
-      writer.uint32(10).string(message.amount);
+      writer.uint32(18).string(message.amount);
     }
     if (message.token !== undefined) {
-      writer.uint32(16).int32(message.token);
+      writer.uint32(24).int32(message.token);
     }
     return writer;
   },
@@ -962,11 +1033,19 @@ export const RepayRequest: MessageFns<RepayRequest> = {
             break;
           }
 
-          message.amount = reader.string();
+          message.requestId = reader.string();
           continue;
         }
         case 2: {
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
             break;
           }
 
@@ -984,6 +1063,11 @@ export const RepayRequest: MessageFns<RepayRequest> = {
 
   fromJSON(object: any): RepayRequest {
     return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
     };
@@ -991,6 +1075,9 @@ export const RepayRequest: MessageFns<RepayRequest> = {
 
   toJSON(message: RepayRequest): unknown {
     const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
     if (message.amount !== "") {
       obj.amount = message.amount;
     }
@@ -1005,6 +1092,7 @@ export const RepayRequest: MessageFns<RepayRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<RepayRequest>, I>>(object: I): RepayRequest {
     const message = createBaseRepayRequest();
+    message.requestId = object.requestId ?? "";
     message.amount = object.amount ?? "";
     message.token = object.token ?? undefined;
     return message;
@@ -1318,6 +1406,14 @@ export const KaminoDefinition = {
       responseStream: false,
       options: {},
     },
+    refreshStats: {
+      name: "RefreshStats",
+      requestType: RefreshStatsRequest as typeof RefreshStatsRequest,
+      requestStream: false,
+      responseType: StatsResponse as typeof StatsResponse,
+      responseStream: false,
+      options: {},
+    },
     getCumulativeBorrowRate: {
       name: "GetCumulativeBorrowRate",
       requestType: CbrRequest as typeof CbrRequest,
@@ -1383,6 +1479,10 @@ export interface KaminoServiceImplementation<CallContextExt = {}> {
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<BorrowCapacityResponse>>;
   getStats(request: GetStatsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<StatsResponse>>;
+  refreshStats(
+    request: RefreshStatsRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<StatsResponse>>;
   getCumulativeBorrowRate(
     request: CbrRequest,
     context: CallContext & CallContextExt,
@@ -1407,6 +1507,10 @@ export interface KaminoClient<CallOptionsExt = {}> {
     options?: CallOptions & CallOptionsExt,
   ): Promise<BorrowCapacityResponse>;
   getStats(request: DeepPartial<GetStatsRequest>, options?: CallOptions & CallOptionsExt): Promise<StatsResponse>;
+  refreshStats(
+    request: DeepPartial<RefreshStatsRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<StatsResponse>;
   getCumulativeBorrowRate(
     request: DeepPartial<CbrRequest>,
     options?: CallOptions & CallOptionsExt,

@@ -8,6 +8,7 @@ import "base.proto";
 service Kamino {
   rpc GetBorrowCapacity (BorrowCapacityRequest) returns (BorrowCapacityResponse);
   rpc GetStats (GetStatsRequest) returns (StatsResponse);
+  rpc RefreshStats (RefreshStatsRequest) returns (StatsResponse);
 
   rpc GetCumulativeBorrowRate (CbrRequest) returns (CbrResponse);
   rpc EstimateYield (EstimateYieldRequest) returns (EstimateYieldResponse);
@@ -22,72 +23,75 @@ service Kamino {
 message BorrowCapacityRequest {}
 
 message BorrowCapacityResponse {
-    double borrow_capacity = 1;
+	double borrow_capacity = 1;
 }
 
 message GetStatsRequest {}
+message RefreshStatsRequest {}
 
 message StatsResponse {
-    double collateral_deposited = 1;
-    double borrow_limit = 2;
-    double collateral_utilization = 3;
-    double borrow_capacity = 4;
-    double total_borrowed = 5;
-    double ltv = 6;
-    double deposit_tvl = 7;
-    double borrow_tvl = 8;
-    double accumulated_protocol_fees = 9;
-    double liquidity_available = 10;
-    google.protobuf.Struct misc = 11;
+	double collateral_deposited = 1;
+	double borrow_limit = 2;
+	double collateral_utilization = 3;
+	double borrow_capacity = 4;
+	double total_borrowed = 5;
+	double ltv = 6;
+	double deposit_tvl = 7;
+	double borrow_tvl = 8;
+	double accumulated_protocol_fees = 9;
+	double liquidity_available = 10;
+	google.protobuf.Struct misc = 11;
 }
 
 message CbrRequest {
-    optional base.Token token = 1;
+	optional base.Token token = 1;
 }
 
 message CbrResponse {
-    double cumulative_borrow_rate = 1;
+	double cumulative_borrow_rate = 1;
 }
 
 message EstimateYieldRequest {
-    string amount = 1;
-    string pcbr = 2;
-    optional base.Token token = 3;
+	string amount = 1;
+	string pcbr = 2;
+	optional base.Token token = 3;
 }
 
 message EstimateYieldResponse {
-    double yield_estimate = 1;
+	double yield_estimate = 1;
 }
 
 message DepositRequest {
-    string amount = 1;
-    optional base.Token token = 2;
+	string amount = 1;
+	optional base.Token token = 2;
 }
 
 message BorrowRequest {
-    string amount = 1;
-    optional base.Token token = 2;
+	string request_id = 1;
+	string amount = 2;
+	optional base.Token token = 3;
 }
 
 message RepayRequest {
-    string amount = 1;
-    optional base.Token token = 2;
+	string request_id = 1;
+	string amount = 2;
+	optional base.Token token = 3;
 }
 
 message WithdrawRequest {
-    string amount = 1;
-    optional base.Token token = 2;
+	string amount = 1;
+	optional base.Token token = 2;
 }
 
 message DepositCollateralRequest {
-    string amount = 1;
+	string amount = 1;
 }
 
 message KaminoTx {
-    string amount = 1;
-    string asset = 2;
-    string tx_type = 3;
-    string signature = 4;
-    double tx_cost = 5;
-    int64 time_stamp = 6;
+	string amount = 1;
+	string asset = 2;
+	string tx_type = 3;
+	string signature = 4;
+	double tx_cost = 5;
+	int64 time_stamp = 6;
 }
