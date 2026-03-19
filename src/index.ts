@@ -4,7 +4,7 @@ import {
   ClientMiddleware,
   Metadata,
 } from "nice-grpc";
-import { BaseClient, BaseDefinition } from "./stubs/base";
+import { BaseClient, BaseDefinition, Token, Denom } from "./stubs/base";
 import { CoreClient, CoreDefinition } from "./stubs/core";
 import { KaminoClient, KaminoDefinition } from "./stubs/kamino";
 import { getCallerAndEnv, IOverrides } from "./utils";
@@ -35,5 +35,5 @@ export default (endpoint: string, overrides?: IOverrides) => {
   const base: BaseClient = clientFactory.create(BaseDefinition, channel);
   const kamino: KaminoClient = clientFactory.create(KaminoDefinition, channel);
 
-  return { core, base, kamino };
+  return { core, base, kamino, Token, Denom };
 };
