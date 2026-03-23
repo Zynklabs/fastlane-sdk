@@ -91,10 +91,15 @@ Fastlane(<endpoint>)
 ├─ core
 │   ├─ domainSeparator()
 │   ├─ getPdv()
+│   ├─ generateOrderId()
+│   ├─ deriveOrderTracker()
+│   ├─ readOrderTrackerByAddress()
+│   ├─ readOrderTrackerByIds()
 │   ├─ createOrder()
 │   ├─ replenish()
 │   ├─ transfer()
-│   └─ attestOrder()
+│   ├─ attestOrder()
+│   └─ decodeEvent()
 ├─ orbit
 │   ├─ domainSeparator()
 │   ├─ getUserPda()
@@ -280,7 +285,7 @@ const transferRequest = {
   from,
   to,
   token: Token.USDC,
-  token: Token.USDT,
+  toToken: Token.USDT,
   amount: "1000000",
   ed25519Pair,
   meta: [],
@@ -324,11 +329,7 @@ console.log("Tx signature :", response.signature);
 #### Any arbitrary instructions requiring Zynk signers
 
 ```ts
-import {
-  PublicKey,
-  SystemProgram,
-  TransactionInstruction,
-} from "@solana/web3.js";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import {
   ExecuteTxRequest,
   ExecuteTxResponse,
@@ -340,18 +341,9 @@ const transferIx = SystemProgram.transfer({
   lamports: 1_000_000, // 0.001 SOL
 });
 
-export const TransactionInstructionToTxIx = (ix: TransactionInstruction) => ({
-  programId: ix.programId.toBase58(),
-  data: new Uint8Array(ix.data),
-  keys: ix.keys.map((k) => ({
-    ...k,
-    pubkey: k.pubkey.toBase58(),
-  })),
-});
-
 const ex_request: ExecuteTxRequest = {
   requestId: "execute-tx-1",
-  ixs: [TransactionInstructionToTxIx(transferIx)],
+  ixs: [transferIx],
   signers: ["ZOW"],
 };
 

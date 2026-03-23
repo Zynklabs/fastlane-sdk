@@ -8,6 +8,7 @@ import { BaseClient, BaseDefinition, Token, Denom } from "./stubs/base";
 import { CoreClient, CoreDefinition } from "./stubs/core";
 import { KaminoClient, KaminoDefinition } from "./stubs/kamino";
 import { getCallerAndEnv, IOverrides } from "./utils";
+import { transformTxIx } from "./txIx";
 
 const callerMiddleware = (callerAndEnv: [string, string]): ClientMiddleware =>
   async function* (call, options) {
@@ -22,12 +23,19 @@ const callerMiddleware = (callerAndEnv: [string, string]): ClientMiddleware =>
     return yield* call.next(call.request, options);
   };
 
+const txIxMiddleware = (): ClientMiddleware =>
+  async function* (call, options) {
+    const { transformed, ...req } = transformTxIx(call, "toWire");
+    const res = yield* call.next(req, options);
+    return transformTxIx(res, "fromWire", transformed);
+  };
+
 export default (endpoint: string, overrides?: IOverrides) => {
   const callerAndEnv = getCallerAndEnv(overrides);
 
-  const clientFactory = createClientFactory().use(
-    callerMiddleware(callerAndEnv),
-  );
+  const clientFactory = createClientFactory()
+    .use(callerMiddleware(callerAndEnv))
+    .use(txIxMiddleware());
 
   const channel = createChannel(endpoint);
 

@@ -8,6 +8,7 @@
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import type { CallContext, CallOptions } from "nice-grpc-common";
 import { Ed25519Pair, Token, tokenFromJSON, tokenToJSON } from "./base";
+import { Struct } from "./google/protobuf/struct";
 
 export const protobufPackage = "core";
 
@@ -23,6 +24,44 @@ export interface GetPdvRequest {
 }
 
 export interface PdvResponse {
+  pdv: string;
+}
+
+export interface GenerateOrderIdRequest {
+  partnerId: string;
+  requestId: string;
+}
+
+export interface OrderIdResponse {
+  orderId: string;
+}
+
+export interface DeriveOrderTrackerRequest {
+  orderId: string;
+  beneficiary: string;
+}
+
+export interface OrderTrackerResponse {
+  orderTracker: string;
+}
+
+export interface ReadOrderTrackerByAddressRequest {
+  orderTracker: string;
+}
+
+export interface ReadOrderTrackerByIdsRequest {
+  beneficiary: string;
+  orderId?: string | undefined;
+  partnerId?: string | undefined;
+  requestId?: string | undefined;
+}
+
+export interface OrderTrackerData {
+  orderId: string;
+  partnerId: string;
+  amountIn: string;
+  amountOut: string;
+  beneficiary: string;
   pdv: string;
 }
 
@@ -80,6 +119,7 @@ export interface AttestOrderRequest {
 export interface TxResponse {
   requestId: string;
   orderTracker: string;
+  orderId: string;
   signature: string;
   position: number;
   meta: { [key: string]: string };
@@ -88,6 +128,17 @@ export interface TxResponse {
 export interface TxResponse_MetaEntry {
   key: string;
   value: string;
+}
+
+export interface DecodeEventRequest {
+  signature: string;
+  eventName?: string | undefined;
+}
+
+export interface EventData {
+  eventName: string;
+  ixName: string;
+  content?: { [key: string]: any } | undefined;
 }
 
 function createBaseDomainSeparatorRequest(): DomainSeparatorRequest {
@@ -314,6 +365,642 @@ export const PdvResponse: MessageFns<PdvResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<PdvResponse>, I>>(object: I): PdvResponse {
     const message = createBasePdvResponse();
+    message.pdv = object.pdv ?? "";
+    return message;
+  },
+};
+
+function createBaseGenerateOrderIdRequest(): GenerateOrderIdRequest {
+  return { partnerId: "", requestId: "" };
+}
+
+export const GenerateOrderIdRequest: MessageFns<GenerateOrderIdRequest> = {
+  encode(message: GenerateOrderIdRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.partnerId !== "") {
+      writer.uint32(10).string(message.partnerId);
+    }
+    if (message.requestId !== "") {
+      writer.uint32(18).string(message.requestId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GenerateOrderIdRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGenerateOrderIdRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GenerateOrderIdRequest {
+    return {
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+    };
+  },
+
+  toJSON(message: GenerateOrderIdRequest): unknown {
+    const obj: any = {};
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GenerateOrderIdRequest>, I>>(base?: I): GenerateOrderIdRequest {
+    return GenerateOrderIdRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GenerateOrderIdRequest>, I>>(object: I): GenerateOrderIdRequest {
+    const message = createBaseGenerateOrderIdRequest();
+    message.partnerId = object.partnerId ?? "";
+    message.requestId = object.requestId ?? "";
+    return message;
+  },
+};
+
+function createBaseOrderIdResponse(): OrderIdResponse {
+  return { orderId: "" };
+}
+
+export const OrderIdResponse: MessageFns<OrderIdResponse> = {
+  encode(message: OrderIdResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderIdResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderIdResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderIdResponse {
+    return {
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+    };
+  },
+
+  toJSON(message: OrderIdResponse): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderIdResponse>, I>>(base?: I): OrderIdResponse {
+    return OrderIdResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderIdResponse>, I>>(object: I): OrderIdResponse {
+    const message = createBaseOrderIdResponse();
+    message.orderId = object.orderId ?? "";
+    return message;
+  },
+};
+
+function createBaseDeriveOrderTrackerRequest(): DeriveOrderTrackerRequest {
+  return { orderId: "", beneficiary: "" };
+}
+
+export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = {
+  encode(message: DeriveOrderTrackerRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.beneficiary !== "") {
+      writer.uint32(18).string(message.beneficiary);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeriveOrderTrackerRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeriveOrderTrackerRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.beneficiary = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DeriveOrderTrackerRequest {
+    return {
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+      beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+    };
+  },
+
+  toJSON(message: DeriveOrderTrackerRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.beneficiary !== "") {
+      obj.beneficiary = message.beneficiary;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DeriveOrderTrackerRequest>, I>>(base?: I): DeriveOrderTrackerRequest {
+    return DeriveOrderTrackerRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DeriveOrderTrackerRequest>, I>>(object: I): DeriveOrderTrackerRequest {
+    const message = createBaseDeriveOrderTrackerRequest();
+    message.orderId = object.orderId ?? "";
+    message.beneficiary = object.beneficiary ?? "";
+    return message;
+  },
+};
+
+function createBaseOrderTrackerResponse(): OrderTrackerResponse {
+  return { orderTracker: "" };
+}
+
+export const OrderTrackerResponse: MessageFns<OrderTrackerResponse> = {
+  encode(message: OrderTrackerResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderTracker !== "") {
+      writer.uint32(10).string(message.orderTracker);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderTrackerResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderTrackerResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderTracker = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderTrackerResponse {
+    return {
+      orderTracker: isSet(object.orderTracker)
+        ? globalThis.String(object.orderTracker)
+        : isSet(object.order_tracker)
+        ? globalThis.String(object.order_tracker)
+        : "",
+    };
+  },
+
+  toJSON(message: OrderTrackerResponse): unknown {
+    const obj: any = {};
+    if (message.orderTracker !== "") {
+      obj.orderTracker = message.orderTracker;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderTrackerResponse>, I>>(base?: I): OrderTrackerResponse {
+    return OrderTrackerResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderTrackerResponse>, I>>(object: I): OrderTrackerResponse {
+    const message = createBaseOrderTrackerResponse();
+    message.orderTracker = object.orderTracker ?? "";
+    return message;
+  },
+};
+
+function createBaseReadOrderTrackerByAddressRequest(): ReadOrderTrackerByAddressRequest {
+  return { orderTracker: "" };
+}
+
+export const ReadOrderTrackerByAddressRequest: MessageFns<ReadOrderTrackerByAddressRequest> = {
+  encode(message: ReadOrderTrackerByAddressRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderTracker !== "") {
+      writer.uint32(10).string(message.orderTracker);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReadOrderTrackerByAddressRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReadOrderTrackerByAddressRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderTracker = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReadOrderTrackerByAddressRequest {
+    return {
+      orderTracker: isSet(object.orderTracker)
+        ? globalThis.String(object.orderTracker)
+        : isSet(object.order_tracker)
+        ? globalThis.String(object.order_tracker)
+        : "",
+    };
+  },
+
+  toJSON(message: ReadOrderTrackerByAddressRequest): unknown {
+    const obj: any = {};
+    if (message.orderTracker !== "") {
+      obj.orderTracker = message.orderTracker;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReadOrderTrackerByAddressRequest>, I>>(
+    base?: I,
+  ): ReadOrderTrackerByAddressRequest {
+    return ReadOrderTrackerByAddressRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReadOrderTrackerByAddressRequest>, I>>(
+    object: I,
+  ): ReadOrderTrackerByAddressRequest {
+    const message = createBaseReadOrderTrackerByAddressRequest();
+    message.orderTracker = object.orderTracker ?? "";
+    return message;
+  },
+};
+
+function createBaseReadOrderTrackerByIdsRequest(): ReadOrderTrackerByIdsRequest {
+  return { beneficiary: "", orderId: undefined, partnerId: undefined, requestId: undefined };
+}
+
+export const ReadOrderTrackerByIdsRequest: MessageFns<ReadOrderTrackerByIdsRequest> = {
+  encode(message: ReadOrderTrackerByIdsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.beneficiary !== "") {
+      writer.uint32(10).string(message.beneficiary);
+    }
+    if (message.orderId !== undefined) {
+      writer.uint32(18).string(message.orderId);
+    }
+    if (message.partnerId !== undefined) {
+      writer.uint32(26).string(message.partnerId);
+    }
+    if (message.requestId !== undefined) {
+      writer.uint32(34).string(message.requestId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReadOrderTrackerByIdsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReadOrderTrackerByIdsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.beneficiary = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReadOrderTrackerByIdsRequest {
+    return {
+      beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : undefined,
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : undefined,
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : undefined,
+    };
+  },
+
+  toJSON(message: ReadOrderTrackerByIdsRequest): unknown {
+    const obj: any = {};
+    if (message.beneficiary !== "") {
+      obj.beneficiary = message.beneficiary;
+    }
+    if (message.orderId !== undefined) {
+      obj.orderId = message.orderId;
+    }
+    if (message.partnerId !== undefined) {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.requestId !== undefined) {
+      obj.requestId = message.requestId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReadOrderTrackerByIdsRequest>, I>>(base?: I): ReadOrderTrackerByIdsRequest {
+    return ReadOrderTrackerByIdsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReadOrderTrackerByIdsRequest>, I>>(object: I): ReadOrderTrackerByIdsRequest {
+    const message = createBaseReadOrderTrackerByIdsRequest();
+    message.beneficiary = object.beneficiary ?? "";
+    message.orderId = object.orderId ?? undefined;
+    message.partnerId = object.partnerId ?? undefined;
+    message.requestId = object.requestId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseOrderTrackerData(): OrderTrackerData {
+  return { orderId: "", partnerId: "", amountIn: "", amountOut: "", beneficiary: "", pdv: "" };
+}
+
+export const OrderTrackerData: MessageFns<OrderTrackerData> = {
+  encode(message: OrderTrackerData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.partnerId !== "") {
+      writer.uint32(18).string(message.partnerId);
+    }
+    if (message.amountIn !== "") {
+      writer.uint32(26).string(message.amountIn);
+    }
+    if (message.amountOut !== "") {
+      writer.uint32(34).string(message.amountOut);
+    }
+    if (message.beneficiary !== "") {
+      writer.uint32(42).string(message.beneficiary);
+    }
+    if (message.pdv !== "") {
+      writer.uint32(50).string(message.pdv);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderTrackerData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderTrackerData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.amountIn = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.amountOut = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.beneficiary = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.pdv = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderTrackerData {
+    return {
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      amountIn: isSet(object.amountIn)
+        ? globalThis.String(object.amountIn)
+        : isSet(object.amount_in)
+        ? globalThis.String(object.amount_in)
+        : "",
+      amountOut: isSet(object.amountOut)
+        ? globalThis.String(object.amountOut)
+        : isSet(object.amount_out)
+        ? globalThis.String(object.amount_out)
+        : "",
+      beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+      pdv: isSet(object.pdv) ? globalThis.String(object.pdv) : "",
+    };
+  },
+
+  toJSON(message: OrderTrackerData): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.amountIn !== "") {
+      obj.amountIn = message.amountIn;
+    }
+    if (message.amountOut !== "") {
+      obj.amountOut = message.amountOut;
+    }
+    if (message.beneficiary !== "") {
+      obj.beneficiary = message.beneficiary;
+    }
+    if (message.pdv !== "") {
+      obj.pdv = message.pdv;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderTrackerData>, I>>(base?: I): OrderTrackerData {
+    return OrderTrackerData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderTrackerData>, I>>(object: I): OrderTrackerData {
+    const message = createBaseOrderTrackerData();
+    message.orderId = object.orderId ?? "";
+    message.partnerId = object.partnerId ?? "";
+    message.amountIn = object.amountIn ?? "";
+    message.amountOut = object.amountOut ?? "";
+    message.beneficiary = object.beneficiary ?? "";
     message.pdv = object.pdv ?? "";
     return message;
   },
@@ -1210,7 +1897,7 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
 };
 
 function createBaseTxResponse(): TxResponse {
-  return { requestId: "", orderTracker: "", signature: "", position: 0, meta: {} };
+  return { requestId: "", orderTracker: "", orderId: "", signature: "", position: 0, meta: {} };
 }
 
 export const TxResponse: MessageFns<TxResponse> = {
@@ -1221,14 +1908,17 @@ export const TxResponse: MessageFns<TxResponse> = {
     if (message.orderTracker !== "") {
       writer.uint32(18).string(message.orderTracker);
     }
+    if (message.orderId !== "") {
+      writer.uint32(26).string(message.orderId);
+    }
     if (message.signature !== "") {
-      writer.uint32(26).string(message.signature);
+      writer.uint32(34).string(message.signature);
     }
     if (message.position !== 0) {
-      writer.uint32(32).int64(message.position);
+      writer.uint32(40).int64(message.position);
     }
     globalThis.Object.entries(message.meta).forEach(([key, value]: [string, string]) => {
-      TxResponse_MetaEntry.encode({ key: key as any, value }, writer.uint32(42).fork()).join();
+      TxResponse_MetaEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).join();
     });
     return writer;
   },
@@ -1261,25 +1951,33 @@ export const TxResponse: MessageFns<TxResponse> = {
             break;
           }
 
-          message.signature = reader.string();
+          message.orderId = reader.string();
           continue;
         }
         case 4: {
-          if (tag !== 32) {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.signature = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
             break;
           }
 
           message.position = longToNumber(reader.int64());
           continue;
         }
-        case 5: {
-          if (tag !== 42) {
+        case 6: {
+          if (tag !== 50) {
             break;
           }
 
-          const entry5 = TxResponse_MetaEntry.decode(reader, reader.uint32());
-          if (entry5.value !== undefined) {
-            message.meta[entry5.key] = entry5.value;
+          const entry6 = TxResponse_MetaEntry.decode(reader, reader.uint32());
+          if (entry6.value !== undefined) {
+            message.meta[entry6.key] = entry6.value;
           }
           continue;
         }
@@ -1304,6 +2002,11 @@ export const TxResponse: MessageFns<TxResponse> = {
         : isSet(object.order_tracker)
         ? globalThis.String(object.order_tracker)
         : "",
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
       signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
       position: isSet(object.position) ? globalThis.Number(object.position) : 0,
       meta: isObject(object.meta)
@@ -1325,6 +2028,9 @@ export const TxResponse: MessageFns<TxResponse> = {
     }
     if (message.orderTracker !== "") {
       obj.orderTracker = message.orderTracker;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
     }
     if (message.signature !== "") {
       obj.signature = message.signature;
@@ -1351,6 +2057,7 @@ export const TxResponse: MessageFns<TxResponse> = {
     const message = createBaseTxResponse();
     message.requestId = object.requestId ?? "";
     message.orderTracker = object.orderTracker ?? "";
+    message.orderId = object.orderId ?? "";
     message.signature = object.signature ?? "";
     message.position = object.position ?? 0;
     message.meta = (globalThis.Object.entries(object.meta ?? {}) as [string, string][]).reduce(
@@ -1442,6 +2149,186 @@ export const TxResponse_MetaEntry: MessageFns<TxResponse_MetaEntry> = {
   },
 };
 
+function createBaseDecodeEventRequest(): DecodeEventRequest {
+  return { signature: "", eventName: undefined };
+}
+
+export const DecodeEventRequest: MessageFns<DecodeEventRequest> = {
+  encode(message: DecodeEventRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.signature !== "") {
+      writer.uint32(10).string(message.signature);
+    }
+    if (message.eventName !== undefined) {
+      writer.uint32(18).string(message.eventName);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DecodeEventRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDecodeEventRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.signature = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.eventName = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DecodeEventRequest {
+    return {
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
+      eventName: isSet(object.eventName)
+        ? globalThis.String(object.eventName)
+        : isSet(object.event_name)
+        ? globalThis.String(object.event_name)
+        : undefined,
+    };
+  },
+
+  toJSON(message: DecodeEventRequest): unknown {
+    const obj: any = {};
+    if (message.signature !== "") {
+      obj.signature = message.signature;
+    }
+    if (message.eventName !== undefined) {
+      obj.eventName = message.eventName;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DecodeEventRequest>, I>>(base?: I): DecodeEventRequest {
+    return DecodeEventRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DecodeEventRequest>, I>>(object: I): DecodeEventRequest {
+    const message = createBaseDecodeEventRequest();
+    message.signature = object.signature ?? "";
+    message.eventName = object.eventName ?? undefined;
+    return message;
+  },
+};
+
+function createBaseEventData(): EventData {
+  return { eventName: "", ixName: "", content: undefined };
+}
+
+export const EventData: MessageFns<EventData> = {
+  encode(message: EventData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.eventName !== "") {
+      writer.uint32(10).string(message.eventName);
+    }
+    if (message.ixName !== "") {
+      writer.uint32(18).string(message.ixName);
+    }
+    if (message.content !== undefined) {
+      Struct.encode(Struct.wrap(message.content), writer.uint32(26).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): EventData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEventData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.eventName = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.ixName = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.content = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EventData {
+    return {
+      eventName: isSet(object.eventName)
+        ? globalThis.String(object.eventName)
+        : isSet(object.event_name)
+        ? globalThis.String(object.event_name)
+        : "",
+      ixName: isSet(object.ixName)
+        ? globalThis.String(object.ixName)
+        : isSet(object.ix_name)
+        ? globalThis.String(object.ix_name)
+        : "",
+      content: isObject(object.content) ? object.content : undefined,
+    };
+  },
+
+  toJSON(message: EventData): unknown {
+    const obj: any = {};
+    if (message.eventName !== "") {
+      obj.eventName = message.eventName;
+    }
+    if (message.ixName !== "") {
+      obj.ixName = message.ixName;
+    }
+    if (message.content !== undefined) {
+      obj.content = message.content;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<EventData>, I>>(base?: I): EventData {
+    return EventData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<EventData>, I>>(object: I): EventData {
+    const message = createBaseEventData();
+    message.eventName = object.eventName ?? "";
+    message.ixName = object.ixName ?? "";
+    message.content = object.content ?? undefined;
+    return message;
+  },
+};
+
 export type CoreDefinition = typeof CoreDefinition;
 export const CoreDefinition = {
   name: "Core",
@@ -1460,6 +2347,38 @@ export const CoreDefinition = {
       requestType: GetPdvRequest as typeof GetPdvRequest,
       requestStream: false,
       responseType: PdvResponse as typeof PdvResponse,
+      responseStream: false,
+      options: {},
+    },
+    generateOrderId: {
+      name: "GenerateOrderId",
+      requestType: GenerateOrderIdRequest as typeof GenerateOrderIdRequest,
+      requestStream: false,
+      responseType: OrderIdResponse as typeof OrderIdResponse,
+      responseStream: false,
+      options: {},
+    },
+    deriveOrderTracker: {
+      name: "DeriveOrderTracker",
+      requestType: DeriveOrderTrackerRequest as typeof DeriveOrderTrackerRequest,
+      requestStream: false,
+      responseType: OrderTrackerResponse as typeof OrderTrackerResponse,
+      responseStream: false,
+      options: {},
+    },
+    readOrderTrackerByAddress: {
+      name: "ReadOrderTrackerByAddress",
+      requestType: ReadOrderTrackerByAddressRequest as typeof ReadOrderTrackerByAddressRequest,
+      requestStream: false,
+      responseType: OrderTrackerData as typeof OrderTrackerData,
+      responseStream: false,
+      options: {},
+    },
+    readOrderTrackerByIds: {
+      name: "ReadOrderTrackerByIds",
+      requestType: ReadOrderTrackerByIdsRequest as typeof ReadOrderTrackerByIdsRequest,
+      requestStream: false,
+      responseType: OrderTrackerData as typeof OrderTrackerData,
       responseStream: false,
       options: {},
     },
@@ -1495,6 +2414,14 @@ export const CoreDefinition = {
       responseStream: false,
       options: {},
     },
+    decodeEvent: {
+      name: "DecodeEvent",
+      requestType: DecodeEventRequest as typeof DecodeEventRequest,
+      requestStream: false,
+      responseType: EventData as typeof EventData,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -1504,10 +2431,27 @@ export interface CoreServiceImplementation<CallContextExt = {}> {
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<DomainSeparatorResponse>>;
   getPdv(request: GetPdvRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdvResponse>>;
+  generateOrderId(
+    request: GenerateOrderIdRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<OrderIdResponse>>;
+  deriveOrderTracker(
+    request: DeriveOrderTrackerRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<OrderTrackerResponse>>;
+  readOrderTrackerByAddress(
+    request: ReadOrderTrackerByAddressRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<OrderTrackerData>>;
+  readOrderTrackerByIds(
+    request: ReadOrderTrackerByIdsRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<OrderTrackerData>>;
   createOrder(request: CreateOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   replenish(request: ReplenishRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
 }
 
 export interface CoreClient<CallOptionsExt = {}> {
@@ -1516,10 +2460,27 @@ export interface CoreClient<CallOptionsExt = {}> {
     options?: CallOptions & CallOptionsExt,
   ): Promise<DomainSeparatorResponse>;
   getPdv(request: DeepPartial<GetPdvRequest>, options?: CallOptions & CallOptionsExt): Promise<PdvResponse>;
+  generateOrderId(
+    request: DeepPartial<GenerateOrderIdRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<OrderIdResponse>;
+  deriveOrderTracker(
+    request: DeepPartial<DeriveOrderTrackerRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<OrderTrackerResponse>;
+  readOrderTrackerByAddress(
+    request: DeepPartial<ReadOrderTrackerByAddressRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<OrderTrackerData>;
+  readOrderTrackerByIds(
+    request: DeepPartial<ReadOrderTrackerByIdsRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<OrderTrackerData>;
   createOrder(request: DeepPartial<CreateOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   replenish(request: DeepPartial<ReplenishRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
