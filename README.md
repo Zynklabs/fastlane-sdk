@@ -55,36 +55,40 @@ Import and instantiate the SDK using your gRPC endpoint:
 ```js
 import Fastlane from "@zynk/fastlane";
 
-const sdk = Fastlane(<endpoint>);
+const fastlane = Fastlane(<endpoint>);
 ```
 
 The returned object exposes these primary namespaces:
 
-- sdk.base: for general blockchain operations, token management, and transaction utilities.
-- sdk.core: for zynk-core operations like creating orders, replenishing orders, closing order and one-time transfers (transient orders), along with other peripherals.
-- sdk.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
-- sdk.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
+- fastlane.base: for general blockchain operations, token management, and transaction utilities.
+- fastlane.core: for zynk-core operations like creating orders, replenishing orders, closing order and one-time transfers (transient orders), along with other peripherals.
+- fastlane.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
+- fastlane.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
 
 ### Quick Start
 
 ```js
 import Fastlane from "@zynk/fastlane";
 
-const sdk = Fastlane(<endpoint>);
+const fastlane = Fastlane(<endpoint>);
 
 try {
-    const status = await sdk.base.getTxStatus({
+    const status = await fastlane.base.getTxStatus({
         signature: "5ujeMEWV9PZCSEepZCHUec8QtckwunRgic3YgKXGixP9HpZbLoQmYbtfGrBTsUaxBikeRwhH49F1pHezHn9sgVaY",
     });
+    const txCost = await fastlane.base.getTxCost({
+        signature: "5ujeMEWV9PZCSEepZCHUec8QtckwunRgic3YgKXGixP9HpZbLoQmYbtfGrBTsUaxBikeRwhH49F1pHezHn9sgVaY",
+        denom: fastlane.Denom.SOL
+    });
 
-    console.log("Status :", status.status);
-    console.log("Slot   :", status.slot);
+    console.log("Status  :", status.status);
+    console.log("Tx cost :", txCost);
 } catch (err) {
     console.error("Error:", err.code, err.message, err.details);
 }
 ```
 
-### SDK Structure
+### fastlane Structure
 
 ```
 Fastlane(<endpoint>)
@@ -179,7 +183,8 @@ const createOrderRequest: CreateOrderRequest = {
   meta: [],
 };
 
-const response: TxResponse = await sdk.core.createOrder(createOrderRequest);
+const response: TxResponse =
+  await fastlane.core.createOrder(createOrderRequest);
 
 console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
@@ -199,7 +204,7 @@ const replenishRequest: ReplenishRequest = {
   meta: [],
 };
 
-const response: TxResponse = await sdk.core.replenish(replenishRequest);
+const response: TxResponse = await fastlane.core.replenish(replenishRequest);
 
 console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
@@ -224,15 +229,18 @@ import {
 const from = "ZOW";
 const to = "Royzy1HKXwHpFEnKZRyqSq8S56speHvFD1VnyxXioDe";
 
-const dsResult: DomainSeparatorResponse = await sdk.core.domainSeparator({});
-const pdvResult: PdvResponse = await sdk.core.getPdv({}); // empty arg - this transaction is supposed to use an auto-generated partner internally
+const dsResult: DomainSeparatorResponse = await fastlane.core.domainSeparator(
+  {},
+);
+const pdvResult: PdvResponse = await fastlane.core.getPdv({}); // empty arg - this transaction is supposed to use an auto-generated partner internally
 
 const ed25519Request: BuildEd25519IxRequest = {
   message: `${dsResult.domainSeparator}::${to}::${pdvResult.pdv}`,
   signer: "manager",
 };
 
-const ed25519Pair: Ed25519Pair = await sdk.base.buildEd25519Ix(ed25519Request);
+const ed25519Pair: Ed25519Pair =
+  await fastlane.base.buildEd25519Ix(ed25519Request);
 
 const transferRequest = {
   requestId: "trans-abc-123456",
@@ -244,7 +252,7 @@ const transferRequest = {
   meta: [],
 };
 
-const response: TxResponse = await sdk.core.transfer(transferRequest);
+const response: TxResponse = await fastlane.core.transfer(transferRequest);
 
 console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
@@ -267,16 +275,21 @@ import {
 const from = "partner-1";
 const to = "partner-2"; // can accept partnerId or any bs58 address
 
-const dsResult: DomainSeparatorResponse = await sdk.core.domainSeparator({});
-const pdvFromResult: PdvResponse = await sdk.core.getPdv({ partnerId: from });
-const pdvToResult: PdvResponse = await sdk.core.getPdv({ partnerId: to });
+const dsResult: DomainSeparatorResponse = await fastlane.core.domainSeparator(
+  {},
+);
+const pdvFromResult: PdvResponse = await fastlane.core.getPdv({
+  partnerId: from,
+});
+const pdvToResult: PdvResponse = await fastlane.core.getPdv({ partnerId: to });
 
 const ed25519Request: BuildEd25519IxRequest = {
   message: `${dsResult.domainSeparator}::${pdvToResult.pdv}::${pdvFromResult.pdv}`,
   signer: "manager",
 };
 
-const ed25519Pair: Ed25519Pair = await sdk.base.buildEd25519Ix(ed25519Request);
+const ed25519Pair: Ed25519Pair =
+  await fastlane.base.buildEd25519Ix(ed25519Request);
 
 const transferRequest = {
   requestId: "trans-multi-123456",
@@ -289,7 +302,7 @@ const transferRequest = {
   meta: [],
 };
 
-const response: TxResponse = await sdk.core.transfer(transferRequest);
+const response: TxResponse = await fastlane.core.transfer(transferRequest);
 
 console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
@@ -317,7 +330,8 @@ const attestOrderRequest: AttestOrderRequest = {
   meta: [],
 };
 
-const response: TxResponse = await sdk.core.attestOrder(attestOrderRequest);
+const response: TxResponse =
+  await fastlane.core.attestOrder(attestOrderRequest);
 
 console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
@@ -344,7 +358,7 @@ const ex_request: ExecuteTxRequest = {
   signers: ["ZOW"],
 };
 
-const response: ExecuteTxResponse = await sdk.base.executeIx(ex_request);
+const response: ExecuteTxResponse = await fastlane.base.executeIx(ex_request);
 
 console.log("Order tracker:", response.requestId);
 console.log("Tx signature :", response.signature);
@@ -374,7 +388,7 @@ npm run proto:gen
 import { Code } from "nice-grpc";
 
 try {
-  await sdk.base.executeTx(req);
+  await fastlane.base.executeTx(req);
 } catch (err: any) {
   if (err.code === Code.InvalidArgument) {
     console.log("Bad request:", err.details);
