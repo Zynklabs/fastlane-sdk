@@ -46,7 +46,7 @@ export const transformTxIx = (
 
   const out = { ...(obj?.request || obj) };
 
-  if (transformed || applicableMethods.has(obj?.method.path)) {
+  if (transformed || applicableMethods.has(obj.method?.path)) {
     for (const key of Object.keys(out)) {
       const v = out[key];
 
