@@ -167,14 +167,13 @@ type KmsSignerKey =
 #### Create order
 
 ```ts
-import { Token } from "@zynk/fastlane/sdk/stubs/base";
-import { CreateOrderRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
+import { CreateOrderRequest, TxResponse } from "@zynk/fastlane/src/stubs/core";
 
 const createOrderRequest: CreateOrderRequest = {
   request_id: "ord-abc-123456",
   partner_id: "partner-789",
   beneficiary: "Royzy1HKXwHpFEnKZRyqSq8S56speHvFD1VnyxXioDe",
-  token: Token.USDC,
+  token: fastlane.Token.USDC,
   amount: "1500000", // 1.5 USDC (6 decimals)
   pull: true, // for pull and create orders
   meta: [],
@@ -189,13 +188,12 @@ console.log("Tx signature :", response.signature);
 #### Replenish order
 
 ```ts
-import { Token } from "@zynk/fastlane/sdk/stubs/base";
-import { ReplenishRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
+import { ReplenishRequest, TxResponse } from "@zynk/fastlane/src/stubs/core";
 
 const replenishRequest: ReplenishRequest = {
   request_id: "rep-abc-123456",
   orderTracker: "ADdhAjpvjrDWLDQfXvouCxYcsZAmKwNaHcC3iD1vUghD",
-  token: Token.USDC,
+  token: fastlane.Token.USDC,
   amount: "1500000", // 1.5 USDC (6 decimals)
   doNotClose: true, // to keep the order open (even if it's closable)
   meta: [],
@@ -216,12 +214,12 @@ import {
   BuildEd25519IxRequest,
   Ed25519Pair,
   Token,
-} from "@zynk/fastlane/sdk/stubs/base";
+} from "@zynk/fastlane/src/stubs/base";
 import {
   DomainSeparatorResponse,
   PdvResponse,
   TxResponse,
-} from "@zynk/fastlane/sdk/stubs/core";
+} from "@zynk/fastlane/src/stubs/core";
 
 const from = "ZOW";
 const to = "Royzy1HKXwHpFEnKZRyqSq8S56speHvFD1VnyxXioDe";
@@ -240,7 +238,7 @@ const transferRequest = {
   requestId: "trans-abc-123456",
   from,
   to,
-  token: Token.USDC,
+  token: fastlane.Token.USDC,
   amount: "1000000",
   ed25519Pair,
   meta: [],
@@ -259,12 +257,12 @@ import {
   BuildEd25519IxRequest,
   Ed25519Pair,
   Token,
-} from "@zynk/fastlane/sdk/stubs/base";
+} from "@zynk/fastlane/src/stubs/base";
 import {
   DomainSeparatorResponse,
   PdvResponse,
   TxResponse,
-} from "@zynk/fastlane/sdk/stubs/core";
+} from "@zynk/fastlane/src/stubs/core";
 
 const from = "partner-1";
 const to = "partner-2"; // can accept partnerId or any bs58 address
@@ -284,8 +282,8 @@ const transferRequest = {
   requestId: "trans-multi-123456",
   from,
   to,
-  token: Token.USDC,
-  toToken: Token.USDT,
+  token: fastlane.Token.USDC,
+  toToken: fastlane.Token.USDT,
   amount: "1000000",
   ed25519Pair,
   meta: [],
@@ -302,8 +300,7 @@ console.log("Tx signature :", response.signature);
 ##### Solana ZOW => Arbitrum Beneficiary
 
 ```ts
-import { Token } from "@zynk/fastlane/sdk/stubs/base";
-import { AttestOrderRequest, TxResponse } from "@zynk/fastlane/sdk/stubs/core";
+import { AttestOrderRequest, TxResponse } from "@zynk/fastlane/src/stubs/core";
 
 const attestOrderRequest: AttestOrderRequest = {
   orderId: "sol-arb-12345",
@@ -313,10 +310,10 @@ const attestOrderRequest: AttestOrderRequest = {
   proxy: "<ARB_ZOW>",
   target: "<ARB_Beneficiary>",
   txn: "0x821y03n12u294324......",
-  asset: Token.USDC,
+  asset: fastlane.Token.USDC,
   amount: "2000000",
   proxyTxn: "<CCTP_Sig>", // Bridge transaction hash/signature (if applicable)
-  proxyAsset: Token.USDT, // asset used during bridging (if different)
+  proxyAsset: fastlane.Token.USDT, // asset used during bridging (if different)
   meta: [],
 };
 
@@ -333,7 +330,7 @@ import { PublicKey, SystemProgram } from "@solana/web3.js";
 import {
   ExecuteTxRequest,
   ExecuteTxResponse,
-} from "@zynk/fastlane/sdk/stubs/base";
+} from "@zynk/fastlane/src/stubs/base";
 
 const transferIx = SystemProgram.transfer({
   fromPubkey: new PublicKey("3r7r8dgdcnd8U3HNXxGvS81JXZntJWNk1pJKrN2JiuDR"), // Solana Devnet ZOW
