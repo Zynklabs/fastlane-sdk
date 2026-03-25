@@ -535,12 +535,11 @@ import {
   DomainSeparatorResponse,
 } from "@zynk/fastlane/src/stubs/core";
 
-
-const origin = "<SOLANA_ZOW>
-const proxy = "<ARB_ZOW>
-const target = "<ARB_BENEFICIARY>
-const txn = "tx_1ejkj3o333........"
-const amount = "2000000"
+const origin = "<SOLANA_ZOW>";
+const proxy = "<ARB_ZOW>";
+const target = "<ARB_BENEFICIARY>";
+const txn = "tx_1ejkj3o333........";
+const amount = "2000000";
 
 const dsResult: DomainSeparatorResponse = await fastlane.core.domainSeparator(
   {},
@@ -569,7 +568,8 @@ const attestOrderRequest: AttestOrderRequest = {
   meta: [],
 };
 
-const response: TxResponse = await fastlane.core.attestOrder(attestOrderRequest);
+const response: TxResponse =
+  await fastlane.core.attestOrder(attestOrderRequest);
 
 console.log("Order tracker:", response.orderTracker);
 console.log("Tx signature :", response.signature);
