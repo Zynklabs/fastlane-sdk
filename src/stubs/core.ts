@@ -111,6 +111,7 @@ export interface AttestOrderRequest {
   txn: string;
   asset: Token;
   amount: string;
+  ed25519Pair?: Ed25519Pair | undefined;
   proxyTxn?: string | undefined;
   proxyAsset?: Token | undefined;
   meta: MetaArg[];
@@ -1636,6 +1637,7 @@ function createBaseAttestOrderRequest(): AttestOrderRequest {
     txn: "",
     asset: 0,
     amount: "",
+    ed25519Pair: undefined,
     proxyTxn: undefined,
     proxyAsset: undefined,
     meta: [],
@@ -1671,14 +1673,17 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
     if (message.amount !== "") {
       writer.uint32(74).string(message.amount);
     }
+    if (message.ed25519Pair !== undefined) {
+      Ed25519Pair.encode(message.ed25519Pair, writer.uint32(82).fork()).join();
+    }
     if (message.proxyTxn !== undefined) {
-      writer.uint32(82).string(message.proxyTxn);
+      writer.uint32(90).string(message.proxyTxn);
     }
     if (message.proxyAsset !== undefined) {
-      writer.uint32(88).int32(message.proxyAsset);
+      writer.uint32(96).int32(message.proxyAsset);
     }
     for (const v of message.meta) {
-      MetaArg.encode(v!, writer.uint32(98).fork()).join();
+      MetaArg.encode(v!, writer.uint32(106).fork()).join();
     }
     return writer;
   },
@@ -1767,19 +1772,27 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
             break;
           }
 
-          message.proxyTxn = reader.string();
+          message.ed25519Pair = Ed25519Pair.decode(reader, reader.uint32());
           continue;
         }
         case 11: {
-          if (tag !== 88) {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.proxyTxn = reader.string();
+          continue;
+        }
+        case 12: {
+          if (tag !== 96) {
             break;
           }
 
           message.proxyAsset = reader.int32() as any;
           continue;
         }
-        case 12: {
-          if (tag !== 98) {
+        case 13: {
+          if (tag !== 106) {
             break;
           }
 
@@ -1818,6 +1831,11 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
       txn: isSet(object.txn) ? globalThis.String(object.txn) : "",
       asset: isSet(object.asset) ? tokenFromJSON(object.asset) : 0,
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      ed25519Pair: isSet(object.ed25519Pair)
+        ? Ed25519Pair.fromJSON(object.ed25519Pair)
+        : isSet(object.ed25519_pair)
+        ? Ed25519Pair.fromJSON(object.ed25519_pair)
+        : undefined,
       proxyTxn: isSet(object.proxyTxn)
         ? globalThis.String(object.proxyTxn)
         : isSet(object.proxy_txn)
@@ -1863,6 +1881,9 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
     if (message.amount !== "") {
       obj.amount = message.amount;
     }
+    if (message.ed25519Pair !== undefined) {
+      obj.ed25519Pair = Ed25519Pair.toJSON(message.ed25519Pair);
+    }
     if (message.proxyTxn !== undefined) {
       obj.proxyTxn = message.proxyTxn;
     }
@@ -1889,6 +1910,9 @@ export const AttestOrderRequest: MessageFns<AttestOrderRequest> = {
     message.txn = object.txn ?? "";
     message.asset = object.asset ?? 0;
     message.amount = object.amount ?? "";
+    message.ed25519Pair = (object.ed25519Pair !== undefined && object.ed25519Pair !== null)
+      ? Ed25519Pair.fromPartial(object.ed25519Pair)
+      : undefined;
     message.proxyTxn = object.proxyTxn ?? undefined;
     message.proxyAsset = object.proxyAsset ?? undefined;
     message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];

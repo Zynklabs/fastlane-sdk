@@ -134,16 +134,33 @@ export interface GetBalancesRequest {
   token?: Token | undefined;
 }
 
+export interface Asset {
+  symbol: string;
+  address?: string | undefined;
+  token?: Token | undefined;
+}
+
 export interface Balance {
   amount: string;
   uiAmount: string;
   of?: string | undefined;
   address?: string | undefined;
-  token?: Token | undefined;
+  asset?: Asset | undefined;
+}
+
+export interface BalancesItem {
+  of: string;
+  address: string;
+  balances: { [key: string]: Balance };
+}
+
+export interface BalancesItem_BalancesEntry {
+  key: string;
+  value?: Balance | undefined;
 }
 
 export interface Balances {
-  balances: Balance[];
+  data: BalancesItem[];
 }
 
 export interface GetAccountInfoRequest {
@@ -860,8 +877,100 @@ export const GetBalancesRequest: MessageFns<GetBalancesRequest> = {
   },
 };
 
+function createBaseAsset(): Asset {
+  return { symbol: "", address: undefined, token: undefined };
+}
+
+export const Asset: MessageFns<Asset> = {
+  encode(message: Asset, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.symbol !== "") {
+      writer.uint32(10).string(message.symbol);
+    }
+    if (message.address !== undefined) {
+      writer.uint32(18).string(message.address);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(24).int32(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Asset {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAsset();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.symbol = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Asset {
+    return {
+      symbol: isSet(object.symbol) ? globalThis.String(object.symbol) : "",
+      address: isSet(object.address) ? globalThis.String(object.address) : undefined,
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+    };
+  },
+
+  toJSON(message: Asset): unknown {
+    const obj: any = {};
+    if (message.symbol !== "") {
+      obj.symbol = message.symbol;
+    }
+    if (message.address !== undefined) {
+      obj.address = message.address;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Asset>, I>>(base?: I): Asset {
+    return Asset.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Asset>, I>>(object: I): Asset {
+    const message = createBaseAsset();
+    message.symbol = object.symbol ?? "";
+    message.address = object.address ?? undefined;
+    message.token = object.token ?? undefined;
+    return message;
+  },
+};
+
 function createBaseBalance(): Balance {
-  return { amount: "", uiAmount: "", of: undefined, address: undefined, token: undefined };
+  return { amount: "", uiAmount: "", of: undefined, address: undefined, asset: undefined };
 }
 
 export const Balance: MessageFns<Balance> = {
@@ -878,8 +987,8 @@ export const Balance: MessageFns<Balance> = {
     if (message.address !== undefined) {
       writer.uint32(34).string(message.address);
     }
-    if (message.token !== undefined) {
-      writer.uint32(40).int32(message.token);
+    if (message.asset !== undefined) {
+      Asset.encode(message.asset, writer.uint32(42).fork()).join();
     }
     return writer;
   },
@@ -924,11 +1033,11 @@ export const Balance: MessageFns<Balance> = {
           continue;
         }
         case 5: {
-          if (tag !== 40) {
+          if (tag !== 42) {
             break;
           }
 
-          message.token = reader.int32() as any;
+          message.asset = Asset.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -950,7 +1059,7 @@ export const Balance: MessageFns<Balance> = {
         : "",
       of: isSet(object.of) ? globalThis.String(object.of) : undefined,
       address: isSet(object.address) ? globalThis.String(object.address) : undefined,
-      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      asset: isSet(object.asset) ? Asset.fromJSON(object.asset) : undefined,
     };
   },
 
@@ -968,8 +1077,8 @@ export const Balance: MessageFns<Balance> = {
     if (message.address !== undefined) {
       obj.address = message.address;
     }
-    if (message.token !== undefined) {
-      obj.token = tokenToJSON(message.token);
+    if (message.asset !== undefined) {
+      obj.asset = Asset.toJSON(message.asset);
     }
     return obj;
   },
@@ -983,19 +1092,214 @@ export const Balance: MessageFns<Balance> = {
     message.uiAmount = object.uiAmount ?? "";
     message.of = object.of ?? undefined;
     message.address = object.address ?? undefined;
-    message.token = object.token ?? undefined;
+    message.asset = (object.asset !== undefined && object.asset !== null) ? Asset.fromPartial(object.asset) : undefined;
+    return message;
+  },
+};
+
+function createBaseBalancesItem(): BalancesItem {
+  return { of: "", address: "", balances: {} };
+}
+
+export const BalancesItem: MessageFns<BalancesItem> = {
+  encode(message: BalancesItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.of !== "") {
+      writer.uint32(10).string(message.of);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    globalThis.Object.entries(message.balances).forEach(([key, value]: [string, Balance]) => {
+      BalancesItem_BalancesEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).join();
+    });
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BalancesItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBalancesItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.of = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          const entry3 = BalancesItem_BalancesEntry.decode(reader, reader.uint32());
+          if (entry3.value !== undefined) {
+            message.balances[entry3.key] = entry3.value;
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BalancesItem {
+    return {
+      of: isSet(object.of) ? globalThis.String(object.of) : "",
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      balances: isObject(object.balances)
+        ? (globalThis.Object.entries(object.balances) as [string, any][]).reduce(
+          (acc: { [key: string]: Balance }, [key, value]: [string, any]) => {
+            acc[key] = Balance.fromJSON(value);
+            return acc;
+          },
+          {},
+        )
+        : {},
+    };
+  },
+
+  toJSON(message: BalancesItem): unknown {
+    const obj: any = {};
+    if (message.of !== "") {
+      obj.of = message.of;
+    }
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.balances) {
+      const entries = globalThis.Object.entries(message.balances) as [string, Balance][];
+      if (entries.length > 0) {
+        obj.balances = {};
+        entries.forEach(([k, v]) => {
+          obj.balances[k] = Balance.toJSON(v);
+        });
+      }
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BalancesItem>, I>>(base?: I): BalancesItem {
+    return BalancesItem.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BalancesItem>, I>>(object: I): BalancesItem {
+    const message = createBaseBalancesItem();
+    message.of = object.of ?? "";
+    message.address = object.address ?? "";
+    message.balances = (globalThis.Object.entries(object.balances ?? {}) as [string, Balance][]).reduce(
+      (acc: { [key: string]: Balance }, [key, value]: [string, Balance]) => {
+        if (value !== undefined) {
+          acc[key] = Balance.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseBalancesItem_BalancesEntry(): BalancesItem_BalancesEntry {
+  return { key: "", value: undefined };
+}
+
+export const BalancesItem_BalancesEntry: MessageFns<BalancesItem_BalancesEntry> = {
+  encode(message: BalancesItem_BalancesEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      Balance.encode(message.value, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BalancesItem_BalancesEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBalancesItem_BalancesEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = Balance.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BalancesItem_BalancesEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      value: isSet(object.value) ? Balance.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: BalancesItem_BalancesEntry): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== undefined) {
+      obj.value = Balance.toJSON(message.value);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BalancesItem_BalancesEntry>, I>>(base?: I): BalancesItem_BalancesEntry {
+    return BalancesItem_BalancesEntry.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BalancesItem_BalancesEntry>, I>>(object: I): BalancesItem_BalancesEntry {
+    const message = createBaseBalancesItem_BalancesEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? Balance.fromPartial(object.value)
+      : undefined;
     return message;
   },
 };
 
 function createBaseBalances(): Balances {
-  return { balances: [] };
+  return { data: [] };
 }
 
 export const Balances: MessageFns<Balances> = {
   encode(message: Balances, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    for (const v of message.balances) {
-      Balance.encode(v!, writer.uint32(10).fork()).join();
+    for (const v of message.data) {
+      BalancesItem.encode(v!, writer.uint32(10).fork()).join();
     }
     return writer;
   },
@@ -1012,7 +1316,7 @@ export const Balances: MessageFns<Balances> = {
             break;
           }
 
-          message.balances.push(Balance.decode(reader, reader.uint32()));
+          message.data.push(BalancesItem.decode(reader, reader.uint32()));
           continue;
         }
       }
@@ -1026,14 +1330,14 @@ export const Balances: MessageFns<Balances> = {
 
   fromJSON(object: any): Balances {
     return {
-      balances: globalThis.Array.isArray(object?.balances) ? object.balances.map((e: any) => Balance.fromJSON(e)) : [],
+      data: globalThis.Array.isArray(object?.data) ? object.data.map((e: any) => BalancesItem.fromJSON(e)) : [],
     };
   },
 
   toJSON(message: Balances): unknown {
     const obj: any = {};
-    if (message.balances?.length) {
-      obj.balances = message.balances.map((e) => Balance.toJSON(e));
+    if (message.data?.length) {
+      obj.data = message.data.map((e) => BalancesItem.toJSON(e));
     }
     return obj;
   },
@@ -1043,7 +1347,7 @@ export const Balances: MessageFns<Balances> = {
   },
   fromPartial<I extends Exact<DeepPartial<Balances>, I>>(object: I): Balances {
     const message = createBaseBalances();
-    message.balances = object.balances?.map((e) => Balance.fromPartial(e)) || [];
+    message.data = object.data?.map((e) => BalancesItem.fromPartial(e)) || [];
     return message;
   },
 };
@@ -2601,6 +2905,10 @@ function longToNumber(int64: { toString(): string }): number {
     throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
   }
   return num;
+}
+
+function isObject(value: any): boolean {
+  return typeof value === "object" && value !== null;
 }
 
 function isSet(value: any): boolean {

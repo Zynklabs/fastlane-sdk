@@ -119,9 +119,10 @@ message AttestOrderRequest {
   string txn = 7;
   base.Token asset = 8;
   string amount = 9;
-  optional string proxy_txn = 10;
-  optional base.Token proxy_asset = 11;
-  repeated MetaArg meta = 12;
+  base.Ed25519Pair ed25519_pair = 10;
+  optional string proxy_txn = 11;
+  optional base.Token proxy_asset = 12;
+  repeated MetaArg meta = 13;
 }
 
 message TxResponse {

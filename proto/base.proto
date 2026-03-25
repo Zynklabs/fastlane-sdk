@@ -78,16 +78,28 @@ message GetBalancesRequest {
   optional Token token = 2;
 }
 
+message Asset {
+  string symbol = 1;
+  optional string address = 2;
+  optional Token token = 3;
+}
+
 message Balance {
   string amount = 1;
   string ui_amount = 2;
   optional string of = 3;
   optional string address = 4;
-  optional Token token = 5;
+  optional Asset asset = 5;
+}
+
+message BalancesItem {
+  string of = 1;
+  string address = 2;
+  map<string, Balance> balances = 3;
 }
 
 message Balances {
-  repeated Balance balances = 1;
+  repeated BalancesItem data = 1;
 }
 
 message GetAccountInfoRequest {
