@@ -1,3 +1,17 @@
+import { TransactionInstruction } from "@solana/web3.js";
+import { TxIx } from "./base";
+
+export interface ExecuteTxRequest {
+  requestId: string;
+  ixs: Array<TxIx | TransactionInstruction>;
+  signers: string[];
+}
+
+export interface Ed25519Pair {
+  ed25519Sig: Buffer;
+  ed25519Ix?: TxIx | TransactionInstruction | undefined;
+}
+
 export type {
   Token,
   Asset,
@@ -6,12 +20,9 @@ export type {
   Balances,
   BalancesItem,
   BalancesItem_BalancesEntry,
-  TxIxAccount,
-  TxIx,
   GenerateHashedArrayRequest,
   HashedArrayResponse,
   BuildEd25519IxRequest,
-  Ed25519Pair,
   GetBalanceRequest,
   GetBalancesRequest,
   GetAddressRequest,
@@ -26,7 +37,6 @@ export type {
   AtaAddressResponse,
   GetOrCreateAtaRequest,
   GetOrCreateAtaResponse,
-  ExecuteTxRequest,
   ExecuteTxResponse,
   GetTxStatusRequest,
   TxStatus,
