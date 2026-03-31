@@ -1,6 +1,6 @@
 {
   "name": "@zynk/fastlane",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "homepage": "https://github.com/Zynklabs/fastlane-sdk#readme",
   "bugs": {
@@ -14,6 +14,9 @@
   "author": "roy@zynk.money",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",

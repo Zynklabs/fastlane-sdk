@@ -1,0 +1,15 @@
+import { TransactionInstruction } from "@solana/web3.js";
+import { TxIx } from "./base";
+export interface ExecuteTxRequest {
+    requestId: string;
+    ixs: Array<TxIx | TransactionInstruction>;
+    signers: string[];
+}
+export interface Ed25519Pair {
+    ed25519Sig: Buffer;
+    ed25519Ix?: TxIx | TransactionInstruction | undefined;
+}
+export type { Token, Asset, Denom, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, GenerateHashedArrayRequest, HashedArrayResponse, BuildEd25519IxRequest, GetBalanceRequest, GetBalancesRequest, GetAddressRequest, AddressResponse, GetAccountInfoRequest, AccountInfoResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, TokenAccountOwnerResponse, GetAtaAddressRequest, AtaAddressResponse, GetOrCreateAtaRequest, GetOrCreateAtaResponse, ExecuteTxResponse, GetTxStatusRequest, TxStatus, GetTxDetailsRequest, TxDetails, GetTxCostRequest, TxCost, } from "./base";
+export type { DomainSeparatorRequest, DomainSeparatorResponse, GetPdvRequest, PdvResponse, GenerateOrderIdRequest, OrderIdResponse, DeriveOrderTrackerRequest, OrderTrackerResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, OrderTrackerData, MetaArg, CreateOrderRequest, ReplenishRequest, TransferRequest, AttestOrderRequest, TxResponse, TxResponse_MetaEntry, DecodeEventRequest, EventData, } from "./core";
+export type { BorrowCapacityRequest, BorrowCapacityResponse, GetStatsRequest, RefreshStatsRequest, StatsResponse, CbrRequest, CbrResponse, EstimateYieldRequest, EstimateYieldResponse, DepositRequest, BorrowRequest, RepayRequest, WithdrawRequest, DepositCollateralRequest, KaminoTx, } from "./kamino";
+//# sourceMappingURL=index.d.ts.map
