@@ -134,6 +134,15 @@ export interface GetBalancesRequest {
   token?: Token | undefined;
 }
 
+export interface GetAddressRequest {
+  key: string;
+}
+
+export interface AddressResponse {
+  address: string;
+  key: string;
+}
+
 export interface Asset {
   symbol: string;
   address?: string | undefined;
@@ -873,6 +882,140 @@ export const GetBalancesRequest: MessageFns<GetBalancesRequest> = {
     const message = createBaseGetBalancesRequest();
     message.of = object.of?.map((e) => e) || [];
     message.token = object.token ?? undefined;
+    return message;
+  },
+};
+
+function createBaseGetAddressRequest(): GetAddressRequest {
+  return { key: "" };
+}
+
+export const GetAddressRequest: MessageFns<GetAddressRequest> = {
+  encode(message: GetAddressRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAddressRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAddressRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAddressRequest {
+    return { key: isSet(object.key) ? globalThis.String(object.key) : "" };
+  },
+
+  toJSON(message: GetAddressRequest): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAddressRequest>, I>>(base?: I): GetAddressRequest {
+    return GetAddressRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAddressRequest>, I>>(object: I): GetAddressRequest {
+    const message = createBaseGetAddressRequest();
+    message.key = object.key ?? "";
+    return message;
+  },
+};
+
+function createBaseAddressResponse(): AddressResponse {
+  return { address: "", key: "" };
+}
+
+export const AddressResponse: MessageFns<AddressResponse> = {
+  encode(message: AddressResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
+    if (message.key !== "") {
+      writer.uint32(18).string(message.key);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddressResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddressResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddressResponse {
+    return {
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+    };
+  },
+
+  toJSON(message: AddressResponse): unknown {
+    const obj: any = {};
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddressResponse>, I>>(base?: I): AddressResponse {
+    return AddressResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddressResponse>, I>>(object: I): AddressResponse {
+    const message = createBaseAddressResponse();
+    message.address = object.address ?? "";
+    message.key = object.key ?? "";
     return message;
   },
 };
@@ -2733,6 +2876,14 @@ export const BaseDefinition = {
       responseStream: false,
       options: {},
     },
+    getAddress: {
+      name: "GetAddress",
+      requestType: GetAddressRequest as typeof GetAddressRequest,
+      requestStream: false,
+      responseType: AddressResponse as typeof AddressResponse,
+      responseStream: false,
+      options: {},
+    },
     getAccountInfo: {
       name: "GetAccountInfo",
       requestType: GetAccountInfoRequest as typeof GetAccountInfoRequest,
@@ -2819,6 +2970,7 @@ export interface BaseServiceImplementation<CallContextExt = {}> {
   ): Promise<DeepPartial<Ed25519Pair>>;
   getBalance(request: GetBalanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balance>>;
   getBalances(request: GetBalancesRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balances>>;
+  getAddress(request: GetAddressRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AddressResponse>>;
   getAccountInfo(
     request: GetAccountInfoRequest,
     context: CallContext & CallContextExt,
@@ -2853,6 +3005,7 @@ export interface BaseClient<CallOptionsExt = {}> {
   ): Promise<Ed25519Pair>;
   getBalance(request: DeepPartial<GetBalanceRequest>, options?: CallOptions & CallOptionsExt): Promise<Balance>;
   getBalances(request: DeepPartial<GetBalancesRequest>, options?: CallOptions & CallOptionsExt): Promise<Balances>;
+  getAddress(request: DeepPartial<GetAddressRequest>, options?: CallOptions & CallOptionsExt): Promise<AddressResponse>;
   getAccountInfo(
     request: DeepPartial<GetAccountInfoRequest>,
     options?: CallOptions & CallOptionsExt,

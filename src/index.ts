@@ -45,3 +45,5 @@ export default (endpoint: string, overrides?: IOverrides) => {
 
   return { core, base, kamino, Token, Denom };
 };
+
+export * from "./stubs";
