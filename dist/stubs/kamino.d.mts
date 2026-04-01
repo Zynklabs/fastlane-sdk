@@ -1,6 +1,6 @@
 import { BinaryWriter, BinaryReader } from '@bufbuild/protobuf/wire';
 import { CallOptions, CallContext } from 'nice-grpc-common';
-import { Token } from './base.js';
+import { Token } from './base.mjs';
 
 declare const protobufPackage = "kamino";
 interface BorrowCapacityRequest {

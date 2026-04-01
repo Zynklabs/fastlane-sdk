@@ -25,7 +25,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --clean --minify --shims && tsc",
+    "build": "tsup src/index.ts --format esm --clean --minify --shims",
     "proto:gen": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/stubs --ts_proto_opt=outputServices=nice-grpc,outputServices=generic-definitions,env=node,useOptionals=messages,snakeToCamel=true -I ./proto proto/*.proto"
   },
   "devDependencies": {
