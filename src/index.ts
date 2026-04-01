@@ -6,6 +6,7 @@ import {
 } from "nice-grpc";
 import { BaseClient, BaseDefinition, Token, Denom } from "./stubs/base";
 import { CoreClient, CoreDefinition } from "./stubs/core";
+import { OrbitClient, OrbitDefinition } from "./stubs/orbit";
 import { KaminoClient, KaminoDefinition } from "./stubs/kamino";
 import { getCallerAndEnv, IOverrides } from "./utils";
 import { transformTxIx } from "./txIx";
@@ -39,11 +40,12 @@ export default (endpoint: string, overrides?: IOverrides) => {
 
   const channel = createChannel(endpoint);
 
-  const core: CoreClient = clientFactory.create(CoreDefinition, channel);
   const base: BaseClient = clientFactory.create(BaseDefinition, channel);
+  const core: CoreClient = clientFactory.create(CoreDefinition, channel);
+  const orbit: OrbitClient = clientFactory.create(OrbitDefinition, channel);
   const kamino: KaminoClient = clientFactory.create(KaminoDefinition, channel);
 
-  return { core, base, kamino, Token, Denom };
+  return { base, core, orbit, kamino, Token, Denom };
 };
 
 export * from "./stubs";
