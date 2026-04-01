@@ -215,4 +215,3 @@ export interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 export {};
-//# sourceMappingURL=kamino.d.ts.map

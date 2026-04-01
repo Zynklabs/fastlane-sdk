@@ -276,4 +276,3 @@ export interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 export {};
-//# sourceMappingURL=core.d.ts.map

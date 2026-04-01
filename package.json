@@ -25,7 +25,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/index.ts --format esm --clean --minify --shims && tsc",
     "proto:gen": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/stubs --ts_proto_opt=outputServices=nice-grpc,outputServices=generic-definitions,env=node,useOptionals=messages,snakeToCamel=true -I ./proto proto/*.proto"
   },
   "devDependencies": {
@@ -33,6 +33,7 @@
     "@zynk/fastlane": "github:Zynklabs/fastlane-sdk",
     "ts-node": "^10.9.2",
     "ts-proto": "^2.11.5",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {

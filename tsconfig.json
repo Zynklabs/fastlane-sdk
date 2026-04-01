@@ -8,8 +8,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
     "stripInternal": true
   },
   "include": ["src/**/*"],

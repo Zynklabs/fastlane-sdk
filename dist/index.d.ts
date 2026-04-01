@@ -11,4 +11,3 @@ declare const _default: (endpoint: string, overrides?: IOverrides) => {
 };
 export default _default;
 export * from "./stubs";
-//# sourceMappingURL=index.d.ts.map

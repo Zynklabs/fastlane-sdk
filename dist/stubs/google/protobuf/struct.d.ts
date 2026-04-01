@@ -105,4 +105,3 @@ export interface ListValueWrapperFns {
     unwrap(message: ListValue): Array<any>;
 }
 export {};
-//# sourceMappingURL=struct.d.ts.map
