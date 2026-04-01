@@ -1,6 +1,6 @@
 import { BinaryWriter, BinaryReader } from '@bufbuild/protobuf/wire';
 import { CallOptions, CallContext } from 'nice-grpc-common';
-import { Token, Ed25519Pair } from './base.mjs';
+import { Token, Ed25519Pair, DecodeEventRequest, EventData } from './base.mjs';
 
 declare const protobufPackage = "core";
 interface DomainSeparatorRequest {
@@ -124,19 +124,6 @@ interface TxResponse_MetaEntry {
     value: string;
 }
 declare const TxResponse_MetaEntry: MessageFns<TxResponse_MetaEntry>;
-interface DecodeEventRequest {
-    signature: string;
-    eventName?: string | undefined;
-}
-declare const DecodeEventRequest: MessageFns<DecodeEventRequest>;
-interface EventData {
-    eventName: string;
-    ixName: string;
-    content?: {
-        [key: string]: any;
-    } | undefined;
-}
-declare const EventData: MessageFns<EventData>;
 type CoreDefinition = typeof CoreDefinition;
 declare const CoreDefinition: {
     readonly name: "Core";
@@ -277,4 +264,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AttestOrderRequest, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, EventData, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };
+export { AttestOrderRequest, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };

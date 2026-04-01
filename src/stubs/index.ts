@@ -44,6 +44,8 @@ export type {
   TxDetails,
   GetTxCostRequest,
   TxCost,
+  DecodeEventRequest,
+  EventData,
 } from "./base";
 
 export type {
@@ -65,9 +67,16 @@ export type {
   AttestOrderRequest,
   TxResponse,
   TxResponse_MetaEntry,
-  DecodeEventRequest,
-  EventData,
 } from "./core";
+
+export type {
+  GetPdaRequest,
+  PdaResponse,
+  SpendTokensRequest,
+  TransferToLpRequest,
+  TransferPdaToWalletRequest,
+  TxResponse as OrbitTxResponse,
+} from "./orbit";
 
 export type {
   BorrowCapacityRequest,

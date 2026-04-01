@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package core;
 
-import "google/protobuf/struct.proto";
 import "base.proto";
 
 service Core {
@@ -19,7 +18,7 @@ service Core {
   rpc Transfer (TransferRequest) returns (TxResponse);
   rpc AttestOrder (AttestOrderRequest) returns (TxResponse);
 
-  rpc DecodeEvent (DecodeEventRequest) returns (EventData);
+  rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
 }
 
 message DomainSeparatorRequest {}
@@ -132,15 +131,4 @@ message TxResponse {
   string signature = 4;
   int64 position = 5;
   map<string, string> meta = 6;
-}
-
-message DecodeEventRequest {
-  string signature = 1;
-  optional string event_name = 2;
-}
-
-message EventData {
-  string event_name = 1;
-  string ix_name = 2;
-  google.protobuf.Struct content = 3;
 }

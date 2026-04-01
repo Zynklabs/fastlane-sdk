@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package orbit;
+
+import "base.proto";
+
+service Orbit {
+  rpc DomainSeparator (DomainSeparatorRequest) returns (DomainSeparatorResponse);
+  
+  rpc GetUserPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetDelegatePda (GetPdaRequest) returns (PdaResponse);
+
+  rpc SpendTokens (SpendTokensRequest) returns (TxResponse);
+  rpc TransferToLp (TransferToLpRequest) returns (TxResponse);
+  rpc TransferPdaToWallet (TransferPdaToWalletRequest) returns (TxResponse);
+
+  rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
+}
+
+message DomainSeparatorRequest {}
+message DomainSeparatorResponse {
+  int64 domain_separator = 1;
+}
+
+message GetPdaRequest {
+  optional string key = 1;
+}
+
+message PdaResponse {
+  string pda = 1;
+  string key = 2;
+  string type = 3;
+}
+
+message SpendTokensRequest {
+  string request_id = 1;
+  string approver = 2;
+  string amount = 3;
+  optional string delegate_key = 4;
+  optional base.Token token = 5;
+}
+
+message TransferToLpRequest {
+  string request_id = 1;
+  string to = 2;
+  string amount = 3;
+  optional base.Token token = 4;
+}
+
+message TransferPdaToWalletRequest {
+  string request_id = 1;
+  string user_key = 2;
+  string to = 3;
+  string amount = 4;
+  base.Ed25519Pair ed25519_pair = 5;
+  optional base.Token token = 6;
+}
+
+message TxResponse {
+  string request_id = 1;
+  string signature = 4;
+  int64 position = 5;
+}

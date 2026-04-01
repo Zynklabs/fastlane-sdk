@@ -187,6 +187,19 @@ interface TxCost {
     denom: string;
 }
 declare const TxCost: MessageFns<TxCost>;
+interface DecodeEventRequest {
+    signature: string;
+    eventName?: string | undefined;
+}
+declare const DecodeEventRequest: MessageFns<DecodeEventRequest>;
+interface EventData {
+    eventName: string;
+    ixName: string;
+    content?: {
+        [key: string]: any;
+    } | undefined;
+}
+declare const EventData: MessageFns<EventData>;
 type BaseDefinition = typeof BaseDefinition;
 declare const BaseDefinition: {
     readonly name: "Base";
@@ -357,4 +370,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountInfoResponse, AddressResponse, Asset, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, type DeepPartial, Denom, Ed25519Pair, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
+export { AccountInfoResponse, AddressResponse, Asset, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
