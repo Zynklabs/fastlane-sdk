@@ -58,6 +58,6 @@ message TransferPdaToWalletRequest {
 
 message TxResponse {
   string request_id = 1;
-  string signature = 4;
-  int64 position = 5;
+  string signature = 2;
+  int64 position = 3;
 }

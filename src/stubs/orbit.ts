@@ -723,10 +723,10 @@ export const TxResponse: MessageFns<TxResponse> = {
       writer.uint32(10).string(message.requestId);
     }
     if (message.signature !== "") {
-      writer.uint32(34).string(message.signature);
+      writer.uint32(18).string(message.signature);
     }
     if (message.position !== 0) {
-      writer.uint32(40).int64(message.position);
+      writer.uint32(24).int64(message.position);
     }
     return writer;
   },
@@ -746,16 +746,16 @@ export const TxResponse: MessageFns<TxResponse> = {
           message.requestId = reader.string();
           continue;
         }
-        case 4: {
-          if (tag !== 34) {
+        case 2: {
+          if (tag !== 18) {
             break;
           }
 
           message.signature = reader.string();
           continue;
         }
-        case 5: {
-          if (tag !== 40) {
+        case 3: {
+          if (tag !== 24) {
             break;
           }
 
