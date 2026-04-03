@@ -80,7 +80,7 @@ export const extensionsMiddleware = (
         ...res,
         duration,
       });
-      await extensions.metrics?.(method, path, 0, Date.now() - start);
+      await extensions.metrics?.(method, path, "Ok", Date.now() - start);
 
       return res;
     } catch (err: any) {
