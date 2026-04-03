@@ -193,20 +193,3 @@ npm install
 # Regenerate protobuf TS types (if .proto files change)
 npm run proto:gen
 ```
-
-## Error Handling
-
-```ts
-import { Code } from "nice-grpc";
-
-try {
-  await fastlane.base.executeTx(req);
-} catch (err: any) {
-  if (err.code === Code.InvalidArgument) {
-    console.log("Bad request:", err.details);
-  }
-  if (err.code === Code.NotFound) {
-    console.log("Resource not found");
-  }
-}
-```
