@@ -4,18 +4,18 @@ interface IOverrides {
     pkgName?: string;
     envName?: string;
 }
-interface ILogger {
-    loggerCallbackFn: (level: "info" | "error" | "debug", context: any, error?: {
+interface IExtensions {
+    logger: (level: "info" | "error" | "debug", context: any, error?: {
         code?: string | number;
         raw?: any;
         message?: string;
     }) => Promise<any>;
-    metricsCallbackFn?: (method: string, path: string, status: number | string, duration: number) => Promise<any>;
+    metrics?: (method: string, path: string, status: number | string, duration: number) => Promise<any>;
 }
 interface IOptions {
     overrides?: IOverrides;
-    logger?: ILogger;
+    extensions?: IExtensions;
     retryPolicy?: RetryPolicy;
 }
 
-export type { ILogger, IOptions, IOverrides };
+export type { IExtensions, IOptions, IOverrides };
