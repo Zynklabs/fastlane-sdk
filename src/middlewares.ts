@@ -1,7 +1,7 @@
 import { ClientError, ClientMiddleware, Metadata } from "nice-grpc";
 import { RetryPolicy } from "@grpc/grpc-js";
 import { transformTxIx } from "./txIx";
-import { ILogger } from "./_";
+import { IExtensions } from "./_";
 import { backoffWithJitter, delay, nonRetryables } from "./utils";
 
 export const callerMiddleware = (
@@ -20,9 +20,11 @@ export const callerMiddleware = (
   };
 
 export const retryMiddleware = (
-  retryPolicy: Partial<RetryPolicy>,
+  retryPolicy?: Partial<RetryPolicy>,
 ): ClientMiddleware =>
   async function* (call, options) {
+    if (!retryPolicy) return yield* call.next(call.request, options);
+
     const {
       maxAttempts = 1,
       initialBackoff,
@@ -58,29 +60,32 @@ export const retryMiddleware = (
     }
   };
 
-export const loggerMiddleware = (logger: ILogger): ClientMiddleware =>
+export const extensionsMiddleware = (
+  extensions?: IExtensions,
+): ClientMiddleware =>
   async function* (call, options) {
+    if (!extensions) return yield* call.next(call.request, options);
+
     const start = Date.now();
     const { path } = call.method;
     const method = path.split("/").at(-1)!;
-
     const defaults = { path, method };
 
     try {
       const res = yield* call.next(call.request, options);
 
       const duration = Date.now() - start;
-      await logger.loggerCallbackFn?.("info", {
+      await extensions.logger?.("info", {
         ...defaults,
         ...res,
         duration,
       });
-      await logger.metricsCallbackFn?.(method, path, 0, Date.now() - start);
+      await extensions.metrics?.(method, path, 0, Date.now() - start);
 
       return res;
     } catch (err: any) {
       const duration = Date.now() - start;
-      await logger.loggerCallbackFn?.(
+      await extensions.logger?.(
         "error",
         { ...defaults, duration },
         {
@@ -89,7 +94,7 @@ export const loggerMiddleware = (logger: ILogger): ClientMiddleware =>
           message: err.details,
         },
       );
-      await logger.metricsCallbackFn?.(method, path, err.status, duration);
+      await extensions.metrics?.(method, path, err.status, duration);
 
       throw err;
     }

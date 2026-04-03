@@ -5,13 +5,13 @@ export interface IOverrides {
   envName?: string;
 }
 
-export interface ILogger {
-  loggerCallbackFn: (
+export interface IExtensions {
+  logger: (
     level: "info" | "error" | "debug",
     context: any,
     error?: { code?: string | number; raw?: any; message?: string },
   ) => Promise<any>;
-  metricsCallbackFn?: (
+  metrics?: (
     method: string,
     path: string,
     status: number | string,
@@ -21,6 +21,6 @@ export interface ILogger {
 
 export interface IOptions {
   overrides?: IOverrides;
-  logger?: ILogger;
+  extensions?: IExtensions;
   retryPolicy?: RetryPolicy;
 }

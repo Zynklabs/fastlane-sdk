@@ -6,20 +6,20 @@ import { KaminoClient, KaminoDefinition } from "./stubs/kamino";
 import { getCallerAndEnv } from "./utils";
 import {
   callerMiddleware,
-  loggerMiddleware,
   retryMiddleware,
   txIxMiddleware,
+  extensionsMiddleware,
 } from "./middlewares";
 import { IOptions } from "./_";
 
 export default (endpoint: string, options?: IOptions) => {
-  const { overrides, logger, retryPolicy } = options || {};
+  const { overrides, extensions, retryPolicy } = options || {};
 
-  const clientFactory = createClientFactory();
-  clientFactory.use(callerMiddleware(getCallerAndEnv(overrides)));
-  if (retryPolicy) clientFactory.use(retryMiddleware(retryPolicy));
-  if (logger) clientFactory.use(loggerMiddleware(logger));
-  clientFactory.use(txIxMiddleware());
+  const clientFactory = createClientFactory()
+    .use(callerMiddleware(getCallerAndEnv(overrides)))
+    .use(retryMiddleware(retryPolicy))
+    .use(extensionsMiddleware(extensions))
+    .use(txIxMiddleware());
 
   const channel = createChannel(endpoint);
 
