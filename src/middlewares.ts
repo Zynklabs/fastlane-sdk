@@ -37,6 +37,8 @@ export const retryMiddleware = (
     let attempt = 0;
 
     while (true) {
+      console.debug(`[${path}] attempt count: ${attempt + 1}`);
+
       try {
         return yield* call.next(call.request, options);
       } catch (err) {
@@ -69,40 +71,41 @@ export const extensionsMiddleware = (
     const start = Date.now();
     const { path } = call.method;
     const method = path.split("/").at(-1)!;
-    const defaults = { path, method };
+
+    let error;
+    let code = "Ok";
+    let level = "info";
+    let payload = { path, method, message: code };
 
     try {
       const res = yield* call.next(call.request, options);
-
-      const duration = Date.now() - start;
-      await extensions.logger?.("info", {
-        ...defaults,
-        ...res,
-        duration,
-      });
-      await extensions.metrics?.(method, path, "Ok", Date.now() - start);
+      payload = { ...payload, ...res };
 
       return res;
     } catch (err: any) {
-      const duration = Date.now() - start;
-      await extensions.logger?.(
-        "error",
-        { ...defaults, duration },
-        {
-          code: err.status,
-          raw: err,
-          message: err.details,
-        },
-      );
-      await extensions.metrics?.(method, path, err.status, duration);
+      code = err.code;
+      level = "error";
+      error = {
+        code,
+        raw: err,
+        message: err.details,
+      };
 
       throw err;
+    } finally {
+      const duration = Date.now() - start;
+      await extensions.logger(level as any, { ...payload, duration }, error);
+      await extensions.metrics?.(method, path, code, duration);
     }
   };
 
 export const txIxMiddleware = (): ClientMiddleware =>
   async function* (call, options) {
     const { transformed, ...req } = transformTxIx(call, "toWire");
-    const res = yield* call.next(req, options);
-    return transformTxIx(res, "fromWire", transformed);
+
+    const _res = yield* call.next(req, options);
+    const res = transformTxIx(_res, "fromWire", transformed);
+
+    delete res["transformed"];
+    return res;
   };

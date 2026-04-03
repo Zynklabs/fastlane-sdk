@@ -17,8 +17,8 @@ export default (endpoint: string, options?: IOptions) => {
 
   const clientFactory = createClientFactory()
     .use(callerMiddleware(getCallerAndEnv(overrides)))
-    .use(retryMiddleware(retryPolicy))
     .use(extensionsMiddleware(extensions))
+    .use(retryMiddleware(retryPolicy))
     .use(txIxMiddleware());
 
   const channel = createChannel(endpoint);
