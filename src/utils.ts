@@ -1,10 +1,35 @@
 import fs from "fs";
 import path from "path";
+import { IOverrides } from "./_";
 
-export interface IOverrides {
-  pkgName?: string;
-  envName?: string;
-}
+export const nonRetryables = new Set([
+  "ExecuteTx",
+  "Replenish",
+  "Transfer",
+  "AttestOrder",
+  "Deposit",
+  "Borrow",
+  "Repay",
+  "Withdraw",
+  "DepositCollateral",
+  "SpendTokens",
+  "TransferToLp",
+  "TransferPdaToWallet",
+]);
+
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+export const backoffWithJitter = (
+  attempt: number,
+  initialBackoff: string | number = 500,
+  maxBackoff: string | number = 5000,
+  multiplier: number = 1.2,
+) => {
+  const base = +initialBackoff * Math.pow(multiplier, attempt - 1);
+  const capped = Math.min(base, +maxBackoff);
+
+  return capped * (0.573 + Math.random());
+};
 
 export const getCallerAndEnv = (overrides?: IOverrides): [string, string] => {
   let { pkgName, envName } = overrides || {};

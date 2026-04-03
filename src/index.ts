@@ -1,42 +1,25 @@
-import {
-  createChannel,
-  createClientFactory,
-  ClientMiddleware,
-  Metadata,
-} from "nice-grpc";
+import { createChannel, createClientFactory } from "nice-grpc";
 import { BaseClient, BaseDefinition, Token, Denom } from "./stubs/base";
 import { CoreClient, CoreDefinition } from "./stubs/core";
 import { OrbitClient, OrbitDefinition } from "./stubs/orbit";
 import { KaminoClient, KaminoDefinition } from "./stubs/kamino";
-import { getCallerAndEnv, IOverrides } from "./utils";
-import { transformTxIx } from "./txIx";
+import { getCallerAndEnv } from "./utils";
+import {
+  callerMiddleware,
+  loggerMiddleware,
+  retryMiddleware,
+  txIxMiddleware,
+} from "./middlewares";
+import { IOptions } from "./_";
 
-const callerMiddleware = (callerAndEnv: [string, string]): ClientMiddleware =>
-  async function* (call, options) {
-    const metadata = options.metadata ?? new Metadata();
-    const [caller, env] = callerAndEnv;
+export default (endpoint: string, options?: IOptions) => {
+  const { overrides, logger, retryPolicy } = options || {};
 
-    metadata.set("z-caller", caller);
-    metadata.set("z-env", env);
-
-    options.metadata = metadata;
-
-    return yield* call.next(call.request, options);
-  };
-
-const txIxMiddleware = (): ClientMiddleware =>
-  async function* (call, options) {
-    const { transformed, ...req } = transformTxIx(call, "toWire");
-    const res = yield* call.next(req, options);
-    return transformTxIx(res, "fromWire", transformed);
-  };
-
-export default (endpoint: string, overrides?: IOverrides) => {
-  const callerAndEnv = getCallerAndEnv(overrides);
-
-  const clientFactory = createClientFactory()
-    .use(callerMiddleware(callerAndEnv))
-    .use(txIxMiddleware());
+  const clientFactory = createClientFactory();
+  clientFactory.use(callerMiddleware(getCallerAndEnv(overrides)));
+  if (retryPolicy) clientFactory.use(retryMiddleware(retryPolicy));
+  if (logger) clientFactory.use(loggerMiddleware(logger));
+  clientFactory.use(txIxMiddleware());
 
   const channel = createChannel(endpoint);
 
@@ -49,3 +32,4 @@ export default (endpoint: string, overrides?: IOverrides) => {
 };
 
 export * from "./stubs";
+export { IOptions };
