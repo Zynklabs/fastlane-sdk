@@ -1,7 +1,7 @@
 import { ClientError, ClientMiddleware, Metadata } from "nice-grpc";
 import { RetryPolicy } from "@grpc/grpc-js";
 import { transformTxIx } from "./txIx";
-import { IExtensions } from "./_";
+import { IExtensions } from "./interfaces";
 import { backoffWithJitter, delay, nonRetryables } from "./utils";
 
 export const callerMiddleware = (

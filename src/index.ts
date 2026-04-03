@@ -10,7 +10,7 @@ import {
   txIxMiddleware,
   extensionsMiddleware,
 } from "./middlewares";
-import { IOptions } from "./_";
+import { IOptions } from "./interfaces";
 
 export default (endpoint: string, options?: IOptions) => {
   const { overrides, extensions, retryPolicy } = options || {};

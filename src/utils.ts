@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { IOverrides } from "./_";
+import { IOverrides } from "./interfaces";
 
 export const nonRetryables = new Set([
   "ExecuteTx",
