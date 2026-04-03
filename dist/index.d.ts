@@ -6,7 +6,7 @@ import { OrbitClient } from './stubs/orbit.js';
 export { GetPdaRequest, TxResponse as OrbitTxResponse, PdaResponse, SpendTokensRequest, TransferPdaToWalletRequest, TransferToLpRequest } from './stubs/orbit.js';
 import { KaminoClient } from './stubs/kamino.js';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.js';
-import { IOptions } from './_.js';
+import { IOptions } from './interfaces.js';
 export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.js';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';

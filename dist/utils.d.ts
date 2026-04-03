@@ -1,4 +1,4 @@
-import { IOverrides } from './_.js';
+import { IOverrides } from './interfaces.js';
 import '@grpc/grpc-js';
 
 declare const nonRetryables: Set<string>;

@@ -173,7 +173,7 @@ type KmsSignerKey =
 - [Transfer - PDV => Beneficiary (incl. PDVs) - multi asset swapr](./examples/core/transfers/pdvToBeneficiary__multiAsset.ts)
 - [Attest order - Solana ZOW => Arbitrum Beneficiary](./examples/attestations/zowToBeneficiary.ts)
 - [Arbitrary transaction/instructions requiring Zynk signers](./examples/arbitrary.ts)
-- [Get Tx Details](./examples/txDetails.ts)
+- [Get tx details](./examples/txDetails.ts)
 
 ## Protobuf Reference
 
