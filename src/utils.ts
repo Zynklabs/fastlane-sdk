@@ -4,9 +4,6 @@ import { IOverrides } from "./interfaces";
 
 export const nonRetryables = new Set([
   "ExecuteTx",
-  "Replenish",
-  "Transfer",
-  "AttestOrder",
   "Deposit",
   "Borrow",
   "Repay",
