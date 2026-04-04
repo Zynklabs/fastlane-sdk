@@ -32,4 +32,3 @@ export default (endpoint: string, options?: IOptions) => {
 };
 
 export * from "./stubs";
-export { IOptions };

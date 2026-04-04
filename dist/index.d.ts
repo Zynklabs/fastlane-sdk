@@ -22,4 +22,4 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     Denom: typeof Denom;
 };
 
-export { Denom, IOptions, Token, _default as default };
+export { Denom, Token, _default as default };
