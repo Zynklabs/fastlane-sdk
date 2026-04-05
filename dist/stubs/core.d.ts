@@ -30,7 +30,6 @@ declare const OrderIdResponse: MessageFns<OrderIdResponse>;
 interface DeriveOrderTrackerRequest {
     orderId: string;
     beneficiary: string;
-    asString?: boolean | undefined;
 }
 declare const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest>;
 interface OrderTrackerResponse {
