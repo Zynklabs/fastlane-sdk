@@ -38,6 +38,7 @@ export interface OrderIdResponse {
 export interface DeriveOrderTrackerRequest {
   orderId: string;
   beneficiary: string;
+  asString?: boolean | undefined;
 }
 
 export interface OrderTrackerResponse {
@@ -508,7 +509,7 @@ export const OrderIdResponse: MessageFns<OrderIdResponse> = {
 };
 
 function createBaseDeriveOrderTrackerRequest(): DeriveOrderTrackerRequest {
-  return { orderId: "", beneficiary: "" };
+  return { orderId: "", beneficiary: "", asString: undefined };
 }
 
 export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = {
@@ -518,6 +519,9 @@ export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = 
     }
     if (message.beneficiary !== "") {
       writer.uint32(18).string(message.beneficiary);
+    }
+    if (message.asString !== undefined) {
+      writer.uint32(24).bool(message.asString);
     }
     return writer;
   },
@@ -545,6 +549,14 @@ export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = 
           message.beneficiary = reader.string();
           continue;
         }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.asString = reader.bool();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -562,6 +574,11 @@ export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = 
         ? globalThis.String(object.order_id)
         : "",
       beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+      asString: isSet(object.asString)
+        ? globalThis.Boolean(object.asString)
+        : isSet(object.as_string)
+        ? globalThis.Boolean(object.as_string)
+        : undefined,
     };
   },
 
@@ -573,6 +590,9 @@ export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = 
     if (message.beneficiary !== "") {
       obj.beneficiary = message.beneficiary;
     }
+    if (message.asString !== undefined) {
+      obj.asString = message.asString;
+    }
     return obj;
   },
 
@@ -583,6 +603,7 @@ export const DeriveOrderTrackerRequest: MessageFns<DeriveOrderTrackerRequest> = 
     const message = createBaseDeriveOrderTrackerRequest();
     message.orderId = object.orderId ?? "";
     message.beneficiary = object.beneficiary ?? "";
+    message.asString = object.asString ?? undefined;
     return message;
   },
 };

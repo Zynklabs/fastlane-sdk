@@ -18,7 +18,6 @@ Built with [nice-grpc](https://github.com/deeplay-io/nice-grpc) — modern, type
 - [Usage Examples](#usage-examples)
 - [Protobuf Reference](#protobuf-reference)
 - [Development](#development)
-- [Error Handling](#error-handling)
 
 ---
 

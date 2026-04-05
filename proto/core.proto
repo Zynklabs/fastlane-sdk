@@ -46,6 +46,7 @@ message OrderIdResponse {
 message DeriveOrderTrackerRequest {
   string order_id = 1;
   string beneficiary = 2;
+  optional bool as_string = 3;
 }
 
 message OrderTrackerResponse {
