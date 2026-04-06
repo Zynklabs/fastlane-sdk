@@ -30,3 +30,17 @@ const ataResponse: AtaAddressResponse =
   await fastlane.base.getAtaAddress(ataAddressRequest);
 
 console.log("Ata address:", ataResponse.ata);
+
+/***************************************************************/
+
+// 3. Get pdv address from partnerId
+
+import { GetPdvRequest, PdvResponse } from "@zynk/fastlane";
+
+const pdvRequest: GetPdvRequest = {
+  partnerId: "zp_test",
+};
+
+const pdvResponse: PdvResponse = await fastlane.core.getPdv(pdvRequest);
+
+console.log("Pdv address:", pdvResponse.pdv);
