@@ -33,7 +33,7 @@ console.log("Ata address:", ataResponse.ata);
 
 /***************************************************************/
 
-// 3. Get pdv address from partnerId
+// 3. Get pdv address from partnerId //
 
 import { GetPdvRequest, PdvResponse } from "@zynk/fastlane";
 

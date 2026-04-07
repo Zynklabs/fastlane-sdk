@@ -1,6 +1,6 @@
 {
   "name": "@zynk/fastlane",
-  "version": "0.1.4",
+  "version": "0.1.4-test",
   "description": "",
   "homepage": "https://github.com/Zynklabs/fastlane-sdk#readme",
   "bugs": {
@@ -16,8 +16,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "tsconfig.json"
+    "dist"
   ],
   "exports": {
     ".": {
