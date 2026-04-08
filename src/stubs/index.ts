@@ -95,3 +95,15 @@ export type {
   DepositCollateralRequest,
   KaminoTx,
 } from "./kamino";
+
+export type {
+  GetChainByNameRequest,
+  GetChainByIdRequest,
+  ChainDetails,
+  GetTokenDetailsRequest,
+  TokenDetails,
+  GetAllChainsRequest,
+  AllChains,
+  GetAllTokensRequest,
+  AllTokens,
+} from "./evm";

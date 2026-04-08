@@ -39,6 +39,8 @@ service Base {
   rpc GetTxStatus (GetTxStatusRequest) returns (TxStatus);
   rpc GetTxDetails (GetTxDetailsRequest) returns (TxDetails);
   rpc GetTxCost (GetTxCostRequest) returns (TxCost);
+
+  rpc GetAssetPrice (GetAssetPriceRequest) returns (AssetPrice);
 }
 
 
@@ -212,4 +214,16 @@ message EventData {
   string event_name = 1;
   string ix_name = 2;
   google.protobuf.Struct content = 3;
+}
+
+message GetAssetPriceRequest {
+  string currency = 1;
+  optional Token token = 2;
+  optional string native = 3;
+}
+
+message AssetPrice {
+  string price = 1;
+  string symbol = 2;
+  string conversion_rate = 3;
 }

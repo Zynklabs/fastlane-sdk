@@ -272,6 +272,18 @@ export interface EventData {
   content?: { [key: string]: any } | undefined;
 }
 
+export interface GetAssetPriceRequest {
+  currency: string;
+  token?: Token | undefined;
+  native?: string | undefined;
+}
+
+export interface AssetPrice {
+  price: string;
+  symbol: string;
+  conversionRate: string;
+}
+
 function createBaseTxIxAccount(): TxIxAccount {
   return { pubkey: "", isSigner: false, isWritable: false };
 }
@@ -3031,6 +3043,194 @@ export const EventData: MessageFns<EventData> = {
   },
 };
 
+function createBaseGetAssetPriceRequest(): GetAssetPriceRequest {
+  return { currency: "", token: undefined, native: undefined };
+}
+
+export const GetAssetPriceRequest: MessageFns<GetAssetPriceRequest> = {
+  encode(message: GetAssetPriceRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.currency !== "") {
+      writer.uint32(10).string(message.currency);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(16).int32(message.token);
+    }
+    if (message.native !== undefined) {
+      writer.uint32(26).string(message.native);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAssetPriceRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAssetPriceRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.currency = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.native = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAssetPriceRequest {
+    return {
+      currency: isSet(object.currency) ? globalThis.String(object.currency) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      native: isSet(object.native) ? globalThis.String(object.native) : undefined,
+    };
+  },
+
+  toJSON(message: GetAssetPriceRequest): unknown {
+    const obj: any = {};
+    if (message.currency !== "") {
+      obj.currency = message.currency;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.native !== undefined) {
+      obj.native = message.native;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAssetPriceRequest>, I>>(base?: I): GetAssetPriceRequest {
+    return GetAssetPriceRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAssetPriceRequest>, I>>(object: I): GetAssetPriceRequest {
+    const message = createBaseGetAssetPriceRequest();
+    message.currency = object.currency ?? "";
+    message.token = object.token ?? undefined;
+    message.native = object.native ?? undefined;
+    return message;
+  },
+};
+
+function createBaseAssetPrice(): AssetPrice {
+  return { price: "", symbol: "", conversionRate: "" };
+}
+
+export const AssetPrice: MessageFns<AssetPrice> = {
+  encode(message: AssetPrice, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.price !== "") {
+      writer.uint32(10).string(message.price);
+    }
+    if (message.symbol !== "") {
+      writer.uint32(18).string(message.symbol);
+    }
+    if (message.conversionRate !== "") {
+      writer.uint32(26).string(message.conversionRate);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AssetPrice {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAssetPrice();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.price = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.symbol = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.conversionRate = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AssetPrice {
+    return {
+      price: isSet(object.price) ? globalThis.String(object.price) : "",
+      symbol: isSet(object.symbol) ? globalThis.String(object.symbol) : "",
+      conversionRate: isSet(object.conversionRate)
+        ? globalThis.String(object.conversionRate)
+        : isSet(object.conversion_rate)
+        ? globalThis.String(object.conversion_rate)
+        : "",
+    };
+  },
+
+  toJSON(message: AssetPrice): unknown {
+    const obj: any = {};
+    if (message.price !== "") {
+      obj.price = message.price;
+    }
+    if (message.symbol !== "") {
+      obj.symbol = message.symbol;
+    }
+    if (message.conversionRate !== "") {
+      obj.conversionRate = message.conversionRate;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AssetPrice>, I>>(base?: I): AssetPrice {
+    return AssetPrice.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AssetPrice>, I>>(object: I): AssetPrice {
+    const message = createBaseAssetPrice();
+    message.price = object.price ?? "";
+    message.symbol = object.symbol ?? "";
+    message.conversionRate = object.conversionRate ?? "";
+    return message;
+  },
+};
+
 export type BaseDefinition = typeof BaseDefinition;
 export const BaseDefinition = {
   name: "Base",
@@ -3148,6 +3348,14 @@ export const BaseDefinition = {
       responseStream: false,
       options: {},
     },
+    getAssetPrice: {
+      name: "GetAssetPrice",
+      requestType: GetAssetPriceRequest as typeof GetAssetPriceRequest,
+      requestStream: false,
+      responseType: AssetPrice as typeof AssetPrice,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -3184,6 +3392,7 @@ export interface BaseServiceImplementation<CallContextExt = {}> {
   getTxStatus(request: GetTxStatusRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxStatus>>;
   getTxDetails(request: GetTxDetailsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxDetails>>;
   getTxCost(request: GetTxCostRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxCost>>;
+  getAssetPrice(request: GetAssetPriceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AssetPrice>>;
 }
 
 export interface BaseClient<CallOptionsExt = {}> {
@@ -3219,6 +3428,10 @@ export interface BaseClient<CallOptionsExt = {}> {
   getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: CallOptions & CallOptionsExt): Promise<TxStatus>;
   getTxDetails(request: DeepPartial<GetTxDetailsRequest>, options?: CallOptions & CallOptionsExt): Promise<TxDetails>;
   getTxCost(request: DeepPartial<GetTxCostRequest>, options?: CallOptions & CallOptionsExt): Promise<TxCost>;
+  getAssetPrice(
+    request: DeepPartial<GetAssetPriceRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<AssetPrice>;
 }
 
 function bytesFromBase64(b64: string): Uint8Array {
