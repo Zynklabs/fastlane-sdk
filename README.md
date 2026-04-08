@@ -162,17 +162,18 @@ type KmsSignerKey =
 
 ### Usage Examples
 
-- [Get address](./examples/address.ts)
-- [Get SOL balance - single owner](./examples/solBalance__singleOwner.ts)
-- [Get token balance - single owner](./examples/tokenBalance__singleOwner.ts)
-- [Get all balances - multiple owners](./examples/allBalances__multiOwners.ts)
+- [Addresses](./examples/address.ts)
+- [Tokens/Assets](./examples/assets.ts)
+- [SOL balance - single owner](./examples/solBalance__singleOwner.ts)
+- [Token balance - single owner](./examples/tokenBalance__singleOwner.ts)
+- [All balances - multiple owners](./examples/allBalances__multiOwners.ts)
 - [Create order](./examples/core/createOrder.ts)
 - [Replenish order](./examples/core/replenishOrder.ts)
 - [Transfer - ZOW => Beneficiary (incl. PDVs) - transient order](./examples/core/transfers/zowToBeneficiary__transient.ts)
 - [Transfer - PDV => Beneficiary (incl. PDVs) - multi asset swapr](./examples/core/transfers/pdvToBeneficiary__multiAsset.ts)
 - [Attest order - Solana ZOW => Arbitrum Beneficiary](./examples/attestations/zowToBeneficiary.ts)
 - [Arbitrary transaction/instructions requiring Zynk signers](./examples/arbitrary.ts)
-- [Get tx details](./examples/txDetails.ts)
+- [Tx details](./examples/txDetails.ts)
 
 ## Protobuf Reference
 

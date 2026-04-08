@@ -9,11 +9,11 @@ const addressRequest: GetAddressRequest = {
   key: "ZOW", // any predefined KMS signer key
 };
 
-const response: AddressResponse =
+const addressResponse: AddressResponse =
   await fastlane.base.getAddress(addressRequest);
 
-console.log("Address:", response.address);
-console.log("Key    :", response.key);
+console.log("Address:", addressResponse.address);
+console.log("Key    :", addressResponse.key);
 
 /***************************************************************/
 

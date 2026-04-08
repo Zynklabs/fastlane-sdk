@@ -46,6 +46,8 @@ export type {
   TxCost,
   DecodeEventRequest,
   EventData,
+  GetAssetPriceRequest,
+  AssetPrice,
 } from "./base";
 
 export type {
