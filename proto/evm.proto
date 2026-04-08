@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package evm;
+
+import "base.proto";
+
+service Evm {
+  rpc GetChainByName (GetChainByNameRequest) returns (ChainDetails);
+  rpc GetChainById (GetChainByIdRequest) returns (ChainDetails);
+
+  rpc GetTokenDetails (GetTokenDetailsRequest) returns (TokenDetails);
+
+  rpc GetAllChains (GetAllChainsRequest) returns (AllChains);
+  rpc GetAllTokens (GetAllTokensRequest) returns (AllTokens);
+}
+
+message GetChainByNameRequest {
+	string name = 1;
+}
+
+message GetChainByIdRequest {
+	int32 id = 1;
+}
+
+message ChainDetails {
+	int32 id = 1;
+	string name = 2;
+	string short_name = 3;
+	string og_name = 4;
+}
+
+message GetTokenDetailsRequest {
+	base.Token token = 1;
+	optional int32 chain_id = 2;
+	optional string chain_name = 3;
+}
+
+message TokenDetails {
+	string symbol = 1;
+	string address = 2;
+	int32 decimals = 3;
+	ChainDetails chain = 4;
+}
+
+message GetAllChainsRequest {}
+message AllChains {
+  repeated ChainDetails chains = 1;
+}
+
+message GetAllTokensRequest {}
+message AllTokens {
+  repeated TokenDetails tokens = 1;
+}
+

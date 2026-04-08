@@ -7,6 +7,7 @@ export { GetPdaRequest, TxResponse as OrbitTxResponse, PdaResponse, SpendTokensR
 import { KaminoClient } from './stubs/kamino.mjs';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.mjs';
 import { IOptions } from './interfaces.mjs';
+import { EvmClient } from './stubs/evm.mjs';
 export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.mjs';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
@@ -18,6 +19,7 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     core: CoreClient<{}>;
     orbit: OrbitClient<{}>;
     kamino: KaminoClient<{}>;
+    evm: EvmClient<{}>;
     Token: typeof Token;
     Denom: typeof Denom;
 };

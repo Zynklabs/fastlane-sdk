@@ -11,6 +11,7 @@ import {
   extensionsMiddleware,
 } from "./middlewares";
 import { IOptions } from "./interfaces";
+import { EvmClient, EvmDefinition } from "./stubs/evm";
 
 export default (endpoint: string, options?: IOptions) => {
   const { overrides, extensions, retryPolicy } = options || {};
@@ -27,8 +28,9 @@ export default (endpoint: string, options?: IOptions) => {
   const core: CoreClient = clientFactory.create(CoreDefinition, channel);
   const orbit: OrbitClient = clientFactory.create(OrbitDefinition, channel);
   const kamino: KaminoClient = clientFactory.create(KaminoDefinition, channel);
+  const evm: EvmClient = clientFactory.create(EvmDefinition, channel);
 
-  return { base, core, orbit, kamino, Token, Denom };
+  return { base, core, orbit, kamino, evm, Token, Denom };
 };
 
 export * from "./stubs";
