@@ -200,6 +200,18 @@ interface EventData {
     } | undefined;
 }
 declare const EventData: MessageFns<EventData>;
+interface GetAssetPriceRequest {
+    currency: string;
+    token?: Token | undefined;
+    native?: string | undefined;
+}
+declare const GetAssetPriceRequest: MessageFns<GetAssetPriceRequest>;
+interface AssetPrice {
+    price: string;
+    symbol: string;
+    conversionRate: string;
+}
+declare const AssetPrice: MessageFns<AssetPrice>;
 type BaseDefinition = typeof BaseDefinition;
 declare const BaseDefinition: {
     readonly name: "Base";
@@ -317,6 +329,14 @@ declare const BaseDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly getAssetPrice: {
+            readonly name: "GetAssetPrice";
+            readonly requestType: typeof GetAssetPriceRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof AssetPrice;
+            readonly responseStream: false;
+            readonly options: {};
+        };
     };
 };
 interface BaseServiceImplementation<CallContextExt = {}> {
@@ -334,6 +354,7 @@ interface BaseServiceImplementation<CallContextExt = {}> {
     getTxStatus(request: GetTxStatusRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxStatus>>;
     getTxDetails(request: GetTxDetailsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxDetails>>;
     getTxCost(request: GetTxCostRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxCost>>;
+    getAssetPrice(request: GetAssetPriceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AssetPrice>>;
 }
 interface BaseClient<CallOptionsExt = {}> {
     generateHashedArray(request: DeepPartial<GenerateHashedArrayRequest>, options?: CallOptions & CallOptionsExt): Promise<HashedArrayResponse>;
@@ -350,6 +371,7 @@ interface BaseClient<CallOptionsExt = {}> {
     getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: CallOptions & CallOptionsExt): Promise<TxStatus>;
     getTxDetails(request: DeepPartial<GetTxDetailsRequest>, options?: CallOptions & CallOptionsExt): Promise<TxDetails>;
     getTxCost(request: DeepPartial<GetTxCostRequest>, options?: CallOptions & CallOptionsExt): Promise<TxCost>;
+    getAssetPrice(request: DeepPartial<GetAssetPriceRequest>, options?: CallOptions & CallOptionsExt): Promise<AssetPrice>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 type DeepPartial<T> = T extends Builtin ? T : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
@@ -370,4 +392,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountInfoResponse, AddressResponse, Asset, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
+export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };

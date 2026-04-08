@@ -8,6 +8,7 @@ import { KaminoClient } from './stubs/kamino.js';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.js';
 import { IOptions } from './interfaces.js';
 import { EvmClient } from './stubs/evm.js';
+export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.js';
 export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.js';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
