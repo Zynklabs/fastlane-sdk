@@ -23,7 +23,7 @@ service Core {
 
 message DomainSeparatorRequest {}
 message DomainSeparatorResponse {
-  int64 domain_separator = 1;
+  uint64 domain_separator = 1;
 }
 
 message GetPdvRequest {
@@ -129,6 +129,6 @@ message TxResponse {
   string order_tracker = 2;
   string order_id = 3;
   string signature = 4;
-  int64 position = 5;
+  uint32 position = 5;
   map<string, string> meta = 6;
 }

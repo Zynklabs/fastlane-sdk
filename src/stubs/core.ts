@@ -180,7 +180,7 @@ function createBaseDomainSeparatorResponse(): DomainSeparatorResponse {
 export const DomainSeparatorResponse: MessageFns<DomainSeparatorResponse> = {
   encode(message: DomainSeparatorResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.domainSeparator !== 0) {
-      writer.uint32(8).int64(message.domainSeparator);
+      writer.uint32(8).uint64(message.domainSeparator);
     }
     return writer;
   },
@@ -197,7 +197,7 @@ export const DomainSeparatorResponse: MessageFns<DomainSeparatorResponse> = {
             break;
           }
 
-          message.domainSeparator = longToNumber(reader.int64());
+          message.domainSeparator = longToNumber(reader.uint64());
           continue;
         }
       }
@@ -1927,7 +1927,7 @@ export const TxResponse: MessageFns<TxResponse> = {
       writer.uint32(34).string(message.signature);
     }
     if (message.position !== 0) {
-      writer.uint32(40).int64(message.position);
+      writer.uint32(40).uint32(message.position);
     }
     globalThis.Object.entries(message.meta).forEach(([key, value]: [string, string]) => {
       TxResponse_MetaEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).join();
@@ -1979,7 +1979,7 @@ export const TxResponse: MessageFns<TxResponse> = {
             break;
           }
 
-          message.position = longToNumber(reader.int64());
+          message.position = reader.uint32();
           continue;
         }
         case 6: {

@@ -26,6 +26,7 @@ service Base {
   rpc GetBalances (GetBalancesRequest) returns (Balances);
 
   rpc GetAddress (GetAddressRequest) returns (AddressResponse);
+  rpc GetTokenAddress (GetTokenAddressRequest) returns (AddressResponse);
 
   rpc GetAccountInfo (GetAccountInfoRequest) returns (AccountInfoResponse);
   rpc GetOwner (GetOwnerRequest) returns (GetOwnerResponse);
@@ -86,6 +87,11 @@ message GetBalancesRequest {
 
 message GetAddressRequest {
   string key = 1;
+}
+
+message GetTokenAddressRequest {
+  Token token = 1;
+  optional uint32 chain_id = 2;
 }
 
 message AddressResponse {

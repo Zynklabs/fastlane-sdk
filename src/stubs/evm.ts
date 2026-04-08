@@ -118,7 +118,7 @@ function createBaseGetChainByIdRequest(): GetChainByIdRequest {
 export const GetChainByIdRequest: MessageFns<GetChainByIdRequest> = {
   encode(message: GetChainByIdRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== 0) {
-      writer.uint32(8).int32(message.id);
+      writer.uint32(8).uint32(message.id);
     }
     return writer;
   },
@@ -135,7 +135,7 @@ export const GetChainByIdRequest: MessageFns<GetChainByIdRequest> = {
             break;
           }
 
-          message.id = reader.int32();
+          message.id = reader.uint32();
           continue;
         }
       }
@@ -176,7 +176,7 @@ function createBaseChainDetails(): ChainDetails {
 export const ChainDetails: MessageFns<ChainDetails> = {
   encode(message: ChainDetails, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== 0) {
-      writer.uint32(8).int32(message.id);
+      writer.uint32(8).uint32(message.id);
     }
     if (message.name !== "") {
       writer.uint32(18).string(message.name);
@@ -202,7 +202,7 @@ export const ChainDetails: MessageFns<ChainDetails> = {
             break;
           }
 
-          message.id = reader.int32();
+          message.id = reader.uint32();
           continue;
         }
         case 2: {
@@ -295,7 +295,7 @@ export const GetTokenDetailsRequest: MessageFns<GetTokenDetailsRequest> = {
       writer.uint32(8).int32(message.token);
     }
     if (message.chainId !== undefined) {
-      writer.uint32(16).int32(message.chainId);
+      writer.uint32(16).uint32(message.chainId);
     }
     if (message.chainName !== undefined) {
       writer.uint32(26).string(message.chainName);
@@ -323,7 +323,7 @@ export const GetTokenDetailsRequest: MessageFns<GetTokenDetailsRequest> = {
             break;
           }
 
-          message.chainId = reader.int32();
+          message.chainId = reader.uint32();
           continue;
         }
         case 3: {
@@ -398,7 +398,7 @@ export const TokenDetails: MessageFns<TokenDetails> = {
       writer.uint32(18).string(message.address);
     }
     if (message.decimals !== 0) {
-      writer.uint32(24).int32(message.decimals);
+      writer.uint32(24).uint32(message.decimals);
     }
     if (message.chain !== undefined) {
       ChainDetails.encode(message.chain, writer.uint32(34).fork()).join();
@@ -434,7 +434,7 @@ export const TokenDetails: MessageFns<TokenDetails> = {
             break;
           }
 
-          message.decimals = reader.int32();
+          message.decimals = reader.uint32();
           continue;
         }
         case 4: {

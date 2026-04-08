@@ -139,6 +139,11 @@ export interface GetAddressRequest {
   key: string;
 }
 
+export interface GetTokenAddressRequest {
+  token: Token;
+  chainId?: number | undefined;
+}
+
 export interface AddressResponse {
   address: string;
   key: string;
@@ -964,6 +969,86 @@ export const GetAddressRequest: MessageFns<GetAddressRequest> = {
   fromPartial<I extends Exact<DeepPartial<GetAddressRequest>, I>>(object: I): GetAddressRequest {
     const message = createBaseGetAddressRequest();
     message.key = object.key ?? "";
+    return message;
+  },
+};
+
+function createBaseGetTokenAddressRequest(): GetTokenAddressRequest {
+  return { token: 0, chainId: undefined };
+}
+
+export const GetTokenAddressRequest: MessageFns<GetTokenAddressRequest> = {
+  encode(message: GetTokenAddressRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.token !== 0) {
+      writer.uint32(8).int32(message.token);
+    }
+    if (message.chainId !== undefined) {
+      writer.uint32(16).uint32(message.chainId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetTokenAddressRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetTokenAddressRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.chainId = reader.uint32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetTokenAddressRequest {
+    return {
+      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      chainId: isSet(object.chainId)
+        ? globalThis.Number(object.chainId)
+        : isSet(object.chain_id)
+        ? globalThis.Number(object.chain_id)
+        : undefined,
+    };
+  },
+
+  toJSON(message: GetTokenAddressRequest): unknown {
+    const obj: any = {};
+    if (message.token !== 0) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.chainId !== undefined) {
+      obj.chainId = Math.round(message.chainId);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetTokenAddressRequest>, I>>(base?: I): GetTokenAddressRequest {
+    return GetTokenAddressRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetTokenAddressRequest>, I>>(object: I): GetTokenAddressRequest {
+    const message = createBaseGetTokenAddressRequest();
+    message.token = object.token ?? 0;
+    message.chainId = object.chainId ?? undefined;
     return message;
   },
 };
@@ -3276,6 +3361,14 @@ export const BaseDefinition = {
       responseStream: false,
       options: {},
     },
+    getTokenAddress: {
+      name: "GetTokenAddress",
+      requestType: GetTokenAddressRequest as typeof GetTokenAddressRequest,
+      requestStream: false,
+      responseType: AddressResponse as typeof AddressResponse,
+      responseStream: false,
+      options: {},
+    },
     getAccountInfo: {
       name: "GetAccountInfo",
       requestType: GetAccountInfoRequest as typeof GetAccountInfoRequest,
@@ -3371,6 +3464,10 @@ export interface BaseServiceImplementation<CallContextExt = {}> {
   getBalance(request: GetBalanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balance>>;
   getBalances(request: GetBalancesRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balances>>;
   getAddress(request: GetAddressRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AddressResponse>>;
+  getTokenAddress(
+    request: GetTokenAddressRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<AddressResponse>>;
   getAccountInfo(
     request: GetAccountInfoRequest,
     context: CallContext & CallContextExt,
@@ -3407,6 +3504,10 @@ export interface BaseClient<CallOptionsExt = {}> {
   getBalance(request: DeepPartial<GetBalanceRequest>, options?: CallOptions & CallOptionsExt): Promise<Balance>;
   getBalances(request: DeepPartial<GetBalancesRequest>, options?: CallOptions & CallOptionsExt): Promise<Balances>;
   getAddress(request: DeepPartial<GetAddressRequest>, options?: CallOptions & CallOptionsExt): Promise<AddressResponse>;
+  getTokenAddress(
+    request: DeepPartial<GetTokenAddressRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<AddressResponse>;
   getAccountInfo(
     request: DeepPartial<GetAccountInfoRequest>,
     options?: CallOptions & CallOptionsExt,

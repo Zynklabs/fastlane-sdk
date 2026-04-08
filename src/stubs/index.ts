@@ -26,6 +26,7 @@ export type {
   GetBalanceRequest,
   GetBalancesRequest,
   GetAddressRequest,
+  GetTokenAddressRequest,
   AddressResponse,
   GetAccountInfoRequest,
   AccountInfoResponse,

@@ -63,6 +63,11 @@ interface GetAddressRequest {
     key: string;
 }
 declare const GetAddressRequest: MessageFns<GetAddressRequest>;
+interface GetTokenAddressRequest {
+    token: Token;
+    chainId?: number | undefined;
+}
+declare const GetTokenAddressRequest: MessageFns<GetTokenAddressRequest>;
 interface AddressResponse {
     address: string;
     key: string;
@@ -257,6 +262,14 @@ declare const BaseDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly getTokenAddress: {
+            readonly name: "GetTokenAddress";
+            readonly requestType: typeof GetTokenAddressRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof AddressResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly getAccountInfo: {
             readonly name: "GetAccountInfo";
             readonly requestType: typeof GetAccountInfoRequest;
@@ -345,6 +358,7 @@ interface BaseServiceImplementation<CallContextExt = {}> {
     getBalance(request: GetBalanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balance>>;
     getBalances(request: GetBalancesRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balances>>;
     getAddress(request: GetAddressRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AddressResponse>>;
+    getTokenAddress(request: GetTokenAddressRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AddressResponse>>;
     getAccountInfo(request: GetAccountInfoRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountInfoResponse>>;
     getOwner(request: GetOwnerRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GetOwnerResponse>>;
     getTokenAccountOwner(request: GetTokenAccountOwnerRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TokenAccountOwnerResponse>>;
@@ -362,6 +376,7 @@ interface BaseClient<CallOptionsExt = {}> {
     getBalance(request: DeepPartial<GetBalanceRequest>, options?: CallOptions & CallOptionsExt): Promise<Balance>;
     getBalances(request: DeepPartial<GetBalancesRequest>, options?: CallOptions & CallOptionsExt): Promise<Balances>;
     getAddress(request: DeepPartial<GetAddressRequest>, options?: CallOptions & CallOptionsExt): Promise<AddressResponse>;
+    getTokenAddress(request: DeepPartial<GetTokenAddressRequest>, options?: CallOptions & CallOptionsExt): Promise<AddressResponse>;
     getAccountInfo(request: DeepPartial<GetAccountInfoRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountInfoResponse>;
     getOwner(request: DeepPartial<GetOwnerRequest>, options?: CallOptions & CallOptionsExt): Promise<GetOwnerResponse>;
     getTokenAccountOwner(request: DeepPartial<GetTokenAccountOwnerRequest>, options?: CallOptions & CallOptionsExt): Promise<TokenAccountOwnerResponse>;
@@ -392,4 +407,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
+export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
