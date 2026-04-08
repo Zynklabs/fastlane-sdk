@@ -1,4 +1,4 @@
-import Fastlane, { Token } from "@zynk/fastlane";
+import Fastlane from "@zynk/fastlane";
 const fastlane = Fastlane("34.73.11.238:50051");
 
 // 1. Get EVM token details //
@@ -7,7 +7,7 @@ import { GetTokenDetailsRequest, TokenDetails } from "@zynk/fastlane";
 
 const tokenDetailsRequest: GetTokenDetailsRequest = {
   chainId: 1,
-  token: Token.USDC,
+  token: fastlane.Token.USDC,
 };
 
 const tokenDetailsResponse: TokenDetails =
@@ -29,7 +29,7 @@ import { GetAssetPriceRequest, AssetPrice } from "@zynk/fastlane";
 
 const assetPriceRequest: GetAssetPriceRequest = {
   currency: "usd",
-  token: Token.USDC,
+  token: fastlane.Token.USDC,
 };
 
 const assetPriceResponse: AssetPrice =
@@ -45,7 +45,7 @@ console.log("Rate   :", assetPriceResponse.conversionRate);
 
 const nativePriceRequest: GetAssetPriceRequest = {
   currency: "aed",
-  native: "SOLANA",
+  native: "SOL",
 };
 
 const nativePriceResponse: AssetPrice =

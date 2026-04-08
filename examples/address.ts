@@ -17,7 +17,23 @@ console.log("Key    :", addressResponse.key);
 
 /***************************************************************/
 
-// 2. Get ata address from KMS signer key and token //
+// 2. Get token address - both Solana and EVM //
+
+import { GetTokenAddressRequest } from "@zynk/fastlane";
+
+const tokenAddressRequest: GetTokenAddressRequest = {
+  token: fastlane.Token.USDC,
+  // chainId: 42164    /* optional - assume Solana when not provided */
+};
+
+const tokenAddressResponse: AddressResponse =
+  await fastlane.base.getTokenAddress(tokenAddressRequest);
+
+console.log("Token address:", tokenAddressResponse.address);
+
+/***************************************************************/
+
+// 3. Get ata address from KMS signer key and token //
 
 import { GetAtaAddressRequest, AtaAddressResponse } from "@zynk/fastlane";
 
@@ -33,7 +49,7 @@ console.log("Ata address:", ataResponse.ata);
 
 /***************************************************************/
 
-// 3. Get pdv address from partnerId //
+// 4. Get pdv address from partnerId //
 
 import { GetPdvRequest, PdvResponse } from "@zynk/fastlane";
 
