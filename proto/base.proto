@@ -186,7 +186,7 @@ message GetOrCreateAtaRequest {
 
 message GetOrCreateAtaResponse {
   string ata = 1;
-  AccountInfoResponse token_account = 2;
+  google.protobuf.Struct token_account = 2;
   optional string signature = 3;
 }
 

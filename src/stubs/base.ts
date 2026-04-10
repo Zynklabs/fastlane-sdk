@@ -239,7 +239,7 @@ export interface GetOrCreateAtaRequest {
 
 export interface GetOrCreateAtaResponse {
   ata: string;
-  tokenAccount?: AccountInfoResponse | undefined;
+  tokenAccount?: { [key: string]: any } | undefined;
   signature?: string | undefined;
 }
 
@@ -2529,7 +2529,7 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
       writer.uint32(10).string(message.ata);
     }
     if (message.tokenAccount !== undefined) {
-      AccountInfoResponse.encode(message.tokenAccount, writer.uint32(18).fork()).join();
+      Struct.encode(Struct.wrap(message.tokenAccount), writer.uint32(18).fork()).join();
     }
     if (message.signature !== undefined) {
       writer.uint32(26).string(message.signature);
@@ -2557,7 +2557,7 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
             break;
           }
 
-          message.tokenAccount = AccountInfoResponse.decode(reader, reader.uint32());
+          message.tokenAccount = Struct.unwrap(Struct.decode(reader, reader.uint32()));
           continue;
         }
         case 3: {
@@ -2580,10 +2580,10 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
   fromJSON(object: any): GetOrCreateAtaResponse {
     return {
       ata: isSet(object.ata) ? globalThis.String(object.ata) : "",
-      tokenAccount: isSet(object.tokenAccount)
-        ? AccountInfoResponse.fromJSON(object.tokenAccount)
-        : isSet(object.token_account)
-        ? AccountInfoResponse.fromJSON(object.token_account)
+      tokenAccount: isObject(object.tokenAccount)
+        ? object.tokenAccount
+        : isObject(object.token_account)
+        ? object.token_account
         : undefined,
       signature: isSet(object.signature) ? globalThis.String(object.signature) : undefined,
     };
@@ -2595,7 +2595,7 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
       obj.ata = message.ata;
     }
     if (message.tokenAccount !== undefined) {
-      obj.tokenAccount = AccountInfoResponse.toJSON(message.tokenAccount);
+      obj.tokenAccount = message.tokenAccount;
     }
     if (message.signature !== undefined) {
       obj.signature = message.signature;
@@ -2609,9 +2609,7 @@ export const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse> = {
   fromPartial<I extends Exact<DeepPartial<GetOrCreateAtaResponse>, I>>(object: I): GetOrCreateAtaResponse {
     const message = createBaseGetOrCreateAtaResponse();
     message.ata = object.ata ?? "";
-    message.tokenAccount = (object.tokenAccount !== undefined && object.tokenAccount !== null)
-      ? AccountInfoResponse.fromPartial(object.tokenAccount)
-      : undefined;
+    message.tokenAccount = object.tokenAccount ?? undefined;
     message.signature = object.signature ?? undefined;
     return message;
   },

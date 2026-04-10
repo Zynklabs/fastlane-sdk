@@ -167,7 +167,9 @@ interface GetOrCreateAtaRequest {
 declare const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest>;
 interface GetOrCreateAtaResponse {
     ata: string;
-    tokenAccount?: AccountInfoResponse | undefined;
+    tokenAccount?: {
+        [key: string]: any;
+    } | undefined;
     signature?: string | undefined;
 }
 declare const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse>;
