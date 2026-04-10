@@ -33,6 +33,8 @@ service Base {
   rpc GetTokenAccountOwner (GetTokenAccountOwnerRequest) returns (TokenAccountOwnerResponse);
 
   rpc GetAtaAddress (GetAtaAddressRequest) returns (AtaAddressResponse);
+  rpc GetAta(GetAtaRequest) returns (AtaResponse);
+  rpc GetAtaByMint(GetAtaByMintRequest) returns (AtaResponse);
   rpc GetOrCreateAta (GetOrCreateAtaRequest) returns (GetOrCreateAtaResponse);
 
   rpc ExecuteTx (ExecuteTxRequest) returns (ExecuteTxResponse);
@@ -144,6 +146,7 @@ message GetOwnerResponse {
 
 message GetTokenAccountOwnerRequest {
   string address = 1;
+  optional bool token2022 = 2;
 }
 
 message TokenAccountOwnerResponse {
@@ -159,8 +162,24 @@ message AtaAddressResponse {
   string ata = 1;
 }
 
-message GetOrCreateAtaRequest {
+message GetAtaRequest {
   Token token = 1;
+  string owner = 2;
+}
+
+message GetAtaByMintRequest {
+  string mint = 1;
+  string owner = 2;
+}
+
+message AtaResponse {
+  string ata = 1;
+  google.protobuf.Struct token_account = 2;
+  string token_program_id = 3;
+}
+
+message GetOrCreateAtaRequest {
+  string mint = 1;
   string owner = 2;
   optional uint32 max_attempts = 3;
 }

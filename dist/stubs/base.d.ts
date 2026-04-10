@@ -125,6 +125,7 @@ interface GetOwnerResponse {
 declare const GetOwnerResponse: MessageFns<GetOwnerResponse>;
 interface GetTokenAccountOwnerRequest {
     address: string;
+    token2022?: boolean | undefined;
 }
 declare const GetTokenAccountOwnerRequest: MessageFns<GetTokenAccountOwnerRequest>;
 interface TokenAccountOwnerResponse {
@@ -140,8 +141,26 @@ interface AtaAddressResponse {
     ata: string;
 }
 declare const AtaAddressResponse: MessageFns<AtaAddressResponse>;
-interface GetOrCreateAtaRequest {
+interface GetAtaRequest {
     token: Token;
+    owner: string;
+}
+declare const GetAtaRequest: MessageFns<GetAtaRequest>;
+interface GetAtaByMintRequest {
+    mint: string;
+    owner: string;
+}
+declare const GetAtaByMintRequest: MessageFns<GetAtaByMintRequest>;
+interface AtaResponse {
+    ata: string;
+    tokenAccount?: {
+        [key: string]: any;
+    } | undefined;
+    tokenProgramId: string;
+}
+declare const AtaResponse: MessageFns<AtaResponse>;
+interface GetOrCreateAtaRequest {
+    mint: string;
     owner: string;
     maxAttempts?: number | undefined;
 }
@@ -302,6 +321,22 @@ declare const BaseDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly getAta: {
+            readonly name: "GetAta";
+            readonly requestType: typeof GetAtaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof AtaResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly getAtaByMint: {
+            readonly name: "GetAtaByMint";
+            readonly requestType: typeof GetAtaByMintRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof AtaResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly getOrCreateAta: {
             readonly name: "GetOrCreateAta";
             readonly requestType: typeof GetOrCreateAtaRequest;
@@ -363,6 +398,8 @@ interface BaseServiceImplementation<CallContextExt = {}> {
     getOwner(request: GetOwnerRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GetOwnerResponse>>;
     getTokenAccountOwner(request: GetTokenAccountOwnerRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TokenAccountOwnerResponse>>;
     getAtaAddress(request: GetAtaAddressRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaAddressResponse>>;
+    getAta(request: GetAtaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaResponse>>;
+    getAtaByMint(request: GetAtaByMintRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaResponse>>;
     getOrCreateAta(request: GetOrCreateAtaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GetOrCreateAtaResponse>>;
     executeTx(request: ExecuteTxRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ExecuteTxResponse>>;
     getTxStatus(request: GetTxStatusRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxStatus>>;
@@ -381,6 +418,8 @@ interface BaseClient<CallOptionsExt = {}> {
     getOwner(request: DeepPartial<GetOwnerRequest>, options?: CallOptions & CallOptionsExt): Promise<GetOwnerResponse>;
     getTokenAccountOwner(request: DeepPartial<GetTokenAccountOwnerRequest>, options?: CallOptions & CallOptionsExt): Promise<TokenAccountOwnerResponse>;
     getAtaAddress(request: DeepPartial<GetAtaAddressRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaAddressResponse>;
+    getAta(request: DeepPartial<GetAtaRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaResponse>;
+    getAtaByMint(request: DeepPartial<GetAtaByMintRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaResponse>;
     getOrCreateAta(request: DeepPartial<GetOrCreateAtaRequest>, options?: CallOptions & CallOptionsExt): Promise<GetOrCreateAtaResponse>;
     executeTx(request: DeepPartial<ExecuteTxRequest>, options?: CallOptions & CallOptionsExt): Promise<ExecuteTxResponse>;
     getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: CallOptions & CallOptionsExt): Promise<TxStatus>;
@@ -407,4 +446,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
+export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, AtaResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetAtaByMintRequest, GetAtaRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, HashedArrayResponse, type MessageFns, Token, TokenAccountOwnerResponse, TxCost, TxDetails, TxIx, TxIxAccount, TxStatus, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };

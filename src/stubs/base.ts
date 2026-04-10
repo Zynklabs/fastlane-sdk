@@ -199,6 +199,7 @@ export interface GetOwnerResponse {
 
 export interface GetTokenAccountOwnerRequest {
   address: string;
+  token2022?: boolean | undefined;
 }
 
 export interface TokenAccountOwnerResponse {
@@ -214,8 +215,24 @@ export interface AtaAddressResponse {
   ata: string;
 }
 
-export interface GetOrCreateAtaRequest {
+export interface GetAtaRequest {
   token: Token;
+  owner: string;
+}
+
+export interface GetAtaByMintRequest {
+  mint: string;
+  owner: string;
+}
+
+export interface AtaResponse {
+  ata: string;
+  tokenAccount?: { [key: string]: any } | undefined;
+  tokenProgramId: string;
+}
+
+export interface GetOrCreateAtaRequest {
+  mint: string;
   owner: string;
   maxAttempts?: number | undefined;
 }
@@ -1887,13 +1904,16 @@ export const GetOwnerResponse: MessageFns<GetOwnerResponse> = {
 };
 
 function createBaseGetTokenAccountOwnerRequest(): GetTokenAccountOwnerRequest {
-  return { address: "" };
+  return { address: "", token2022: undefined };
 }
 
 export const GetTokenAccountOwnerRequest: MessageFns<GetTokenAccountOwnerRequest> = {
   encode(message: GetTokenAccountOwnerRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
+    }
+    if (message.token2022 !== undefined) {
+      writer.uint32(16).bool(message.token2022);
     }
     return writer;
   },
@@ -1913,6 +1933,14 @@ export const GetTokenAccountOwnerRequest: MessageFns<GetTokenAccountOwnerRequest
           message.address = reader.string();
           continue;
         }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.token2022 = reader.bool();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1923,13 +1951,19 @@ export const GetTokenAccountOwnerRequest: MessageFns<GetTokenAccountOwnerRequest
   },
 
   fromJSON(object: any): GetTokenAccountOwnerRequest {
-    return { address: isSet(object.address) ? globalThis.String(object.address) : "" };
+    return {
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      token2022: isSet(object.token2022) ? globalThis.Boolean(object.token2022) : undefined,
+    };
   },
 
   toJSON(message: GetTokenAccountOwnerRequest): unknown {
     const obj: any = {};
     if (message.address !== "") {
       obj.address = message.address;
+    }
+    if (message.token2022 !== undefined) {
+      obj.token2022 = message.token2022;
     }
     return obj;
   },
@@ -1940,6 +1974,7 @@ export const GetTokenAccountOwnerRequest: MessageFns<GetTokenAccountOwnerRequest
   fromPartial<I extends Exact<DeepPartial<GetTokenAccountOwnerRequest>, I>>(object: I): GetTokenAccountOwnerRequest {
     const message = createBaseGetTokenAccountOwnerRequest();
     message.address = object.address ?? "";
+    message.token2022 = object.token2022 ?? undefined;
     return message;
   },
 };
@@ -2136,14 +2171,266 @@ export const AtaAddressResponse: MessageFns<AtaAddressResponse> = {
   },
 };
 
+function createBaseGetAtaRequest(): GetAtaRequest {
+  return { token: 0, owner: "" };
+}
+
+export const GetAtaRequest: MessageFns<GetAtaRequest> = {
+  encode(message: GetAtaRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.token !== 0) {
+      writer.uint32(8).int32(message.token);
+    }
+    if (message.owner !== "") {
+      writer.uint32(18).string(message.owner);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAtaRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAtaRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.owner = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAtaRequest {
+    return {
+      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      owner: isSet(object.owner) ? globalThis.String(object.owner) : "",
+    };
+  },
+
+  toJSON(message: GetAtaRequest): unknown {
+    const obj: any = {};
+    if (message.token !== 0) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.owner !== "") {
+      obj.owner = message.owner;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAtaRequest>, I>>(base?: I): GetAtaRequest {
+    return GetAtaRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAtaRequest>, I>>(object: I): GetAtaRequest {
+    const message = createBaseGetAtaRequest();
+    message.token = object.token ?? 0;
+    message.owner = object.owner ?? "";
+    return message;
+  },
+};
+
+function createBaseGetAtaByMintRequest(): GetAtaByMintRequest {
+  return { mint: "", owner: "" };
+}
+
+export const GetAtaByMintRequest: MessageFns<GetAtaByMintRequest> = {
+  encode(message: GetAtaByMintRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.mint !== "") {
+      writer.uint32(10).string(message.mint);
+    }
+    if (message.owner !== "") {
+      writer.uint32(18).string(message.owner);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAtaByMintRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAtaByMintRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.mint = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.owner = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAtaByMintRequest {
+    return {
+      mint: isSet(object.mint) ? globalThis.String(object.mint) : "",
+      owner: isSet(object.owner) ? globalThis.String(object.owner) : "",
+    };
+  },
+
+  toJSON(message: GetAtaByMintRequest): unknown {
+    const obj: any = {};
+    if (message.mint !== "") {
+      obj.mint = message.mint;
+    }
+    if (message.owner !== "") {
+      obj.owner = message.owner;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAtaByMintRequest>, I>>(base?: I): GetAtaByMintRequest {
+    return GetAtaByMintRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAtaByMintRequest>, I>>(object: I): GetAtaByMintRequest {
+    const message = createBaseGetAtaByMintRequest();
+    message.mint = object.mint ?? "";
+    message.owner = object.owner ?? "";
+    return message;
+  },
+};
+
+function createBaseAtaResponse(): AtaResponse {
+  return { ata: "", tokenAccount: undefined, tokenProgramId: "" };
+}
+
+export const AtaResponse: MessageFns<AtaResponse> = {
+  encode(message: AtaResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.ata !== "") {
+      writer.uint32(10).string(message.ata);
+    }
+    if (message.tokenAccount !== undefined) {
+      Struct.encode(Struct.wrap(message.tokenAccount), writer.uint32(18).fork()).join();
+    }
+    if (message.tokenProgramId !== "") {
+      writer.uint32(26).string(message.tokenProgramId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AtaResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAtaResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.ata = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.tokenAccount = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.tokenProgramId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AtaResponse {
+    return {
+      ata: isSet(object.ata) ? globalThis.String(object.ata) : "",
+      tokenAccount: isObject(object.tokenAccount)
+        ? object.tokenAccount
+        : isObject(object.token_account)
+        ? object.token_account
+        : undefined,
+      tokenProgramId: isSet(object.tokenProgramId)
+        ? globalThis.String(object.tokenProgramId)
+        : isSet(object.token_program_id)
+        ? globalThis.String(object.token_program_id)
+        : "",
+    };
+  },
+
+  toJSON(message: AtaResponse): unknown {
+    const obj: any = {};
+    if (message.ata !== "") {
+      obj.ata = message.ata;
+    }
+    if (message.tokenAccount !== undefined) {
+      obj.tokenAccount = message.tokenAccount;
+    }
+    if (message.tokenProgramId !== "") {
+      obj.tokenProgramId = message.tokenProgramId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AtaResponse>, I>>(base?: I): AtaResponse {
+    return AtaResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AtaResponse>, I>>(object: I): AtaResponse {
+    const message = createBaseAtaResponse();
+    message.ata = object.ata ?? "";
+    message.tokenAccount = object.tokenAccount ?? undefined;
+    message.tokenProgramId = object.tokenProgramId ?? "";
+    return message;
+  },
+};
+
 function createBaseGetOrCreateAtaRequest(): GetOrCreateAtaRequest {
-  return { token: 0, owner: "", maxAttempts: undefined };
+  return { mint: "", owner: "", maxAttempts: undefined };
 }
 
 export const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest> = {
   encode(message: GetOrCreateAtaRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.token !== 0) {
-      writer.uint32(8).int32(message.token);
+    if (message.mint !== "") {
+      writer.uint32(10).string(message.mint);
     }
     if (message.owner !== "") {
       writer.uint32(18).string(message.owner);
@@ -2162,11 +2449,11 @@ export const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 8) {
+          if (tag !== 10) {
             break;
           }
 
-          message.token = reader.int32() as any;
+          message.mint = reader.string();
           continue;
         }
         case 2: {
@@ -2196,7 +2483,7 @@ export const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest> = {
 
   fromJSON(object: any): GetOrCreateAtaRequest {
     return {
-      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      mint: isSet(object.mint) ? globalThis.String(object.mint) : "",
       owner: isSet(object.owner) ? globalThis.String(object.owner) : "",
       maxAttempts: isSet(object.maxAttempts)
         ? globalThis.Number(object.maxAttempts)
@@ -2208,8 +2495,8 @@ export const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest> = {
 
   toJSON(message: GetOrCreateAtaRequest): unknown {
     const obj: any = {};
-    if (message.token !== 0) {
-      obj.token = tokenToJSON(message.token);
+    if (message.mint !== "") {
+      obj.mint = message.mint;
     }
     if (message.owner !== "") {
       obj.owner = message.owner;
@@ -2225,7 +2512,7 @@ export const GetOrCreateAtaRequest: MessageFns<GetOrCreateAtaRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetOrCreateAtaRequest>, I>>(object: I): GetOrCreateAtaRequest {
     const message = createBaseGetOrCreateAtaRequest();
-    message.token = object.token ?? 0;
+    message.mint = object.mint ?? "";
     message.owner = object.owner ?? "";
     message.maxAttempts = object.maxAttempts ?? undefined;
     return message;
@@ -3401,6 +3688,22 @@ export const BaseDefinition = {
       responseStream: false,
       options: {},
     },
+    getAta: {
+      name: "GetAta",
+      requestType: GetAtaRequest as typeof GetAtaRequest,
+      requestStream: false,
+      responseType: AtaResponse as typeof AtaResponse,
+      responseStream: false,
+      options: {},
+    },
+    getAtaByMint: {
+      name: "GetAtaByMint",
+      requestType: GetAtaByMintRequest as typeof GetAtaByMintRequest,
+      requestStream: false,
+      responseType: AtaResponse as typeof AtaResponse,
+      responseStream: false,
+      options: {},
+    },
     getOrCreateAta: {
       name: "GetOrCreateAta",
       requestType: GetOrCreateAtaRequest as typeof GetOrCreateAtaRequest,
@@ -3481,6 +3784,8 @@ export interface BaseServiceImplementation<CallContextExt = {}> {
     request: GetAtaAddressRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<AtaAddressResponse>>;
+  getAta(request: GetAtaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaResponse>>;
+  getAtaByMint(request: GetAtaByMintRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaResponse>>;
   getOrCreateAta(
     request: GetOrCreateAtaRequest,
     context: CallContext & CallContextExt,
@@ -3521,6 +3826,8 @@ export interface BaseClient<CallOptionsExt = {}> {
     request: DeepPartial<GetAtaAddressRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<AtaAddressResponse>;
+  getAta(request: DeepPartial<GetAtaRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaResponse>;
+  getAtaByMint(request: DeepPartial<GetAtaByMintRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaResponse>;
   getOrCreateAta(
     request: DeepPartial<GetOrCreateAtaRequest>,
     options?: CallOptions & CallOptionsExt,
