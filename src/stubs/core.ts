@@ -75,6 +75,8 @@ export interface CreateOrderRequest {
   beneficiary: string;
   token: Token;
   amount: string;
+  zovId?: string | undefined;
+  transient?: boolean | undefined;
   pull?: boolean | undefined;
   meta: MetaArg[];
 }
@@ -95,6 +97,7 @@ export interface TransferRequest {
   to: string;
   amount: string;
   token: Token;
+  partnerId?: string | undefined;
   toToken?: Token | undefined;
   ed25519Pair?: Ed25519Pair | undefined;
   meta: MetaArg[];
@@ -1072,7 +1075,17 @@ export const MetaArg: MessageFns<MetaArg> = {
 };
 
 function createBaseCreateOrderRequest(): CreateOrderRequest {
-  return { requestId: "", partnerId: "", beneficiary: "", token: 0, amount: "", pull: undefined, meta: [] };
+  return {
+    requestId: "",
+    partnerId: "",
+    beneficiary: "",
+    token: 0,
+    amount: "",
+    zovId: undefined,
+    transient: undefined,
+    pull: undefined,
+    meta: [],
+  };
 }
 
 export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
@@ -1092,11 +1105,17 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     if (message.amount !== "") {
       writer.uint32(42).string(message.amount);
     }
+    if (message.zovId !== undefined) {
+      writer.uint32(50).string(message.zovId);
+    }
+    if (message.transient !== undefined) {
+      writer.uint32(56).bool(message.transient);
+    }
     if (message.pull !== undefined) {
-      writer.uint32(48).bool(message.pull);
+      writer.uint32(64).bool(message.pull);
     }
     for (const v of message.meta) {
-      MetaArg.encode(v!, writer.uint32(58).fork()).join();
+      MetaArg.encode(v!, writer.uint32(74).fork()).join();
     }
     return writer;
   },
@@ -1149,15 +1168,31 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
           continue;
         }
         case 6: {
-          if (tag !== 48) {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.zovId = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.transient = reader.bool();
+          continue;
+        }
+        case 8: {
+          if (tag !== 64) {
             break;
           }
 
           message.pull = reader.bool();
           continue;
         }
-        case 7: {
-          if (tag !== 58) {
+        case 9: {
+          if (tag !== 74) {
             break;
           }
 
@@ -1188,8 +1223,16 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
       beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
       token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      zovId: isSet(object.zovId)
+        ? globalThis.String(object.zovId)
+        : isSet(object.zov_id)
+        ? globalThis.String(object.zov_id)
+        : undefined,
+      transient: isSet(object.transient) ? globalThis.Boolean(object.transient) : undefined,
       pull: isSet(object.pull) ? globalThis.Boolean(object.pull) : undefined,
-      meta: globalThis.Array.isArray(object?.meta) ? object.meta.map((e: any) => MetaArg.fromJSON(e)) : [],
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
     };
   },
 
@@ -1210,6 +1253,12 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     if (message.amount !== "") {
       obj.amount = message.amount;
     }
+    if (message.zovId !== undefined) {
+      obj.zovId = message.zovId;
+    }
+    if (message.transient !== undefined) {
+      obj.transient = message.transient;
+    }
     if (message.pull !== undefined) {
       obj.pull = message.pull;
     }
@@ -1229,6 +1278,8 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     message.beneficiary = object.beneficiary ?? "";
     message.token = object.token ?? 0;
     message.amount = object.amount ?? "";
+    message.zovId = object.zovId ?? undefined;
+    message.transient = object.transient ?? undefined;
     message.pull = object.pull ?? undefined;
     message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
     return message;
@@ -1424,6 +1475,7 @@ function createBaseTransferRequest(): TransferRequest {
     to: "",
     amount: "",
     token: 0,
+    partnerId: undefined,
     toToken: undefined,
     ed25519Pair: undefined,
     meta: [],
@@ -1447,14 +1499,17 @@ export const TransferRequest: MessageFns<TransferRequest> = {
     if (message.token !== 0) {
       writer.uint32(40).int32(message.token);
     }
+    if (message.partnerId !== undefined) {
+      writer.uint32(50).string(message.partnerId);
+    }
     if (message.toToken !== undefined) {
-      writer.uint32(48).int32(message.toToken);
+      writer.uint32(56).int32(message.toToken);
     }
     if (message.ed25519Pair !== undefined) {
-      Ed25519Pair.encode(message.ed25519Pair, writer.uint32(58).fork()).join();
+      Ed25519Pair.encode(message.ed25519Pair, writer.uint32(66).fork()).join();
     }
     for (const v of message.meta) {
-      MetaArg.encode(v!, writer.uint32(66).fork()).join();
+      MetaArg.encode(v!, writer.uint32(74).fork()).join();
     }
     return writer;
   },
@@ -1507,23 +1562,31 @@ export const TransferRequest: MessageFns<TransferRequest> = {
           continue;
         }
         case 6: {
-          if (tag !== 48) {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
             break;
           }
 
           message.toToken = reader.int32() as any;
           continue;
         }
-        case 7: {
-          if (tag !== 58) {
+        case 8: {
+          if (tag !== 66) {
             break;
           }
 
           message.ed25519Pair = Ed25519Pair.decode(reader, reader.uint32());
           continue;
         }
-        case 8: {
-          if (tag !== 66) {
+        case 9: {
+          if (tag !== 74) {
             break;
           }
 
@@ -1550,6 +1613,11 @@ export const TransferRequest: MessageFns<TransferRequest> = {
       to: isSet(object.to) ? globalThis.String(object.to) : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : undefined,
       toToken: isSet(object.toToken)
         ? tokenFromJSON(object.toToken)
         : isSet(object.to_token)
@@ -1583,6 +1651,9 @@ export const TransferRequest: MessageFns<TransferRequest> = {
     if (message.token !== 0) {
       obj.token = tokenToJSON(message.token);
     }
+    if (message.partnerId !== undefined) {
+      obj.partnerId = message.partnerId;
+    }
     if (message.toToken !== undefined) {
       obj.toToken = tokenToJSON(message.toToken);
     }
@@ -1605,6 +1676,7 @@ export const TransferRequest: MessageFns<TransferRequest> = {
     message.to = object.to ?? "";
     message.amount = object.amount ?? "";
     message.token = object.token ?? 0;
+    message.partnerId = object.partnerId ?? undefined;
     message.toToken = object.toToken ?? undefined;
     message.ed25519Pair = (object.ed25519Pair !== undefined && object.ed25519Pair !== null)
       ? Ed25519Pair.fromPartial(object.ed25519Pair)

@@ -83,8 +83,10 @@ message CreateOrderRequest {
   string beneficiary = 3;
   base.Token token = 4;
   string amount = 5;
-  optional bool pull = 6;
-  repeated MetaArg meta = 7;
+  optional string zov_id = 6;
+  optional bool transient = 7;
+  optional bool pull = 8;
+  repeated MetaArg meta = 9;
 }
 
 message ReplenishRequest {
@@ -103,9 +105,10 @@ message TransferRequest {
   string to = 3;
   string amount = 4;
   base.Token token = 5;
-  optional base.Token to_token = 6;
-  optional base.Ed25519Pair ed25519_pair = 7;
-  repeated MetaArg meta = 8;
+  optional string partner_id = 6;
+  optional base.Token to_token = 7;
+  optional base.Ed25519Pair ed25519_pair = 8;
+  repeated MetaArg meta = 9;
 }
 
 message AttestOrderRequest {
@@ -132,3 +135,4 @@ message TxResponse {
   uint32 position = 5;
   map<string, string> meta = 6;
 }
+

@@ -67,6 +67,8 @@ interface CreateOrderRequest {
     beneficiary: string;
     token: Token;
     amount: string;
+    zovId?: string | undefined;
+    transient?: boolean | undefined;
     pull?: boolean | undefined;
     meta: MetaArg[];
 }
@@ -87,6 +89,7 @@ interface TransferRequest {
     to: string;
     amount: string;
     token: Token;
+    partnerId?: string | undefined;
     toToken?: Token | undefined;
     ed25519Pair?: Ed25519Pair | undefined;
     meta: MetaArg[];
