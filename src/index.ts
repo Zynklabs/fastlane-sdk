@@ -9,7 +9,6 @@ import {
   retryMiddleware,
   txIxMiddleware,
   extensionsMiddleware,
-  waitMiddleware,
 } from "./middlewares";
 import { IOptions } from "./interfaces";
 import { EvmClient, EvmDefinition } from "./stubs/evm";
@@ -20,7 +19,6 @@ export default (endpoint: string, options?: IOptions) => {
   const clientFactory = createClientFactory()
     .use(callerMiddleware(getCallerAndEnv(overrides)))
     .use(extensionsMiddleware(extensions))
-    .use(waitMiddleware())
     .use(retryMiddleware(retryPolicy))
     .use(txIxMiddleware());
 
