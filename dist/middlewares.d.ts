@@ -6,6 +6,5 @@ declare const callerMiddleware: (callerAndEnv: [string, string]) => ClientMiddle
 declare const retryMiddleware: (retryPolicy?: Partial<RetryPolicy>) => ClientMiddleware;
 declare const extensionsMiddleware: (extensions?: IExtensions) => ClientMiddleware;
 declare const txIxMiddleware: () => ClientMiddleware;
-declare const waitMiddleware: () => ClientMiddleware;
 
-export { callerMiddleware, extensionsMiddleware, retryMiddleware, txIxMiddleware, waitMiddleware };
+export { callerMiddleware, extensionsMiddleware, retryMiddleware, txIxMiddleware };
