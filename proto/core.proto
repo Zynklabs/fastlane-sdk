@@ -19,6 +19,11 @@ service Core {
   rpc AttestOrder (AttestOrderRequest) returns (TxResponse);
 
   rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
+
+  rpc VerifyBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc WhitelistBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc ToggleBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc RevokeBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
 }
 
 message DomainSeparatorRequest {}
@@ -136,3 +141,15 @@ message TxResponse {
   map<string, string> meta = 6;
 }
 
+message BeneficiaryRequest {
+  string partner_id = 1;
+  string beneficiary = 2;
+  optional string memo = 3;
+  optional bool transient = 4;
+}
+
+message BeneficiaryState {
+  string status = 1;
+  optional bool transient_allowed = 2;
+  optional string tx_pda = 3;
+}

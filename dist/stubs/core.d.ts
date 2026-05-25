@@ -127,6 +127,19 @@ interface TxResponse_MetaEntry {
     value: string;
 }
 declare const TxResponse_MetaEntry: MessageFns<TxResponse_MetaEntry>;
+interface BeneficiaryRequest {
+    partnerId: string;
+    beneficiary: string;
+    memo?: string | undefined;
+    transient?: boolean | undefined;
+}
+declare const BeneficiaryRequest: MessageFns<BeneficiaryRequest>;
+interface BeneficiaryState {
+    status: string;
+    transientAllowed?: boolean | undefined;
+    txPda?: string | undefined;
+}
+declare const BeneficiaryState: MessageFns<BeneficiaryState>;
 type CoreDefinition = typeof CoreDefinition;
 declare const CoreDefinition: {
     readonly name: "Core";
@@ -220,6 +233,38 @@ declare const CoreDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly verifyBeneficiary: {
+            readonly name: "VerifyBeneficiary";
+            readonly requestType: typeof BeneficiaryRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof BeneficiaryState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly whitelistBeneficiary: {
+            readonly name: "WhitelistBeneficiary";
+            readonly requestType: typeof BeneficiaryRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof BeneficiaryState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly toggleBeneficiary: {
+            readonly name: "ToggleBeneficiary";
+            readonly requestType: typeof BeneficiaryRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof BeneficiaryState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly revokeBeneficiary: {
+            readonly name: "RevokeBeneficiary";
+            readonly requestType: typeof BeneficiaryRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof BeneficiaryState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
     };
 };
 interface CoreServiceImplementation<CallContextExt = {}> {
@@ -234,6 +279,10 @@ interface CoreServiceImplementation<CallContextExt = {}> {
     transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
+    verifyBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
+    whitelistBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
+    toggleBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
+    revokeBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
 }
 interface CoreClient<CallOptionsExt = {}> {
     domainSeparator(request: DeepPartial<DomainSeparatorRequest>, options?: CallOptions & CallOptionsExt): Promise<DomainSeparatorResponse>;
@@ -247,6 +296,10 @@ interface CoreClient<CallOptionsExt = {}> {
     transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
+    verifyBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
+    whitelistBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
+    toggleBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
+    revokeBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 type DeepPartial<T> = T extends Builtin ? T : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
@@ -267,4 +320,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AttestOrderRequest, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };
+export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };

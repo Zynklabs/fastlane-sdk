@@ -133,6 +133,19 @@ export interface TxResponse_MetaEntry {
   value: string;
 }
 
+export interface BeneficiaryRequest {
+  partnerId: string;
+  beneficiary: string;
+  memo?: string | undefined;
+  transient?: boolean | undefined;
+}
+
+export interface BeneficiaryState {
+  status: string;
+  transientAllowed?: boolean | undefined;
+  txPda?: string | undefined;
+}
+
 function createBaseDomainSeparatorRequest(): DomainSeparatorRequest {
   return {};
 }
@@ -2233,6 +2246,218 @@ export const TxResponse_MetaEntry: MessageFns<TxResponse_MetaEntry> = {
   },
 };
 
+function createBaseBeneficiaryRequest(): BeneficiaryRequest {
+  return { partnerId: "", beneficiary: "", memo: undefined, transient: undefined };
+}
+
+export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
+  encode(message: BeneficiaryRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.partnerId !== "") {
+      writer.uint32(10).string(message.partnerId);
+    }
+    if (message.beneficiary !== "") {
+      writer.uint32(18).string(message.beneficiary);
+    }
+    if (message.memo !== undefined) {
+      writer.uint32(26).string(message.memo);
+    }
+    if (message.transient !== undefined) {
+      writer.uint32(32).bool(message.transient);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BeneficiaryRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBeneficiaryRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.beneficiary = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.memo = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.transient = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BeneficiaryRequest {
+    return {
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+      memo: isSet(object.memo) ? globalThis.String(object.memo) : undefined,
+      transient: isSet(object.transient) ? globalThis.Boolean(object.transient) : undefined,
+    };
+  },
+
+  toJSON(message: BeneficiaryRequest): unknown {
+    const obj: any = {};
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.beneficiary !== "") {
+      obj.beneficiary = message.beneficiary;
+    }
+    if (message.memo !== undefined) {
+      obj.memo = message.memo;
+    }
+    if (message.transient !== undefined) {
+      obj.transient = message.transient;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BeneficiaryRequest>, I>>(base?: I): BeneficiaryRequest {
+    return BeneficiaryRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BeneficiaryRequest>, I>>(object: I): BeneficiaryRequest {
+    const message = createBaseBeneficiaryRequest();
+    message.partnerId = object.partnerId ?? "";
+    message.beneficiary = object.beneficiary ?? "";
+    message.memo = object.memo ?? undefined;
+    message.transient = object.transient ?? undefined;
+    return message;
+  },
+};
+
+function createBaseBeneficiaryState(): BeneficiaryState {
+  return { status: "", transientAllowed: undefined, txPda: undefined };
+}
+
+export const BeneficiaryState: MessageFns<BeneficiaryState> = {
+  encode(message: BeneficiaryState, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== "") {
+      writer.uint32(10).string(message.status);
+    }
+    if (message.transientAllowed !== undefined) {
+      writer.uint32(16).bool(message.transientAllowed);
+    }
+    if (message.txPda !== undefined) {
+      writer.uint32(26).string(message.txPda);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BeneficiaryState {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBeneficiaryState();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.transientAllowed = reader.bool();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txPda = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BeneficiaryState {
+    return {
+      status: isSet(object.status) ? globalThis.String(object.status) : "",
+      transientAllowed: isSet(object.transientAllowed)
+        ? globalThis.Boolean(object.transientAllowed)
+        : isSet(object.transient_allowed)
+        ? globalThis.Boolean(object.transient_allowed)
+        : undefined,
+      txPda: isSet(object.txPda)
+        ? globalThis.String(object.txPda)
+        : isSet(object.tx_pda)
+        ? globalThis.String(object.tx_pda)
+        : undefined,
+    };
+  },
+
+  toJSON(message: BeneficiaryState): unknown {
+    const obj: any = {};
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.transientAllowed !== undefined) {
+      obj.transientAllowed = message.transientAllowed;
+    }
+    if (message.txPda !== undefined) {
+      obj.txPda = message.txPda;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BeneficiaryState>, I>>(base?: I): BeneficiaryState {
+    return BeneficiaryState.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BeneficiaryState>, I>>(object: I): BeneficiaryState {
+    const message = createBaseBeneficiaryState();
+    message.status = object.status ?? "";
+    message.transientAllowed = object.transientAllowed ?? undefined;
+    message.txPda = object.txPda ?? undefined;
+    return message;
+  },
+};
+
 export type CoreDefinition = typeof CoreDefinition;
 export const CoreDefinition = {
   name: "Core",
@@ -2326,6 +2551,38 @@ export const CoreDefinition = {
       responseStream: false,
       options: {},
     },
+    verifyBeneficiary: {
+      name: "VerifyBeneficiary",
+      requestType: BeneficiaryRequest as typeof BeneficiaryRequest,
+      requestStream: false,
+      responseType: BeneficiaryState as typeof BeneficiaryState,
+      responseStream: false,
+      options: {},
+    },
+    whitelistBeneficiary: {
+      name: "WhitelistBeneficiary",
+      requestType: BeneficiaryRequest as typeof BeneficiaryRequest,
+      requestStream: false,
+      responseType: BeneficiaryState as typeof BeneficiaryState,
+      responseStream: false,
+      options: {},
+    },
+    toggleBeneficiary: {
+      name: "ToggleBeneficiary",
+      requestType: BeneficiaryRequest as typeof BeneficiaryRequest,
+      requestStream: false,
+      responseType: BeneficiaryState as typeof BeneficiaryState,
+      responseStream: false,
+      options: {},
+    },
+    revokeBeneficiary: {
+      name: "RevokeBeneficiary",
+      requestType: BeneficiaryRequest as typeof BeneficiaryRequest,
+      requestStream: false,
+      responseType: BeneficiaryState as typeof BeneficiaryState,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -2356,6 +2613,22 @@ export interface CoreServiceImplementation<CallContextExt = {}> {
   transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
+  verifyBeneficiary(
+    request: BeneficiaryRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<BeneficiaryState>>;
+  whitelistBeneficiary(
+    request: BeneficiaryRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<BeneficiaryState>>;
+  toggleBeneficiary(
+    request: BeneficiaryRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<BeneficiaryState>>;
+  revokeBeneficiary(
+    request: BeneficiaryRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<BeneficiaryState>>;
 }
 
 export interface CoreClient<CallOptionsExt = {}> {
@@ -2385,6 +2658,22 @@ export interface CoreClient<CallOptionsExt = {}> {
   transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
+  verifyBeneficiary(
+    request: DeepPartial<BeneficiaryRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<BeneficiaryState>;
+  whitelistBeneficiary(
+    request: DeepPartial<BeneficiaryRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<BeneficiaryState>;
+  toggleBeneficiary(
+    request: DeepPartial<BeneficiaryRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<BeneficiaryState>;
+  revokeBeneficiary(
+    request: DeepPartial<BeneficiaryRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<BeneficiaryState>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
