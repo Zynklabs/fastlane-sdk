@@ -138,6 +138,7 @@ export interface BeneficiaryRequest {
   beneficiary: string;
   memo?: string | undefined;
   transient?: boolean | undefined;
+  isv4?: boolean | undefined;
 }
 
 export interface BeneficiaryState {
@@ -2247,7 +2248,7 @@ export const TxResponse_MetaEntry: MessageFns<TxResponse_MetaEntry> = {
 };
 
 function createBaseBeneficiaryRequest(): BeneficiaryRequest {
-  return { partnerId: "", beneficiary: "", memo: undefined, transient: undefined };
+  return { partnerId: "", beneficiary: "", memo: undefined, transient: undefined, isv4: undefined };
 }
 
 export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
@@ -2263,6 +2264,9 @@ export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
     }
     if (message.transient !== undefined) {
       writer.uint32(32).bool(message.transient);
+    }
+    if (message.isv4 !== undefined) {
+      writer.uint32(40).bool(message.isv4);
     }
     return writer;
   },
@@ -2306,6 +2310,14 @@ export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
           message.transient = reader.bool();
           continue;
         }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.isv4 = reader.bool();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2325,6 +2337,7 @@ export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
       beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
       memo: isSet(object.memo) ? globalThis.String(object.memo) : undefined,
       transient: isSet(object.transient) ? globalThis.Boolean(object.transient) : undefined,
+      isv4: isSet(object.isv4) ? globalThis.Boolean(object.isv4) : undefined,
     };
   },
 
@@ -2342,6 +2355,9 @@ export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
     if (message.transient !== undefined) {
       obj.transient = message.transient;
     }
+    if (message.isv4 !== undefined) {
+      obj.isv4 = message.isv4;
+    }
     return obj;
   },
 
@@ -2354,6 +2370,7 @@ export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
     message.beneficiary = object.beneficiary ?? "";
     message.memo = object.memo ?? undefined;
     message.transient = object.transient ?? undefined;
+    message.isv4 = object.isv4 ?? undefined;
     return message;
   },
 };

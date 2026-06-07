@@ -146,6 +146,7 @@ message BeneficiaryRequest {
   string beneficiary = 2;
   optional string memo = 3;
   optional bool transient = 4;
+  optional bool isv4 = 5;
 }
 
 message BeneficiaryState {
