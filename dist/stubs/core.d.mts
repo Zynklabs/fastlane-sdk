@@ -132,6 +132,7 @@ interface BeneficiaryRequest {
     beneficiary: string;
     memo?: string | undefined;
     transient?: boolean | undefined;
+    isv4?: boolean | undefined;
 }
 declare const BeneficiaryRequest: MessageFns<BeneficiaryRequest>;
 interface BeneficiaryState {
