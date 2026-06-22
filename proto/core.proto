@@ -114,6 +114,7 @@ message TransferRequest {
   optional base.Token to_token = 7;
   optional base.Ed25519Pair ed25519_pair = 8;
   repeated MetaArg meta = 9;
+  optional string proxy = 10;
 }
 
 message AttestOrderRequest {

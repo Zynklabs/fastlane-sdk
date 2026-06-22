@@ -93,6 +93,7 @@ interface TransferRequest {
     toToken?: Token | undefined;
     ed25519Pair?: Ed25519Pair | undefined;
     meta: MetaArg[];
+    proxy?: string | undefined;
 }
 declare const TransferRequest: MessageFns<TransferRequest>;
 interface AttestOrderRequest {

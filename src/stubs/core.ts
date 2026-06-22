@@ -101,6 +101,7 @@ export interface TransferRequest {
   toToken?: Token | undefined;
   ed25519Pair?: Ed25519Pair | undefined;
   meta: MetaArg[];
+  proxy?: string | undefined;
 }
 
 export interface AttestOrderRequest {
@@ -1493,6 +1494,7 @@ function createBaseTransferRequest(): TransferRequest {
     toToken: undefined,
     ed25519Pair: undefined,
     meta: [],
+    proxy: undefined,
   };
 }
 
@@ -1524,6 +1526,9 @@ export const TransferRequest: MessageFns<TransferRequest> = {
     }
     for (const v of message.meta) {
       MetaArg.encode(v!, writer.uint32(74).fork()).join();
+    }
+    if (message.proxy !== undefined) {
+      writer.uint32(82).string(message.proxy);
     }
     return writer;
   },
@@ -1607,6 +1612,14 @@ export const TransferRequest: MessageFns<TransferRequest> = {
           message.meta.push(MetaArg.decode(reader, reader.uint32()));
           continue;
         }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.proxy = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1645,6 +1658,7 @@ export const TransferRequest: MessageFns<TransferRequest> = {
       meta: globalThis.Array.isArray(object?.meta)
         ? object.meta.map((e: any) => MetaArg.fromJSON(e))
         : [],
+      proxy: isSet(object.proxy) ? globalThis.String(object.proxy) : undefined,
     };
   },
 
@@ -1677,6 +1691,9 @@ export const TransferRequest: MessageFns<TransferRequest> = {
     if (message.meta?.length) {
       obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
     }
+    if (message.proxy !== undefined) {
+      obj.proxy = message.proxy;
+    }
     return obj;
   },
 
@@ -1696,6 +1713,7 @@ export const TransferRequest: MessageFns<TransferRequest> = {
       ? Ed25519Pair.fromPartial(object.ed25519Pair)
       : undefined;
     message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
+    message.proxy = object.proxy ?? undefined;
     return message;
   },
 };
