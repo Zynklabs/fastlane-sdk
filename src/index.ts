@@ -30,7 +30,7 @@ export default (endpoint: string, options?: IOptions) => {
   const kamino: KaminoClient = clientFactory.create(KaminoDefinition, channel);
   const evm: EvmClient = clientFactory.create(EvmDefinition, channel);
 
-  return { base, core, orbit, kamino, evm, Token, Denom };
+  return { base, core, orbit, kamino, evm, Token, Denom, ...base };
 };
 
 export * from "./stubs";

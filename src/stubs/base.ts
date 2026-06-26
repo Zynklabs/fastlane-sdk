@@ -254,6 +254,52 @@ export interface ExecuteTxResponse {
   signature: string;
 }
 
+export interface MetaArg {
+  key: string;
+  value: string;
+}
+
+export interface TransferRequest {
+  requestId: string;
+  from: string;
+  to: string;
+  amount: string;
+  token: Token;
+  partnerId?: string | undefined;
+  toToken?: Token | undefined;
+  ed25519Pair?: Ed25519Pair | undefined;
+  meta: MetaArg[];
+  proxy?: string | undefined;
+}
+
+export interface TxResponse {
+  requestId: string;
+  orderTracker: string;
+  orderId: string;
+  signature: string;
+  position: number;
+  meta: { [key: string]: string };
+}
+
+export interface TxResponse_MetaEntry {
+  key: string;
+  value: string;
+}
+
+export interface GetVaultsRequest {
+}
+
+export interface VaultResponse {
+  key: string;
+  address: string;
+  label: string;
+  description: string;
+}
+
+export interface VaultsResponse {
+  vaults: VaultResponse[];
+}
+
 export interface GetTxStatusRequest {
   signature: string;
   confirmation?: string | undefined;
@@ -304,6 +350,12 @@ export interface AssetPrice {
   price: string;
   symbol: string;
   conversionRate: string;
+}
+
+export interface FaucetRequest {
+  address: string;
+  amount: string;
+  token: Token;
 }
 
 function createBaseTxIxAccount(): TxIxAccount {
@@ -2791,6 +2843,781 @@ export const ExecuteTxResponse: MessageFns<ExecuteTxResponse> = {
   },
 };
 
+function createBaseMetaArg(): MetaArg {
+  return { key: "", value: "" };
+}
+
+export const MetaArg: MessageFns<MetaArg> = {
+  encode(message: MetaArg, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MetaArg {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMetaArg();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MetaArg {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      value: isSet(object.value) ? globalThis.String(object.value) : "",
+    };
+  },
+
+  toJSON(message: MetaArg): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== "") {
+      obj.value = message.value;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MetaArg>, I>>(base?: I): MetaArg {
+    return MetaArg.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MetaArg>, I>>(object: I): MetaArg {
+    const message = createBaseMetaArg();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBaseTransferRequest(): TransferRequest {
+  return {
+    requestId: "",
+    from: "",
+    to: "",
+    amount: "",
+    token: 0,
+    partnerId: undefined,
+    toToken: undefined,
+    ed25519Pair: undefined,
+    meta: [],
+    proxy: undefined,
+  };
+}
+
+export const TransferRequest: MessageFns<TransferRequest> = {
+  encode(message: TransferRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    if (message.from !== "") {
+      writer.uint32(18).string(message.from);
+    }
+    if (message.to !== "") {
+      writer.uint32(26).string(message.to);
+    }
+    if (message.amount !== "") {
+      writer.uint32(34).string(message.amount);
+    }
+    if (message.token !== 0) {
+      writer.uint32(40).int32(message.token);
+    }
+    if (message.partnerId !== undefined) {
+      writer.uint32(50).string(message.partnerId);
+    }
+    if (message.toToken !== undefined) {
+      writer.uint32(56).int32(message.toToken);
+    }
+    if (message.ed25519Pair !== undefined) {
+      Ed25519Pair.encode(message.ed25519Pair, writer.uint32(66).fork()).join();
+    }
+    for (const v of message.meta) {
+      MetaArg.encode(v!, writer.uint32(74).fork()).join();
+    }
+    if (message.proxy !== undefined) {
+      writer.uint32(82).string(message.proxy);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TransferRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTransferRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.from = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.to = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.toToken = reader.int32() as any;
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.ed25519Pair = Ed25519Pair.decode(reader, reader.uint32());
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.meta.push(MetaArg.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.proxy = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TransferRequest {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      from: isSet(object.from) ? globalThis.String(object.from) : "",
+      to: isSet(object.to) ? globalThis.String(object.to) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : undefined,
+      toToken: isSet(object.toToken)
+        ? tokenFromJSON(object.toToken)
+        : isSet(object.to_token)
+        ? tokenFromJSON(object.to_token)
+        : undefined,
+      ed25519Pair: isSet(object.ed25519Pair)
+        ? Ed25519Pair.fromJSON(object.ed25519Pair)
+        : isSet(object.ed25519_pair)
+        ? Ed25519Pair.fromJSON(object.ed25519_pair)
+        : undefined,
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
+      proxy: isSet(object.proxy) ? globalThis.String(object.proxy) : undefined,
+    };
+  },
+
+  toJSON(message: TransferRequest): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.from !== "") {
+      obj.from = message.from;
+    }
+    if (message.to !== "") {
+      obj.to = message.to;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.token !== 0) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.partnerId !== undefined) {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.toToken !== undefined) {
+      obj.toToken = tokenToJSON(message.toToken);
+    }
+    if (message.ed25519Pair !== undefined) {
+      obj.ed25519Pair = Ed25519Pair.toJSON(message.ed25519Pair);
+    }
+    if (message.meta?.length) {
+      obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
+    }
+    if (message.proxy !== undefined) {
+      obj.proxy = message.proxy;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TransferRequest>, I>>(base?: I): TransferRequest {
+    return TransferRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TransferRequest>, I>>(object: I): TransferRequest {
+    const message = createBaseTransferRequest();
+    message.requestId = object.requestId ?? "";
+    message.from = object.from ?? "";
+    message.to = object.to ?? "";
+    message.amount = object.amount ?? "";
+    message.token = object.token ?? 0;
+    message.partnerId = object.partnerId ?? undefined;
+    message.toToken = object.toToken ?? undefined;
+    message.ed25519Pair = (object.ed25519Pair !== undefined && object.ed25519Pair !== null)
+      ? Ed25519Pair.fromPartial(object.ed25519Pair)
+      : undefined;
+    message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
+    message.proxy = object.proxy ?? undefined;
+    return message;
+  },
+};
+
+function createBaseTxResponse(): TxResponse {
+  return { requestId: "", orderTracker: "", orderId: "", signature: "", position: 0, meta: {} };
+}
+
+export const TxResponse: MessageFns<TxResponse> = {
+  encode(message: TxResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    if (message.orderTracker !== "") {
+      writer.uint32(18).string(message.orderTracker);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(26).string(message.orderId);
+    }
+    if (message.signature !== "") {
+      writer.uint32(34).string(message.signature);
+    }
+    if (message.position !== 0) {
+      writer.uint32(40).uint32(message.position);
+    }
+    globalThis.Object.entries(message.meta).forEach(([key, value]: [string, string]) => {
+      TxResponse_MetaEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).join();
+    });
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TxResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTxResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderTracker = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.signature = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.position = reader.uint32();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          const entry6 = TxResponse_MetaEntry.decode(reader, reader.uint32());
+          if (entry6.value !== undefined) {
+            message.meta[entry6.key] = entry6.value;
+          }
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TxResponse {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      orderTracker: isSet(object.orderTracker)
+        ? globalThis.String(object.orderTracker)
+        : isSet(object.order_tracker)
+        ? globalThis.String(object.order_tracker)
+        : "",
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
+      position: isSet(object.position) ? globalThis.Number(object.position) : 0,
+      meta: isObject(object.meta)
+        ? (globalThis.Object.entries(object.meta) as [string, any][]).reduce(
+          (acc: { [key: string]: string }, [key, value]: [string, any]) => {
+            acc[key] = globalThis.String(value);
+            return acc;
+          },
+          {},
+        )
+        : {},
+    };
+  },
+
+  toJSON(message: TxResponse): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.orderTracker !== "") {
+      obj.orderTracker = message.orderTracker;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.signature !== "") {
+      obj.signature = message.signature;
+    }
+    if (message.position !== 0) {
+      obj.position = Math.round(message.position);
+    }
+    if (message.meta) {
+      const entries = globalThis.Object.entries(message.meta) as [string, string][];
+      if (entries.length > 0) {
+        obj.meta = {};
+        entries.forEach(([k, v]) => {
+          obj.meta[k] = v;
+        });
+      }
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TxResponse>, I>>(base?: I): TxResponse {
+    return TxResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TxResponse>, I>>(object: I): TxResponse {
+    const message = createBaseTxResponse();
+    message.requestId = object.requestId ?? "";
+    message.orderTracker = object.orderTracker ?? "";
+    message.orderId = object.orderId ?? "";
+    message.signature = object.signature ?? "";
+    message.position = object.position ?? 0;
+    message.meta = (globalThis.Object.entries(object.meta ?? {}) as [string, string][]).reduce(
+      (acc: { [key: string]: string }, [key, value]: [string, string]) => {
+        if (value !== undefined) {
+          acc[key] = globalThis.String(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseTxResponse_MetaEntry(): TxResponse_MetaEntry {
+  return { key: "", value: "" };
+}
+
+export const TxResponse_MetaEntry: MessageFns<TxResponse_MetaEntry> = {
+  encode(message: TxResponse_MetaEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TxResponse_MetaEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTxResponse_MetaEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TxResponse_MetaEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      value: isSet(object.value) ? globalThis.String(object.value) : "",
+    };
+  },
+
+  toJSON(message: TxResponse_MetaEntry): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== "") {
+      obj.value = message.value;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TxResponse_MetaEntry>, I>>(base?: I): TxResponse_MetaEntry {
+    return TxResponse_MetaEntry.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TxResponse_MetaEntry>, I>>(object: I): TxResponse_MetaEntry {
+    const message = createBaseTxResponse_MetaEntry();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBaseGetVaultsRequest(): GetVaultsRequest {
+  return {};
+}
+
+export const GetVaultsRequest: MessageFns<GetVaultsRequest> = {
+  encode(_: GetVaultsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetVaultsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetVaultsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): GetVaultsRequest {
+    return {};
+  },
+
+  toJSON(_: GetVaultsRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetVaultsRequest>, I>>(base?: I): GetVaultsRequest {
+    return GetVaultsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetVaultsRequest>, I>>(_: I): GetVaultsRequest {
+    const message = createBaseGetVaultsRequest();
+    return message;
+  },
+};
+
+function createBaseVaultResponse(): VaultResponse {
+  return { key: "", address: "", label: "", description: "" };
+}
+
+export const VaultResponse: MessageFns<VaultResponse> = {
+  encode(message: VaultResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    if (message.label !== "") {
+      writer.uint32(26).string(message.label);
+    }
+    if (message.description !== "") {
+      writer.uint32(34).string(message.description);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VaultResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVaultResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.label = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VaultResponse {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      label: isSet(object.label) ? globalThis.String(object.label) : "",
+      description: isSet(object.description) ? globalThis.String(object.description) : "",
+    };
+  },
+
+  toJSON(message: VaultResponse): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.label !== "") {
+      obj.label = message.label;
+    }
+    if (message.description !== "") {
+      obj.description = message.description;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VaultResponse>, I>>(base?: I): VaultResponse {
+    return VaultResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VaultResponse>, I>>(object: I): VaultResponse {
+    const message = createBaseVaultResponse();
+    message.key = object.key ?? "";
+    message.address = object.address ?? "";
+    message.label = object.label ?? "";
+    message.description = object.description ?? "";
+    return message;
+  },
+};
+
+function createBaseVaultsResponse(): VaultsResponse {
+  return { vaults: [] };
+}
+
+export const VaultsResponse: MessageFns<VaultsResponse> = {
+  encode(message: VaultsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.vaults) {
+      VaultResponse.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VaultsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVaultsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.vaults.push(VaultResponse.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VaultsResponse {
+    return {
+      vaults: globalThis.Array.isArray(object?.vaults) ? object.vaults.map((e: any) => VaultResponse.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: VaultsResponse): unknown {
+    const obj: any = {};
+    if (message.vaults?.length) {
+      obj.vaults = message.vaults.map((e) => VaultResponse.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VaultsResponse>, I>>(base?: I): VaultsResponse {
+    return VaultsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VaultsResponse>, I>>(object: I): VaultsResponse {
+    const message = createBaseVaultsResponse();
+    message.vaults = object.vaults?.map((e) => VaultResponse.fromPartial(e)) || [];
+    return message;
+  },
+};
+
 function createBaseGetTxStatusRequest(): GetTxStatusRequest {
   return { signature: "", confirmation: undefined };
 }
@@ -3601,6 +4428,98 @@ export const AssetPrice: MessageFns<AssetPrice> = {
   },
 };
 
+function createBaseFaucetRequest(): FaucetRequest {
+  return { address: "", amount: "", token: 0 };
+}
+
+export const FaucetRequest: MessageFns<FaucetRequest> = {
+  encode(message: FaucetRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
+    if (message.amount !== "") {
+      writer.uint32(18).string(message.amount);
+    }
+    if (message.token !== 0) {
+      writer.uint32(24).int32(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): FaucetRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFaucetRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): FaucetRequest {
+    return {
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+    };
+  },
+
+  toJSON(message: FaucetRequest): unknown {
+    const obj: any = {};
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.token !== 0) {
+      obj.token = tokenToJSON(message.token);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<FaucetRequest>, I>>(base?: I): FaucetRequest {
+    return FaucetRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<FaucetRequest>, I>>(object: I): FaucetRequest {
+    const message = createBaseFaucetRequest();
+    message.address = object.address ?? "";
+    message.amount = object.amount ?? "";
+    message.token = object.token ?? 0;
+    return message;
+  },
+};
+
 export type BaseDefinition = typeof BaseDefinition;
 export const BaseDefinition = {
   name: "Base",
@@ -3718,6 +4637,22 @@ export const BaseDefinition = {
       responseStream: false,
       options: {},
     },
+    transfer: {
+      name: "Transfer",
+      requestType: TransferRequest as typeof TransferRequest,
+      requestStream: false,
+      responseType: TxResponse as typeof TxResponse,
+      responseStream: false,
+      options: {},
+    },
+    getVaults: {
+      name: "GetVaults",
+      requestType: GetVaultsRequest as typeof GetVaultsRequest,
+      requestStream: false,
+      responseType: VaultsResponse as typeof VaultsResponse,
+      responseStream: false,
+      options: {},
+    },
     getTxStatus: {
       name: "GetTxStatus",
       requestType: GetTxStatusRequest as typeof GetTxStatusRequest,
@@ -3747,6 +4682,14 @@ export const BaseDefinition = {
       requestType: GetAssetPriceRequest as typeof GetAssetPriceRequest,
       requestStream: false,
       responseType: AssetPrice as typeof AssetPrice,
+      responseStream: false,
+      options: {},
+    },
+    faucet: {
+      name: "Faucet",
+      requestType: FaucetRequest as typeof FaucetRequest,
+      requestStream: false,
+      responseType: ExecuteTxResponse as typeof ExecuteTxResponse,
       responseStream: false,
       options: {},
     },
@@ -3789,10 +4732,13 @@ export interface BaseServiceImplementation<CallContextExt = {}> {
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<GetOrCreateAtaResponse>>;
   executeTx(request: ExecuteTxRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ExecuteTxResponse>>;
+  transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  getVaults(request: GetVaultsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<VaultsResponse>>;
   getTxStatus(request: GetTxStatusRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxStatus>>;
   getTxDetails(request: GetTxDetailsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxDetails>>;
   getTxCost(request: GetTxCostRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxCost>>;
   getAssetPrice(request: GetAssetPriceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AssetPrice>>;
+  faucet(request: FaucetRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ExecuteTxResponse>>;
 }
 
 export interface BaseClient<CallOptionsExt = {}> {
@@ -3831,6 +4777,8 @@ export interface BaseClient<CallOptionsExt = {}> {
     options?: CallOptions & CallOptionsExt,
   ): Promise<GetOrCreateAtaResponse>;
   executeTx(request: DeepPartial<ExecuteTxRequest>, options?: CallOptions & CallOptionsExt): Promise<ExecuteTxResponse>;
+  transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  getVaults(request: DeepPartial<GetVaultsRequest>, options?: CallOptions & CallOptionsExt): Promise<VaultsResponse>;
   getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: CallOptions & CallOptionsExt): Promise<TxStatus>;
   getTxDetails(request: DeepPartial<GetTxDetailsRequest>, options?: CallOptions & CallOptionsExt): Promise<TxDetails>;
   getTxCost(request: DeepPartial<GetTxCostRequest>, options?: CallOptions & CallOptionsExt): Promise<TxCost>;
@@ -3838,6 +4786,7 @@ export interface BaseClient<CallOptionsExt = {}> {
     request: DeepPartial<GetAssetPriceRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<AssetPrice>;
+  faucet(request: DeepPartial<FaucetRequest>, options?: CallOptions & CallOptionsExt): Promise<ExecuteTxResponse>;
 }
 
 function bytesFromBase64(b64: string): Uint8Array {
