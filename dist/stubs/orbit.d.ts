@@ -1,17 +1,10 @@
 import { BinaryWriter, BinaryReader } from '@bufbuild/protobuf/wire';
 import { CallOptions, CallContext } from 'nice-grpc-common';
-import { Token, Ed25519Pair, DecodeEventRequest, EventData } from './base.js';
+import { Token, DecodeEventRequest, EventData } from './base.js';
 
 declare const protobufPackage = "orbit";
-interface DomainSeparatorRequest {
-}
-declare const DomainSeparatorRequest: MessageFns<DomainSeparatorRequest>;
-interface DomainSeparatorResponse {
-    domainSeparator: number;
-}
-declare const DomainSeparatorResponse: MessageFns<DomainSeparatorResponse>;
 interface GetPdaRequest {
-    key?: string | undefined;
+    key: string;
 }
 declare const GetPdaRequest: MessageFns<GetPdaRequest>;
 interface PdaResponse {
@@ -20,84 +13,88 @@ interface PdaResponse {
     type: string;
 }
 declare const PdaResponse: MessageFns<PdaResponse>;
-interface SpendTokensRequest {
-    requestId: string;
-    approver: string;
+interface OrderData {
+    orderId: string;
     amount: string;
-    delegateKey?: string | undefined;
+    address: string;
+}
+declare const OrderData: MessageFns<OrderData>;
+interface CollectRequest {
+    orderId: string;
+    vaultId: string;
+    userId: string;
+    address: string;
+    amount: string;
     token?: Token | undefined;
 }
-declare const SpendTokensRequest: MessageFns<SpendTokensRequest>;
-interface TransferToLpRequest {
+declare const CollectRequest: MessageFns<CollectRequest>;
+interface DisburseRequest {
     requestId: string;
-    to: string;
+    userId: string;
+    address: string;
     amount: string;
+    orderId?: string | undefined;
     token?: Token | undefined;
 }
-declare const TransferToLpRequest: MessageFns<TransferToLpRequest>;
-interface TransferPdaToWalletRequest {
-    requestId: string;
-    userKey: string;
-    to: string;
-    amount: string;
-    ed25519Pair?: Ed25519Pair | undefined;
-    token?: Token | undefined;
-}
-declare const TransferPdaToWalletRequest: MessageFns<TransferPdaToWalletRequest>;
+declare const DisburseRequest: MessageFns<DisburseRequest>;
 interface TxResponse {
-    requestId: string;
+    orderId: string;
     signature: string;
     position: number;
 }
 declare const TxResponse: MessageFns<TxResponse>;
+interface LPRequest {
+    userId: string;
+    address: string;
+    memo?: string | undefined;
+}
+declare const LPRequest: MessageFns<LPRequest>;
+interface LPState {
+    status: string;
+    pda: string;
+    txPda?: string | undefined;
+}
+declare const LPState: MessageFns<LPState>;
 type OrbitDefinition = typeof OrbitDefinition;
 declare const OrbitDefinition: {
     readonly name: "Orbit";
     readonly fullName: "orbit.Orbit";
     readonly methods: {
-        readonly domainSeparator: {
-            readonly name: "DomainSeparator";
-            readonly requestType: typeof DomainSeparatorRequest;
-            readonly requestStream: false;
-            readonly responseType: typeof DomainSeparatorResponse;
-            readonly responseStream: false;
-            readonly options: {};
-        };
-        readonly getUserPda: {
-            readonly name: "GetUserPda";
+        readonly getVaultPda: {
+            readonly name: "GetVaultPda";
             readonly requestType: typeof GetPdaRequest;
             readonly requestStream: false;
             readonly responseType: typeof PdaResponse;
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly getDelegatePda: {
-            readonly name: "GetDelegatePda";
+        readonly getOrderPda: {
+            readonly name: "GetOrderPda";
             readonly requestType: typeof GetPdaRequest;
             readonly requestStream: false;
             readonly responseType: typeof PdaResponse;
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly spendTokens: {
-            readonly name: "SpendTokens";
-            readonly requestType: typeof SpendTokensRequest;
+        readonly readOrderPda: {
+            readonly name: "ReadOrderPda";
+            readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof OrderData;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly collect: {
+            readonly name: "Collect";
+            readonly requestType: typeof CollectRequest;
             readonly requestStream: false;
             readonly responseType: typeof TxResponse;
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly transferToLp: {
-            readonly name: "TransferToLp";
-            readonly requestType: typeof TransferToLpRequest;
-            readonly requestStream: false;
-            readonly responseType: typeof TxResponse;
-            readonly responseStream: false;
-            readonly options: {};
-        };
-        readonly transferPdaToWallet: {
-            readonly name: "TransferPdaToWallet";
-            readonly requestType: typeof TransferPdaToWalletRequest;
+        readonly disburse: {
+            readonly name: "Disburse";
+            readonly requestType: typeof DisburseRequest;
             readonly requestStream: false;
             readonly responseType: typeof TxResponse;
             readonly responseStream: false;
@@ -111,25 +108,53 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly verifyLP: {
+            readonly name: "VerifyLP";
+            readonly requestType: typeof LPRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly whitelistLP: {
+            readonly name: "WhitelistLP";
+            readonly requestType: typeof LPRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly revokeLP: {
+            readonly name: "RevokeLP";
+            readonly requestType: typeof LPRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
     };
 };
 interface OrbitServiceImplementation<CallContextExt = {}> {
-    domainSeparator(request: DomainSeparatorRequest, context: CallContext & CallContextExt): Promise<DeepPartial<DomainSeparatorResponse>>;
-    getUserPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
-    getDelegatePda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
-    spendTokens(request: SpendTokensRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
-    transferToLp(request: TransferToLpRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
-    transferPdaToWallet(request: TransferPdaToWalletRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    getVaultPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+    getOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+    readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
+    collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
+    verifyLP(request: LPRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    whitelistLP(request: LPRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    revokeLP(request: LPRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
 }
 interface OrbitClient<CallOptionsExt = {}> {
-    domainSeparator(request: DeepPartial<DomainSeparatorRequest>, options?: CallOptions & CallOptionsExt): Promise<DomainSeparatorResponse>;
-    getUserPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
-    getDelegatePda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
-    spendTokens(request: DeepPartial<SpendTokensRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
-    transferToLp(request: DeepPartial<TransferToLpRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
-    transferPdaToWallet(request: DeepPartial<TransferPdaToWalletRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    getVaultPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+    getOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+    readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
+    collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
+    verifyLP(request: DeepPartial<LPRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    whitelistLP(request: DeepPartial<LPRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    revokeLP(request: DeepPartial<LPRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 type DeepPartial<T> = T extends Builtin ? T : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
@@ -150,4 +175,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { type DeepPartial, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GetPdaRequest, type MessageFns, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, PdaResponse, SpendTokensRequest, TransferPdaToWalletRequest, TransferToLpRequest, TxResponse, protobufPackage };
+export { CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, LPRequest, LPState, type MessageFns, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, TxResponse, protobufPackage };

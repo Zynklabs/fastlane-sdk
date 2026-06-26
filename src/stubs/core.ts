@@ -144,6 +144,7 @@ export interface BeneficiaryRequest {
 
 export interface BeneficiaryState {
   status: string;
+  pda: string;
   transientAllowed?: boolean | undefined;
   txPda?: string | undefined;
 }
@@ -2394,7 +2395,7 @@ export const BeneficiaryRequest: MessageFns<BeneficiaryRequest> = {
 };
 
 function createBaseBeneficiaryState(): BeneficiaryState {
-  return { status: "", transientAllowed: undefined, txPda: undefined };
+  return { status: "", pda: "", transientAllowed: undefined, txPda: undefined };
 }
 
 export const BeneficiaryState: MessageFns<BeneficiaryState> = {
@@ -2402,11 +2403,14 @@ export const BeneficiaryState: MessageFns<BeneficiaryState> = {
     if (message.status !== "") {
       writer.uint32(10).string(message.status);
     }
+    if (message.pda !== "") {
+      writer.uint32(18).string(message.pda);
+    }
     if (message.transientAllowed !== undefined) {
-      writer.uint32(16).bool(message.transientAllowed);
+      writer.uint32(24).bool(message.transientAllowed);
     }
     if (message.txPda !== undefined) {
-      writer.uint32(26).string(message.txPda);
+      writer.uint32(34).string(message.txPda);
     }
     return writer;
   },
@@ -2427,15 +2431,23 @@ export const BeneficiaryState: MessageFns<BeneficiaryState> = {
           continue;
         }
         case 2: {
-          if (tag !== 16) {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.pda = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
             break;
           }
 
           message.transientAllowed = reader.bool();
           continue;
         }
-        case 3: {
-          if (tag !== 26) {
+        case 4: {
+          if (tag !== 34) {
             break;
           }
 
@@ -2454,6 +2466,7 @@ export const BeneficiaryState: MessageFns<BeneficiaryState> = {
   fromJSON(object: any): BeneficiaryState {
     return {
       status: isSet(object.status) ? globalThis.String(object.status) : "",
+      pda: isSet(object.pda) ? globalThis.String(object.pda) : "",
       transientAllowed: isSet(object.transientAllowed)
         ? globalThis.Boolean(object.transientAllowed)
         : isSet(object.transient_allowed)
@@ -2472,6 +2485,9 @@ export const BeneficiaryState: MessageFns<BeneficiaryState> = {
     if (message.status !== "") {
       obj.status = message.status;
     }
+    if (message.pda !== "") {
+      obj.pda = message.pda;
+    }
     if (message.transientAllowed !== undefined) {
       obj.transientAllowed = message.transientAllowed;
     }
@@ -2487,6 +2503,7 @@ export const BeneficiaryState: MessageFns<BeneficiaryState> = {
   fromPartial<I extends Exact<DeepPartial<BeneficiaryState>, I>>(object: I): BeneficiaryState {
     const message = createBaseBeneficiaryState();
     message.status = object.status ?? "";
+    message.pda = object.pda ?? "";
     message.transientAllowed = object.transientAllowed ?? undefined;
     message.txPda = object.txPda ?? undefined;
     return message;

@@ -138,6 +138,7 @@ interface BeneficiaryRequest {
 declare const BeneficiaryRequest: MessageFns<BeneficiaryRequest>;
 interface BeneficiaryState {
     status: string;
+    pda: string;
     transientAllowed?: boolean | undefined;
     txPda?: string | undefined;
 }

@@ -39,6 +39,10 @@ export type {
   GetOrCreateAtaRequest,
   GetOrCreateAtaResponse,
   ExecuteTxResponse,
+  TransferRequest,
+  TxResponse,
+  GetVaultsRequest,
+  VaultsResponse,
   GetTxStatusRequest,
   TxStatus,
   GetTxDetailsRequest,
@@ -66,18 +70,22 @@ export type {
   MetaArg,
   CreateOrderRequest,
   ReplenishRequest,
-  TransferRequest,
+  TransferRequest as CoreTransferRequest,
   AttestOrderRequest,
-  TxResponse,
+  TxResponse as CoreTxResponse,
+  BeneficiaryRequest,
+  BeneficiaryState,
   TxResponse_MetaEntry,
 } from "./core";
 
 export type {
   GetPdaRequest,
   PdaResponse,
-  SpendTokensRequest,
-  TransferToLpRequest,
-  TransferPdaToWalletRequest,
+  OrderData,
+  CollectRequest,
+  DisburseRequest,
+  LPRequest,
+  LPState,
   TxResponse as OrbitTxResponse,
 } from "./orbit";
 
