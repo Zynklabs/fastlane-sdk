@@ -39,8 +39,8 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.11.0",
-    "@grpc/grpc-js": "^1.14.3",
-    "nice-grpc": "^2.1.14"
+    "@grpc/grpc-js": "1.14.4",
+    "nice-grpc": "2.1.16"
   },
   "peerDependencies": {
     "@coral-xyz/anchor": "^0.30.0",
