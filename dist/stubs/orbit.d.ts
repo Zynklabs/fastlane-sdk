@@ -50,8 +50,54 @@ interface DisburseRequest {
     amount: string;
     orderId?: string | undefined;
     token?: Token | undefined;
+    vaultId?: string | undefined;
 }
 declare const DisburseRequest: MessageFns<DisburseRequest>;
+interface MetaArg {
+    key: string;
+    value: string;
+}
+declare const MetaArg: MessageFns<MetaArg>;
+interface PositionArgs {
+    userId: string;
+    amount: string;
+    /** NCW only: vault id whose PDA holds the token delegate approval. */
+    vaultId?: string | undefined;
+    /** NCW only: wallet holding the source tokens. Defaults to the user PDA. */
+    address?: string | undefined;
+}
+declare const PositionArgs: MessageFns<PositionArgs>;
+interface PledgeRequest {
+    userId: string;
+    address: string;
+    amount: string;
+    token?: Token | undefined;
+    requestId?: string | undefined;
+}
+declare const PledgeRequest: MessageFns<PledgeRequest>;
+interface BorrowRequest {
+    requestId: string;
+    partnerId: string;
+    beneficiary: string;
+    amount: string;
+    positions: PositionArgs[];
+    token?: Token | undefined;
+    zovId?: string | undefined;
+    orderId?: string | undefined;
+    meta: MetaArg[];
+}
+declare const BorrowRequest: MessageFns<BorrowRequest>;
+interface RepayRequest {
+    requestId: string;
+    partnerId: string;
+    amount: string;
+    orderId: string;
+    positions: PositionArgs[];
+    token?: Token | undefined;
+    zovId?: string | undefined;
+    meta: MetaArg[];
+}
+declare const RepayRequest: MessageFns<RepayRequest>;
 interface TxResponse {
     orderId: string;
     signature: string;
@@ -179,6 +225,30 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly pledge: {
+            readonly name: "Pledge";
+            readonly requestType: typeof PledgeRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof TxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly borrow: {
+            readonly name: "Borrow";
+            readonly requestType: typeof BorrowRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof TxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly repay: {
+            readonly name: "Repay";
+            readonly requestType: typeof RepayRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof TxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly decodeEvent: {
             readonly name: "DecodeEvent";
             readonly requestType: typeof DecodeEventRequest;
@@ -268,6 +338,9 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
     readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
     collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    repay(request: RepayRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
     /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
     verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
@@ -286,6 +359,9 @@ interface OrbitClient<CallOptionsExt = {}> {
     readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
     collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    repay(request: DeepPartial<RepayRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
     /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
     verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
@@ -317,4 +393,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { ApproveWithdrawRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, LPState, type MessageFns, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, RegisterUserRequest, RejectWithdrawRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { ApproveWithdrawRequest, BorrowRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };

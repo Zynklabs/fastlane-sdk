@@ -115,6 +115,54 @@ export interface DisburseRequest {
   amount: string;
   orderId?: string | undefined;
   token?: Token | undefined;
+  vaultId?: string | undefined;
+}
+
+export interface MetaArg {
+  key: string;
+  value: string;
+}
+
+export interface PositionArgs {
+  userId: string;
+  amount: string;
+  /** NCW only: vault id whose PDA holds the token delegate approval. */
+  vaultId?:
+    | string
+    | undefined;
+  /** NCW only: wallet holding the source tokens. Defaults to the user PDA. */
+  address?: string | undefined;
+}
+
+export interface PledgeRequest {
+  userId: string;
+  address: string;
+  amount: string;
+  token?: Token | undefined;
+  requestId?: string | undefined;
+}
+
+export interface BorrowRequest {
+  requestId: string;
+  partnerId: string;
+  beneficiary: string;
+  amount: string;
+  positions: PositionArgs[];
+  token?: Token | undefined;
+  zovId?: string | undefined;
+  orderId?: string | undefined;
+  meta: MetaArg[];
+}
+
+export interface RepayRequest {
+  requestId: string;
+  partnerId: string;
+  amount: string;
+  orderId: string;
+  positions: PositionArgs[];
+  token?: Token | undefined;
+  zovId?: string | undefined;
+  meta: MetaArg[];
 }
 
 export interface TxResponse {
@@ -600,7 +648,15 @@ export const CollectRequest: MessageFns<CollectRequest> = {
 };
 
 function createBaseDisburseRequest(): DisburseRequest {
-  return { requestId: "", userId: "", address: "", amount: "", orderId: undefined, token: undefined };
+  return {
+    requestId: "",
+    userId: "",
+    address: "",
+    amount: "",
+    orderId: undefined,
+    token: undefined,
+    vaultId: undefined,
+  };
 }
 
 export const DisburseRequest: MessageFns<DisburseRequest> = {
@@ -622,6 +678,9 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
     }
     if (message.token !== undefined) {
       writer.uint32(48).int32(message.token);
+    }
+    if (message.vaultId !== undefined) {
+      writer.uint32(58).string(message.vaultId);
     }
     return writer;
   },
@@ -681,6 +740,14 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
           message.token = reader.int32() as any;
           continue;
         }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.vaultId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -710,6 +777,11 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
         ? globalThis.String(object.order_id)
         : undefined,
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      vaultId: isSet(object.vaultId)
+        ? globalThis.String(object.vaultId)
+        : isSet(object.vault_id)
+        ? globalThis.String(object.vault_id)
+        : undefined,
     };
   },
 
@@ -733,6 +805,9 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
     if (message.token !== undefined) {
       obj.token = tokenToJSON(message.token);
     }
+    if (message.vaultId !== undefined) {
+      obj.vaultId = message.vaultId;
+    }
     return obj;
   },
 
@@ -747,6 +822,750 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
     message.amount = object.amount ?? "";
     message.orderId = object.orderId ?? undefined;
     message.token = object.token ?? undefined;
+    message.vaultId = object.vaultId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseMetaArg(): MetaArg {
+  return { key: "", value: "" };
+}
+
+export const MetaArg: MessageFns<MetaArg> = {
+  encode(message: MetaArg, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== "") {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== "") {
+      writer.uint32(18).string(message.value);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): MetaArg {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMetaArg();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MetaArg {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      value: isSet(object.value) ? globalThis.String(object.value) : "",
+    };
+  },
+
+  toJSON(message: MetaArg): unknown {
+    const obj: any = {};
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== "") {
+      obj.value = message.value;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MetaArg>, I>>(base?: I): MetaArg {
+    return MetaArg.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MetaArg>, I>>(object: I): MetaArg {
+    const message = createBaseMetaArg();
+    message.key = object.key ?? "";
+    message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBasePositionArgs(): PositionArgs {
+  return { userId: "", amount: "", vaultId: undefined, address: undefined };
+}
+
+export const PositionArgs: MessageFns<PositionArgs> = {
+  encode(message: PositionArgs, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.amount !== "") {
+      writer.uint32(18).string(message.amount);
+    }
+    if (message.vaultId !== undefined) {
+      writer.uint32(26).string(message.vaultId);
+    }
+    if (message.address !== undefined) {
+      writer.uint32(34).string(message.address);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PositionArgs {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionArgs();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.vaultId = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PositionArgs {
+    return {
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      vaultId: isSet(object.vaultId)
+        ? globalThis.String(object.vaultId)
+        : isSet(object.vault_id)
+        ? globalThis.String(object.vault_id)
+        : undefined,
+      address: isSet(object.address) ? globalThis.String(object.address) : undefined,
+    };
+  },
+
+  toJSON(message: PositionArgs): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.vaultId !== undefined) {
+      obj.vaultId = message.vaultId;
+    }
+    if (message.address !== undefined) {
+      obj.address = message.address;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PositionArgs>, I>>(base?: I): PositionArgs {
+    return PositionArgs.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PositionArgs>, I>>(object: I): PositionArgs {
+    const message = createBasePositionArgs();
+    message.userId = object.userId ?? "";
+    message.amount = object.amount ?? "";
+    message.vaultId = object.vaultId ?? undefined;
+    message.address = object.address ?? undefined;
+    return message;
+  },
+};
+
+function createBasePledgeRequest(): PledgeRequest {
+  return { userId: "", address: "", amount: "", token: undefined, requestId: undefined };
+}
+
+export const PledgeRequest: MessageFns<PledgeRequest> = {
+  encode(message: PledgeRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    if (message.amount !== "") {
+      writer.uint32(26).string(message.amount);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(32).int32(message.token);
+    }
+    if (message.requestId !== undefined) {
+      writer.uint32(42).string(message.requestId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PledgeRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePledgeRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PledgeRequest {
+    return {
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : undefined,
+    };
+  },
+
+  toJSON(message: PledgeRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.requestId !== undefined) {
+      obj.requestId = message.requestId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PledgeRequest>, I>>(base?: I): PledgeRequest {
+    return PledgeRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PledgeRequest>, I>>(object: I): PledgeRequest {
+    const message = createBasePledgeRequest();
+    message.userId = object.userId ?? "";
+    message.address = object.address ?? "";
+    message.amount = object.amount ?? "";
+    message.token = object.token ?? undefined;
+    message.requestId = object.requestId ?? undefined;
+    return message;
+  },
+};
+
+function createBaseBorrowRequest(): BorrowRequest {
+  return {
+    requestId: "",
+    partnerId: "",
+    beneficiary: "",
+    amount: "",
+    positions: [],
+    token: undefined,
+    zovId: undefined,
+    orderId: undefined,
+    meta: [],
+  };
+}
+
+export const BorrowRequest: MessageFns<BorrowRequest> = {
+  encode(message: BorrowRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    if (message.partnerId !== "") {
+      writer.uint32(18).string(message.partnerId);
+    }
+    if (message.beneficiary !== "") {
+      writer.uint32(26).string(message.beneficiary);
+    }
+    if (message.amount !== "") {
+      writer.uint32(34).string(message.amount);
+    }
+    for (const v of message.positions) {
+      PositionArgs.encode(v!, writer.uint32(42).fork()).join();
+    }
+    if (message.token !== undefined) {
+      writer.uint32(48).int32(message.token);
+    }
+    if (message.zovId !== undefined) {
+      writer.uint32(58).string(message.zovId);
+    }
+    if (message.orderId !== undefined) {
+      writer.uint32(66).string(message.orderId);
+    }
+    for (const v of message.meta) {
+      MetaArg.encode(v!, writer.uint32(74).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BorrowRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBorrowRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.beneficiary = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.positions.push(PositionArgs.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.zovId = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.meta.push(MetaArg.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BorrowRequest {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      positions: globalThis.Array.isArray(object?.positions)
+        ? object.positions.map((e: any) => PositionArgs.fromJSON(e))
+        : [],
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      zovId: isSet(object.zovId)
+        ? globalThis.String(object.zovId)
+        : isSet(object.zov_id)
+        ? globalThis.String(object.zov_id)
+        : undefined,
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : undefined,
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: BorrowRequest): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.beneficiary !== "") {
+      obj.beneficiary = message.beneficiary;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.positions?.length) {
+      obj.positions = message.positions.map((e) => PositionArgs.toJSON(e));
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.zovId !== undefined) {
+      obj.zovId = message.zovId;
+    }
+    if (message.orderId !== undefined) {
+      obj.orderId = message.orderId;
+    }
+    if (message.meta?.length) {
+      obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BorrowRequest>, I>>(base?: I): BorrowRequest {
+    return BorrowRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<BorrowRequest>, I>>(object: I): BorrowRequest {
+    const message = createBaseBorrowRequest();
+    message.requestId = object.requestId ?? "";
+    message.partnerId = object.partnerId ?? "";
+    message.beneficiary = object.beneficiary ?? "";
+    message.amount = object.amount ?? "";
+    message.positions = object.positions?.map((e) => PositionArgs.fromPartial(e)) || [];
+    message.token = object.token ?? undefined;
+    message.zovId = object.zovId ?? undefined;
+    message.orderId = object.orderId ?? undefined;
+    message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseRepayRequest(): RepayRequest {
+  return {
+    requestId: "",
+    partnerId: "",
+    amount: "",
+    orderId: "",
+    positions: [],
+    token: undefined,
+    zovId: undefined,
+    meta: [],
+  };
+}
+
+export const RepayRequest: MessageFns<RepayRequest> = {
+  encode(message: RepayRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    if (message.partnerId !== "") {
+      writer.uint32(18).string(message.partnerId);
+    }
+    if (message.amount !== "") {
+      writer.uint32(26).string(message.amount);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(34).string(message.orderId);
+    }
+    for (const v of message.positions) {
+      PositionArgs.encode(v!, writer.uint32(42).fork()).join();
+    }
+    if (message.token !== undefined) {
+      writer.uint32(48).int32(message.token);
+    }
+    if (message.zovId !== undefined) {
+      writer.uint32(58).string(message.zovId);
+    }
+    for (const v of message.meta) {
+      MetaArg.encode(v!, writer.uint32(66).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RepayRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRepayRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.positions.push(PositionArgs.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.zovId = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.meta.push(MetaArg.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RepayRequest {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+      positions: globalThis.Array.isArray(object?.positions)
+        ? object.positions.map((e: any) => PositionArgs.fromJSON(e))
+        : [],
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      zovId: isSet(object.zovId)
+        ? globalThis.String(object.zovId)
+        : isSet(object.zov_id)
+        ? globalThis.String(object.zov_id)
+        : undefined,
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: RepayRequest): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.positions?.length) {
+      obj.positions = message.positions.map((e) => PositionArgs.toJSON(e));
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.zovId !== undefined) {
+      obj.zovId = message.zovId;
+    }
+    if (message.meta?.length) {
+      obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RepayRequest>, I>>(base?: I): RepayRequest {
+    return RepayRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RepayRequest>, I>>(object: I): RepayRequest {
+    const message = createBaseRepayRequest();
+    message.requestId = object.requestId ?? "";
+    message.partnerId = object.partnerId ?? "";
+    message.amount = object.amount ?? "";
+    message.orderId = object.orderId ?? "";
+    message.positions = object.positions?.map((e) => PositionArgs.fromPartial(e)) || [];
+    message.token = object.token ?? undefined;
+    message.zovId = object.zovId ?? undefined;
+    message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
     return message;
   },
 };
@@ -1874,6 +2693,30 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
+    pledge: {
+      name: "Pledge",
+      requestType: PledgeRequest as typeof PledgeRequest,
+      requestStream: false,
+      responseType: TxResponse as typeof TxResponse,
+      responseStream: false,
+      options: {},
+    },
+    borrow: {
+      name: "Borrow",
+      requestType: BorrowRequest as typeof BorrowRequest,
+      requestStream: false,
+      responseType: TxResponse as typeof TxResponse,
+      responseStream: false,
+      options: {},
+    },
+    repay: {
+      name: "Repay",
+      requestType: RepayRequest as typeof RepayRequest,
+      requestStream: false,
+      responseType: TxResponse as typeof TxResponse,
+      responseStream: false,
+      options: {},
+    },
     decodeEvent: {
       name: "DecodeEvent",
       requestType: DecodeEventRequest as typeof DecodeEventRequest,
@@ -1964,6 +2807,9 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
   readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
   collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  repay(request: RepayRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
   /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
   verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
@@ -1995,6 +2841,9 @@ export interface OrbitClient<CallOptionsExt = {}> {
   readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
   collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  repay(request: DeepPartial<RepayRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
   /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
   verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
