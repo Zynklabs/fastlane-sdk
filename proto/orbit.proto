@@ -15,9 +15,16 @@ service Orbit {
 
   rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
 
-  rpc VerifyLP (LPRequest) returns (LPState);
-  rpc WhitelistLP (LPRequest) returns (LPState);
-  rpc RevokeLP (LPRequest) returns (LPState);
+  // ── LP / user-management (admin-signed, published via Squads) ────────────
+  rpc VerifyUser  (VerifyUserRequest)  returns (LPState);
+  rpc RegisterUser (RegisterUserRequest) returns (LPState);
+  rpc RevokeLP (RevokeRequest) returns (LPState);
+  rpc UpdatePartnerWhitelist (UpdatePartnerWhitelistRequest) returns (LPState);
+  rpc UpdateWallets (UpdateWalletsRequest) returns (LPState);
+  rpc UpdateMaxPrincipal (UpdateMaxPrincipalRequest) returns (LPState);
+  rpc UpdateCliffPeriod (UpdateCliffPeriodRequest) returns (LPState);
+  rpc ApproveWithdraw (ApproveWithdrawRequest) returns (LPState);
+  rpc RejectWithdraw (RejectWithdrawRequest) returns (LPState);
 }
 
 message GetPdaRequest {
@@ -60,14 +67,89 @@ message TxResponse {
   uint32 position = 3;
 }
 
-message LPRequest {
-  string user_id = 1;
-  string address = 2;
-  optional string memo = 3;
-}
-
 message LPState {
   string status = 1;
   string pda = 2;
   optional string tx_pda = 3;
+}
+
+// ── User-management enums ─────────────────────────────────────────────────────
+
+enum UserType {
+  LP  = 0;
+  NCW = 1;
+  ICV = 2;
+}
+
+enum WhitelistAction {
+  ADD    = 0;
+  REMOVE = 1;
+}
+
+// ── Request messages ──────────────────────────────────────────────────────────
+
+/**
+ * VerifyUser: read-only check – returns LPState for the user's Record PDA.
+ * status = "active" when the user record exists, "unavailable" otherwise.
+ */
+message VerifyUserRequest {
+  string user_id = 1;
+}
+
+message RegisterUserRequest {
+  string    user_id   = 1;
+  UserType  user_type = 2;
+  // 1 to 3 authorised wallet addresses. Missing slots are padded with the
+  // system public key (11111111111111111111111111111111) on-chain.
+  repeated string wallets = 3;
+  // Unix timestamp string. Omit → i64::MAX (no lock).
+  optional string cliff_period = 4;
+  // u32 cap. Omit → u32::MAX (uncapped).
+  optional uint32 max_deposit  = 5;
+  optional string memo         = 6;
+}
+
+message RevokeRequest {
+  // One or more Orbit PDA public-key strings to close via remainingAccounts.
+  repeated string accounts = 1;
+  optional string memo     = 2;
+}
+
+message UpdatePartnerWhitelistRequest {
+  string          user_id    = 1;
+  WhitelistAction action     = 2;
+  uint32          partner_id = 3;
+  optional string memo       = 4;
+}
+
+message UpdateWalletsRequest {
+  string user_id = 1;
+  // 1 to 3 replacement wallet addresses. Missing slots are padded with the
+  // system public key (11111111111111111111111111111111) on-chain.
+  repeated string wallets = 2;
+  optional string memo    = 3;
+}
+
+message UpdateMaxPrincipalRequest {
+  string  user_id     = 1;
+  uint32  max_deposit = 2;
+  optional string memo = 3;
+}
+
+message UpdateCliffPeriodRequest {
+  string user_id = 1;
+  // Unix timestamp string. Omit → preserves existing cliff on-chain.
+  optional string cliff_period = 2;
+  optional string memo         = 3;
+}
+
+message ApproveWithdrawRequest {
+  string          user_id = 1;
+  optional base.Token token = 2;
+  optional string memo    = 3;
+}
+
+message RejectWithdrawRequest {
+  string user_id = 1;
+  optional string memo = 2;
 }

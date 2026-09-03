@@ -5,7 +5,7 @@ export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.js';
 import { CoreClient } from './stubs/core.js';
 export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.js';
 import { OrbitClient } from './stubs/orbit.js';
-export { CollectRequest, DisburseRequest, GetPdaRequest, LPRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse } from './stubs/orbit.js';
+export { CollectRequest, DisburseRequest, GetPdaRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse } from './stubs/orbit.js';
 import { KaminoClient } from './stubs/kamino.js';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.js';
 import { IOptions } from './interfaces.js';

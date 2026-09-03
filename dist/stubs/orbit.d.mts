@@ -3,6 +3,21 @@ import { CallOptions, CallContext } from 'nice-grpc-common';
 import { Token, DecodeEventRequest, EventData } from './base.mjs';
 
 declare const protobufPackage = "orbit";
+declare enum UserType {
+    LP = 0,
+    NCW = 1,
+    ICV = 2,
+    UNRECOGNIZED = -1
+}
+declare function userTypeFromJSON(object: any): UserType;
+declare function userTypeToJSON(object: UserType): string;
+declare enum WhitelistAction {
+    ADD = 0,
+    REMOVE = 1,
+    UNRECOGNIZED = -1
+}
+declare function whitelistActionFromJSON(object: any): WhitelistAction;
+declare function whitelistActionToJSON(object: WhitelistAction): string;
 interface GetPdaRequest {
     key: string;
 }
@@ -43,18 +58,82 @@ interface TxResponse {
     position: number;
 }
 declare const TxResponse: MessageFns<TxResponse>;
-interface LPRequest {
-    userId: string;
-    address: string;
-    memo?: string | undefined;
-}
-declare const LPRequest: MessageFns<LPRequest>;
 interface LPState {
     status: string;
     pda: string;
     txPda?: string | undefined;
 }
 declare const LPState: MessageFns<LPState>;
+/**
+ * VerifyUser: read-only check – returns LPState for the user's Record PDA.
+ * status = "active" when the user record exists, "unavailable" otherwise.
+ */
+interface VerifyUserRequest {
+    userId: string;
+}
+declare const VerifyUserRequest: MessageFns<VerifyUserRequest>;
+interface RegisterUserRequest {
+    userId: string;
+    userType: UserType;
+    /**
+     * 1 to 3 authorised wallet addresses. Missing slots are padded with the
+     * system public key (11111111111111111111111111111111) on-chain.
+     */
+    wallets: string[];
+    /** Unix timestamp string. Omit → i64::MAX (no lock). */
+    cliffPeriod?: string | undefined;
+    /** u32 cap. Omit → u32::MAX (uncapped). */
+    maxDeposit?: number | undefined;
+    memo?: string | undefined;
+}
+declare const RegisterUserRequest: MessageFns<RegisterUserRequest>;
+interface RevokeRequest {
+    /** One or more Orbit PDA public-key strings to close via remainingAccounts. */
+    accounts: string[];
+    memo?: string | undefined;
+}
+declare const RevokeRequest: MessageFns<RevokeRequest>;
+interface UpdatePartnerWhitelistRequest {
+    userId: string;
+    action: WhitelistAction;
+    partnerId: number;
+    memo?: string | undefined;
+}
+declare const UpdatePartnerWhitelistRequest: MessageFns<UpdatePartnerWhitelistRequest>;
+interface UpdateWalletsRequest {
+    userId: string;
+    /**
+     * 1 to 3 replacement wallet addresses. Missing slots are padded with the
+     * system public key (11111111111111111111111111111111) on-chain.
+     */
+    wallets: string[];
+    memo?: string | undefined;
+}
+declare const UpdateWalletsRequest: MessageFns<UpdateWalletsRequest>;
+interface UpdateMaxPrincipalRequest {
+    userId: string;
+    maxDeposit: number;
+    memo?: string | undefined;
+}
+declare const UpdateMaxPrincipalRequest: MessageFns<UpdateMaxPrincipalRequest>;
+interface UpdateCliffPeriodRequest {
+    userId: string;
+    /** Unix timestamp string. Omit → preserves existing cliff on-chain. */
+    cliffPeriod?: string | undefined;
+    memo?: string | undefined;
+}
+declare const UpdateCliffPeriodRequest: MessageFns<UpdateCliffPeriodRequest>;
+interface ApproveWithdrawRequest {
+    userId: string;
+    token?: Token | undefined;
+    memo?: string | undefined;
+}
+declare const ApproveWithdrawRequest: MessageFns<ApproveWithdrawRequest>;
+interface RejectWithdrawRequest {
+    userId: string;
+    memo?: string | undefined;
+}
+declare const RejectWithdrawRequest: MessageFns<RejectWithdrawRequest>;
 type OrbitDefinition = typeof OrbitDefinition;
 declare const OrbitDefinition: {
     readonly name: "Orbit";
@@ -108,17 +187,18 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly verifyLP: {
-            readonly name: "VerifyLP";
-            readonly requestType: typeof LPRequest;
+        /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
+        readonly verifyUser: {
+            readonly name: "VerifyUser";
+            readonly requestType: typeof VerifyUserRequest;
             readonly requestStream: false;
             readonly responseType: typeof LPState;
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly whitelistLP: {
-            readonly name: "WhitelistLP";
-            readonly requestType: typeof LPRequest;
+        readonly registerUser: {
+            readonly name: "RegisterUser";
+            readonly requestType: typeof RegisterUserRequest;
             readonly requestStream: false;
             readonly responseType: typeof LPState;
             readonly responseStream: false;
@@ -126,7 +206,55 @@ declare const OrbitDefinition: {
         };
         readonly revokeLP: {
             readonly name: "RevokeLP";
-            readonly requestType: typeof LPRequest;
+            readonly requestType: typeof RevokeRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly updatePartnerWhitelist: {
+            readonly name: "UpdatePartnerWhitelist";
+            readonly requestType: typeof UpdatePartnerWhitelistRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly updateWallets: {
+            readonly name: "UpdateWallets";
+            readonly requestType: typeof UpdateWalletsRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly updateMaxPrincipal: {
+            readonly name: "UpdateMaxPrincipal";
+            readonly requestType: typeof UpdateMaxPrincipalRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly updateCliffPeriod: {
+            readonly name: "UpdateCliffPeriod";
+            readonly requestType: typeof UpdateCliffPeriodRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly approveWithdraw: {
+            readonly name: "ApproveWithdraw";
+            readonly requestType: typeof ApproveWithdrawRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof LPState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly rejectWithdraw: {
+            readonly name: "RejectWithdraw";
+            readonly requestType: typeof RejectWithdrawRequest;
             readonly requestStream: false;
             readonly responseType: typeof LPState;
             readonly responseStream: false;
@@ -141,9 +269,16 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
     collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
-    verifyLP(request: LPRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
-    whitelistLP(request: LPRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
-    revokeLP(request: LPRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
+    verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    registerUser(request: RegisterUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    revokeLP(request: RevokeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    updatePartnerWhitelist(request: UpdatePartnerWhitelistRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    updateWallets(request: UpdateWalletsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    updateMaxPrincipal(request: UpdateMaxPrincipalRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    updateCliffPeriod(request: UpdateCliffPeriodRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    approveWithdraw(request: ApproveWithdrawRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    rejectWithdraw(request: RejectWithdrawRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
 }
 interface OrbitClient<CallOptionsExt = {}> {
     getVaultPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
@@ -152,9 +287,16 @@ interface OrbitClient<CallOptionsExt = {}> {
     collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
-    verifyLP(request: DeepPartial<LPRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
-    whitelistLP(request: DeepPartial<LPRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
-    revokeLP(request: DeepPartial<LPRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
+    verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    registerUser(request: DeepPartial<RegisterUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    revokeLP(request: DeepPartial<RevokeRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    updatePartnerWhitelist(request: DeepPartial<UpdatePartnerWhitelistRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    updateWallets(request: DeepPartial<UpdateWalletsRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    updateMaxPrincipal(request: DeepPartial<UpdateMaxPrincipalRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    updateCliffPeriod(request: DeepPartial<UpdateCliffPeriodRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    approveWithdraw(request: DeepPartial<ApproveWithdrawRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    rejectWithdraw(request: DeepPartial<RejectWithdrawRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 type DeepPartial<T> = T extends Builtin ? T : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
@@ -175,4 +317,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, LPRequest, LPState, type MessageFns, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, TxResponse, protobufPackage };
+export { ApproveWithdrawRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, LPState, type MessageFns, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, RegisterUserRequest, RejectWithdrawRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };

@@ -84,7 +84,6 @@ export type {
   OrderData,
   CollectRequest,
   DisburseRequest,
-  LPRequest,
   LPState,
   TxResponse as OrbitTxResponse,
 } from "./orbit";
