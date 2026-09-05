@@ -22,6 +22,11 @@ interface GetPdaRequest {
     key: string;
 }
 declare const GetPdaRequest: MessageFns<GetPdaRequest>;
+interface GetPositionPdaRequest {
+    userId: string;
+    orderId: string;
+}
+declare const GetPositionPdaRequest: MessageFns<GetPositionPdaRequest>;
 interface PdaResponse {
     pda: string;
     key: string;
@@ -134,8 +139,7 @@ interface RegisterUserRequest {
 }
 declare const RegisterUserRequest: MessageFns<RegisterUserRequest>;
 interface RevokeRequest {
-    /** One or more Orbit PDA public-key strings to close via remainingAccounts. */
-    accounts: string[];
+    userId: string;
     memo?: string | undefined;
 }
 declare const RevokeRequest: MessageFns<RevokeRequest>;
@@ -196,6 +200,38 @@ declare const OrbitDefinition: {
         readonly getOrderPda: {
             readonly name: "GetOrderPda";
             readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof PdaResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly getUserPda: {
+            readonly name: "GetUserPda";
+            readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof PdaResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly getWithdrawRequestPda: {
+            readonly name: "GetWithdrawRequestPda";
+            readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof PdaResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly getUpdateCliffPeriodRequestPda: {
+            readonly name: "GetUpdateCliffPeriodRequestPda";
+            readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof PdaResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly getPositionPda: {
+            readonly name: "GetPositionPda";
+            readonly requestType: typeof GetPositionPdaRequest;
             readonly requestStream: false;
             readonly responseType: typeof PdaResponse;
             readonly responseStream: false;
@@ -335,6 +371,10 @@ declare const OrbitDefinition: {
 interface OrbitServiceImplementation<CallContextExt = {}> {
     getVaultPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
     getOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+    getUserPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+    getWithdrawRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+    getUpdateCliffPeriodRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+    getPositionPda(request: GetPositionPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
     readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
     collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -356,6 +396,10 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
 interface OrbitClient<CallOptionsExt = {}> {
     getVaultPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
     getOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+    getUserPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+    getWithdrawRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+    getUpdateCliffPeriodRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+    getPositionPda(request: DeepPartial<GetPositionPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
     readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
     collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
@@ -393,4 +437,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { ApproveWithdrawRequest, BorrowRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { ApproveWithdrawRequest, BorrowRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };

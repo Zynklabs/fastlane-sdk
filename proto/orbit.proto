@@ -7,6 +7,10 @@ import "base.proto";
 service Orbit {
   rpc GetVaultPda (GetPdaRequest) returns (PdaResponse);
   rpc GetOrderPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetUserPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetWithdrawRequestPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetUpdateCliffPeriodRequestPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetPositionPda (GetPositionPdaRequest) returns (PdaResponse);
 
   rpc ReadOrderPda (GetPdaRequest) returns (OrderData);
 
@@ -32,6 +36,11 @@ service Orbit {
 
 message GetPdaRequest {
   string key = 1;
+}
+
+message GetPositionPdaRequest {
+  string user_id = 1;
+  string order_id = 2;
 }
 
 message PdaResponse {
@@ -159,9 +168,8 @@ message RegisterUserRequest {
 }
 
 message RevokeRequest {
-  // One or more Orbit PDA public-key strings to close via remainingAccounts.
-  repeated string accounts = 1;
-  optional string memo     = 2;
+  string user_id = 1;
+  optional string memo = 2;
 }
 
 message UpdatePartnerWhitelistRequest {

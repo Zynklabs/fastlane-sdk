@@ -87,6 +87,11 @@ export interface GetPdaRequest {
   key: string;
 }
 
+export interface GetPositionPdaRequest {
+  userId: string;
+  orderId: string;
+}
+
 export interface PdaResponse {
   pda: string;
   key: string;
@@ -203,8 +208,7 @@ export interface RegisterUserRequest {
 }
 
 export interface RevokeRequest {
-  /** One or more Orbit PDA public-key strings to close via remainingAccounts. */
-  accounts: string[];
+  userId: string;
   memo?: string | undefined;
 }
 
@@ -303,6 +307,90 @@ export const GetPdaRequest: MessageFns<GetPdaRequest> = {
   fromPartial<I extends Exact<DeepPartial<GetPdaRequest>, I>>(object: I): GetPdaRequest {
     const message = createBaseGetPdaRequest();
     message.key = object.key ?? "";
+    return message;
+  },
+};
+
+function createBaseGetPositionPdaRequest(): GetPositionPdaRequest {
+  return { userId: "", orderId: "" };
+}
+
+export const GetPositionPdaRequest: MessageFns<GetPositionPdaRequest> = {
+  encode(message: GetPositionPdaRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(18).string(message.orderId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetPositionPdaRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetPositionPdaRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetPositionPdaRequest {
+    return {
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+    };
+  },
+
+  toJSON(message: GetPositionPdaRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetPositionPdaRequest>, I>>(base?: I): GetPositionPdaRequest {
+    return GetPositionPdaRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetPositionPdaRequest>, I>>(object: I): GetPositionPdaRequest {
+    const message = createBaseGetPositionPdaRequest();
+    message.userId = object.userId ?? "";
+    message.orderId = object.orderId ?? "";
     return message;
   },
 };
@@ -1983,13 +2071,13 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
 };
 
 function createBaseRevokeRequest(): RevokeRequest {
-  return { accounts: [], memo: undefined };
+  return { userId: "", memo: undefined };
 }
 
 export const RevokeRequest: MessageFns<RevokeRequest> = {
   encode(message: RevokeRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    for (const v of message.accounts) {
-      writer.uint32(10).string(v!);
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
     }
     if (message.memo !== undefined) {
       writer.uint32(18).string(message.memo);
@@ -2009,7 +2097,7 @@ export const RevokeRequest: MessageFns<RevokeRequest> = {
             break;
           }
 
-          message.accounts.push(reader.string());
+          message.userId = reader.string();
           continue;
         }
         case 2: {
@@ -2031,15 +2119,19 @@ export const RevokeRequest: MessageFns<RevokeRequest> = {
 
   fromJSON(object: any): RevokeRequest {
     return {
-      accounts: globalThis.Array.isArray(object?.accounts) ? object.accounts.map((e: any) => globalThis.String(e)) : [],
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
       memo: isSet(object.memo) ? globalThis.String(object.memo) : undefined,
     };
   },
 
   toJSON(message: RevokeRequest): unknown {
     const obj: any = {};
-    if (message.accounts?.length) {
-      obj.accounts = message.accounts;
+    if (message.userId !== "") {
+      obj.userId = message.userId;
     }
     if (message.memo !== undefined) {
       obj.memo = message.memo;
@@ -2052,7 +2144,7 @@ export const RevokeRequest: MessageFns<RevokeRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<RevokeRequest>, I>>(object: I): RevokeRequest {
     const message = createBaseRevokeRequest();
-    message.accounts = object.accounts?.map((e) => e) || [];
+    message.userId = object.userId ?? "";
     message.memo = object.memo ?? undefined;
     return message;
   },
@@ -2669,6 +2761,38 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
+    getUserPda: {
+      name: "GetUserPda",
+      requestType: GetPdaRequest as typeof GetPdaRequest,
+      requestStream: false,
+      responseType: PdaResponse as typeof PdaResponse,
+      responseStream: false,
+      options: {},
+    },
+    getWithdrawRequestPda: {
+      name: "GetWithdrawRequestPda",
+      requestType: GetPdaRequest as typeof GetPdaRequest,
+      requestStream: false,
+      responseType: PdaResponse as typeof PdaResponse,
+      responseStream: false,
+      options: {},
+    },
+    getUpdateCliffPeriodRequestPda: {
+      name: "GetUpdateCliffPeriodRequestPda",
+      requestType: GetPdaRequest as typeof GetPdaRequest,
+      requestStream: false,
+      responseType: PdaResponse as typeof PdaResponse,
+      responseStream: false,
+      options: {},
+    },
+    getPositionPda: {
+      name: "GetPositionPda",
+      requestType: GetPositionPdaRequest as typeof GetPositionPdaRequest,
+      requestStream: false,
+      responseType: PdaResponse as typeof PdaResponse,
+      responseStream: false,
+      options: {},
+    },
     readOrderPda: {
       name: "ReadOrderPda",
       requestType: GetPdaRequest as typeof GetPdaRequest,
@@ -2804,6 +2928,19 @@ export const OrbitDefinition = {
 export interface OrbitServiceImplementation<CallContextExt = {}> {
   getVaultPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
   getOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+  getUserPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
+  getWithdrawRequestPda(
+    request: GetPdaRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<PdaResponse>>;
+  getUpdateCliffPeriodRequestPda(
+    request: GetPdaRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<PdaResponse>>;
+  getPositionPda(
+    request: GetPositionPdaRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<PdaResponse>>;
   readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
   collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -2838,6 +2975,19 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
 export interface OrbitClient<CallOptionsExt = {}> {
   getVaultPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
   getOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+  getUserPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
+  getWithdrawRequestPda(
+    request: DeepPartial<GetPdaRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<PdaResponse>;
+  getUpdateCliffPeriodRequestPda(
+    request: DeepPartial<GetPdaRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<PdaResponse>;
+  getPositionPda(
+    request: DeepPartial<GetPositionPdaRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<PdaResponse>;
   readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
   collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
