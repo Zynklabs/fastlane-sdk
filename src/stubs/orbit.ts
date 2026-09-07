@@ -205,6 +205,7 @@ export interface RegisterUserRequest {
   /** u32 cap. Omit → u32::MAX (uncapped). */
   maxDeposit?: number | undefined;
   memo?: string | undefined;
+  partnerIds: number[];
 }
 
 export interface RevokeRequest {
@@ -1915,7 +1916,15 @@ export const VerifyUserRequest: MessageFns<VerifyUserRequest> = {
 };
 
 function createBaseRegisterUserRequest(): RegisterUserRequest {
-  return { userId: "", userType: 0, wallets: [], cliffPeriod: undefined, maxDeposit: undefined, memo: undefined };
+  return {
+    userId: "",
+    userType: 0,
+    wallets: [],
+    cliffPeriod: undefined,
+    maxDeposit: undefined,
+    memo: undefined,
+    partnerIds: [],
+  };
 }
 
 export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
@@ -1938,6 +1947,11 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     if (message.memo !== undefined) {
       writer.uint32(50).string(message.memo);
     }
+    writer.uint32(58).fork();
+    for (const v of message.partnerIds) {
+      writer.uint32(v);
+    }
+    writer.join();
     return writer;
   },
 
@@ -1996,6 +2010,24 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
           message.memo = reader.string();
           continue;
         }
+        case 7: {
+          if (tag === 56) {
+            message.partnerIds.push(reader.uint32());
+
+            continue;
+          }
+
+          if (tag === 58) {
+            const end2 = reader.uint32() + reader.pos;
+            while (reader.pos < end2) {
+              message.partnerIds.push(reader.uint32());
+            }
+
+            continue;
+          }
+
+          break;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2029,6 +2061,11 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
         ? globalThis.Number(object.max_deposit)
         : undefined,
       memo: isSet(object.memo) ? globalThis.String(object.memo) : undefined,
+      partnerIds: globalThis.Array.isArray(object?.partnerIds)
+        ? object.partnerIds.map((e: any) => globalThis.Number(e))
+        : globalThis.Array.isArray(object?.partner_ids)
+        ? object.partner_ids.map((e: any) => globalThis.Number(e))
+        : [],
     };
   },
 
@@ -2052,6 +2089,9 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     if (message.memo !== undefined) {
       obj.memo = message.memo;
     }
+    if (message.partnerIds?.length) {
+      obj.partnerIds = message.partnerIds.map((e) => Math.round(e));
+    }
     return obj;
   },
 
@@ -2066,6 +2106,7 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     message.cliffPeriod = object.cliffPeriod ?? undefined;
     message.maxDeposit = object.maxDeposit ?? undefined;
     message.memo = object.memo ?? undefined;
+    message.partnerIds = object.partnerIds?.map((e) => e) || [];
     return message;
   },
 };

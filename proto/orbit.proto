@@ -165,6 +165,7 @@ message RegisterUserRequest {
   // u32 cap. Omit → u32::MAX (uncapped).
   optional uint32 max_deposit  = 5;
   optional string memo         = 6;
+  repeated uint32 partner_ids  = 7;
 }
 
 message RevokeRequest {

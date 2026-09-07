@@ -136,6 +136,7 @@ interface RegisterUserRequest {
     /** u32 cap. Omit → u32::MAX (uncapped). */
     maxDeposit?: number | undefined;
     memo?: string | undefined;
+    partnerIds: number[];
 }
 declare const RegisterUserRequest: MessageFns<RegisterUserRequest>;
 interface RevokeRequest {
