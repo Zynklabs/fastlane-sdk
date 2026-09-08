@@ -13,6 +13,8 @@ service Orbit {
   rpc GetPositionPda (GetPositionPdaRequest) returns (PdaResponse);
 
   rpc ReadOrderPda (GetPdaRequest) returns (OrderData);
+  rpc ReadWithdrawRequestPda (GetPdaRequest) returns (WithdrawRequestData);
+  rpc ReadUpdateCliffPeriodRequestPda (GetPdaRequest) returns (UpdateCliffPeriodRequestData);
 
   rpc Collect (CollectRequest) returns (TxResponse);
   rpc Disburse (DisburseRequest) returns (TxResponse);
@@ -53,6 +55,17 @@ message OrderData {
   string order_id = 1;
   string amount = 2;
   string address = 3;
+}
+
+message WithdrawRequestData {
+  string user_id = 1;
+  string amount = 2;
+  string destination = 3;
+}
+
+message UpdateCliffPeriodRequestData {
+  string user_id = 1;
+  string cliff_period = 2;
 }
 
 message CollectRequest {
