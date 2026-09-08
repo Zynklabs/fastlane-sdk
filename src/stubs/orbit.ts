@@ -104,6 +104,17 @@ export interface OrderData {
   address: string;
 }
 
+export interface WithdrawRequestData {
+  userId: string;
+  amount: string;
+  destination: string;
+}
+
+export interface UpdateCliffPeriodRequestData {
+  userId: string;
+  cliffPeriod: string;
+}
+
 export interface CollectRequest {
   orderId: string;
   vaultId: string;
@@ -580,6 +591,186 @@ export const OrderData: MessageFns<OrderData> = {
     message.orderId = object.orderId ?? "";
     message.amount = object.amount ?? "";
     message.address = object.address ?? "";
+    return message;
+  },
+};
+
+function createBaseWithdrawRequestData(): WithdrawRequestData {
+  return { userId: "", amount: "", destination: "" };
+}
+
+export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
+  encode(message: WithdrawRequestData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.amount !== "") {
+      writer.uint32(18).string(message.amount);
+    }
+    if (message.destination !== "") {
+      writer.uint32(26).string(message.destination);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WithdrawRequestData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWithdrawRequestData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.destination = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WithdrawRequestData {
+    return {
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      destination: isSet(object.destination) ? globalThis.String(object.destination) : "",
+    };
+  },
+
+  toJSON(message: WithdrawRequestData): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.destination !== "") {
+      obj.destination = message.destination;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<WithdrawRequestData>, I>>(base?: I): WithdrawRequestData {
+    return WithdrawRequestData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<WithdrawRequestData>, I>>(object: I): WithdrawRequestData {
+    const message = createBaseWithdrawRequestData();
+    message.userId = object.userId ?? "";
+    message.amount = object.amount ?? "";
+    message.destination = object.destination ?? "";
+    return message;
+  },
+};
+
+function createBaseUpdateCliffPeriodRequestData(): UpdateCliffPeriodRequestData {
+  return { userId: "", cliffPeriod: "" };
+}
+
+export const UpdateCliffPeriodRequestData: MessageFns<UpdateCliffPeriodRequestData> = {
+  encode(message: UpdateCliffPeriodRequestData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.cliffPeriod !== "") {
+      writer.uint32(18).string(message.cliffPeriod);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateCliffPeriodRequestData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateCliffPeriodRequestData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.cliffPeriod = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateCliffPeriodRequestData {
+    return {
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      cliffPeriod: isSet(object.cliffPeriod)
+        ? globalThis.String(object.cliffPeriod)
+        : isSet(object.cliff_period)
+        ? globalThis.String(object.cliff_period)
+        : "",
+    };
+  },
+
+  toJSON(message: UpdateCliffPeriodRequestData): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.cliffPeriod !== "") {
+      obj.cliffPeriod = message.cliffPeriod;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateCliffPeriodRequestData>, I>>(base?: I): UpdateCliffPeriodRequestData {
+    return UpdateCliffPeriodRequestData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateCliffPeriodRequestData>, I>>(object: I): UpdateCliffPeriodRequestData {
+    const message = createBaseUpdateCliffPeriodRequestData();
+    message.userId = object.userId ?? "";
+    message.cliffPeriod = object.cliffPeriod ?? "";
     return message;
   },
 };
@@ -2842,6 +3033,22 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
+    readWithdrawRequestPda: {
+      name: "ReadWithdrawRequestPda",
+      requestType: GetPdaRequest as typeof GetPdaRequest,
+      requestStream: false,
+      responseType: WithdrawRequestData as typeof WithdrawRequestData,
+      responseStream: false,
+      options: {},
+    },
+    readUpdateCliffPeriodRequestPda: {
+      name: "ReadUpdateCliffPeriodRequestPda",
+      requestType: GetPdaRequest as typeof GetPdaRequest,
+      requestStream: false,
+      responseType: UpdateCliffPeriodRequestData as typeof UpdateCliffPeriodRequestData,
+      responseStream: false,
+      options: {},
+    },
     collect: {
       name: "Collect",
       requestType: CollectRequest as typeof CollectRequest,
@@ -2983,6 +3190,14 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<PdaResponse>>;
   readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
+  readWithdrawRequestPda(
+    request: GetPdaRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<WithdrawRequestData>>;
+  readUpdateCliffPeriodRequestPda(
+    request: GetPdaRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<UpdateCliffPeriodRequestData>>;
   collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -3030,6 +3245,14 @@ export interface OrbitClient<CallOptionsExt = {}> {
     options?: CallOptions & CallOptionsExt,
   ): Promise<PdaResponse>;
   readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
+  readWithdrawRequestPda(
+    request: DeepPartial<GetPdaRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<WithdrawRequestData>;
+  readUpdateCliffPeriodRequestPda(
+    request: DeepPartial<GetPdaRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<UpdateCliffPeriodRequestData>;
   collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;

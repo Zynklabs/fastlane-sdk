@@ -39,6 +39,17 @@ interface OrderData {
     address: string;
 }
 declare const OrderData: MessageFns<OrderData>;
+interface WithdrawRequestData {
+    userId: string;
+    amount: string;
+    destination: string;
+}
+declare const WithdrawRequestData: MessageFns<WithdrawRequestData>;
+interface UpdateCliffPeriodRequestData {
+    userId: string;
+    cliffPeriod: string;
+}
+declare const UpdateCliffPeriodRequestData: MessageFns<UpdateCliffPeriodRequestData>;
 interface CollectRequest {
     orderId: string;
     vaultId: string;
@@ -246,6 +257,22 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly readWithdrawRequestPda: {
+            readonly name: "ReadWithdrawRequestPda";
+            readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof WithdrawRequestData;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly readUpdateCliffPeriodRequestPda: {
+            readonly name: "ReadUpdateCliffPeriodRequestPda";
+            readonly requestType: typeof GetPdaRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof UpdateCliffPeriodRequestData;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly collect: {
             readonly name: "Collect";
             readonly requestType: typeof CollectRequest;
@@ -377,6 +404,8 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
     getUpdateCliffPeriodRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
     getPositionPda(request: GetPositionPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PdaResponse>>;
     readOrderPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderData>>;
+    readWithdrawRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<WithdrawRequestData>>;
+    readUpdateCliffPeriodRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<UpdateCliffPeriodRequestData>>;
     collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -402,6 +431,8 @@ interface OrbitClient<CallOptionsExt = {}> {
     getUpdateCliffPeriodRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
     getPositionPda(request: DeepPartial<GetPositionPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PdaResponse>;
     readOrderPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderData>;
+    readWithdrawRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<WithdrawRequestData>;
+    readUpdateCliffPeriodRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<UpdateCliffPeriodRequestData>;
     collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
@@ -438,4 +469,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { ApproveWithdrawRequest, BorrowRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { ApproveWithdrawRequest, BorrowRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
