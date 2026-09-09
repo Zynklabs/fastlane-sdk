@@ -141,7 +141,8 @@ export interface MetaArg {
 
 export interface PositionArgs {
   userId: string;
-  amount: string;
+  /** Required on borrow; omit on repay. */
+  amount?: string | undefined;
   /** NCW only: vault id whose PDA holds the token delegate approval. */
   vaultId?:
     | string
@@ -163,7 +164,7 @@ export interface BorrowRequest {
   partnerId: string;
   beneficiary: string;
   amount: string;
-  positions: PositionArgs[];
+  positions: Array<PositionArgs & { amount: string }>;
   token?: Token | undefined;
   zovId?: string | undefined;
   orderId?: string | undefined;
@@ -1184,7 +1185,7 @@ export const MetaArg: MessageFns<MetaArg> = {
 };
 
 function createBasePositionArgs(): PositionArgs {
-  return { userId: "", amount: "", vaultId: undefined, address: undefined };
+  return { userId: "", amount: undefined, vaultId: undefined, address: undefined };
 }
 
 export const PositionArgs: MessageFns<PositionArgs> = {
@@ -1192,7 +1193,7 @@ export const PositionArgs: MessageFns<PositionArgs> = {
     if (message.userId !== "") {
       writer.uint32(10).string(message.userId);
     }
-    if (message.amount !== "") {
+    if (message.amount !== undefined) {
       writer.uint32(18).string(message.amount);
     }
     if (message.vaultId !== undefined) {
@@ -1259,7 +1260,7 @@ export const PositionArgs: MessageFns<PositionArgs> = {
         : isSet(object.user_id)
         ? globalThis.String(object.user_id)
         : "",
-      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : undefined,
       vaultId: isSet(object.vaultId)
         ? globalThis.String(object.vaultId)
         : isSet(object.vault_id)
@@ -1274,7 +1275,7 @@ export const PositionArgs: MessageFns<PositionArgs> = {
     if (message.userId !== "") {
       obj.userId = message.userId;
     }
-    if (message.amount !== "") {
+    if (message.amount !== undefined) {
       obj.amount = message.amount;
     }
     if (message.vaultId !== undefined) {
@@ -1292,7 +1293,7 @@ export const PositionArgs: MessageFns<PositionArgs> = {
   fromPartial<I extends Exact<DeepPartial<PositionArgs>, I>>(object: I): PositionArgs {
     const message = createBasePositionArgs();
     message.userId = object.userId ?? "";
-    message.amount = object.amount ?? "";
+    message.amount = object.amount ?? undefined;
     message.vaultId = object.vaultId ?? undefined;
     message.address = object.address ?? undefined;
     return message;
@@ -1521,7 +1522,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
             break;
           }
 
-          message.positions.push(PositionArgs.decode(reader, reader.uint32()));
+          message.positions.push(PositionArgs.decode(reader, reader.uint32()) as PositionArgs & { amount: string });
           continue;
         }
         case 6: {
@@ -1580,7 +1581,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
       beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       positions: globalThis.Array.isArray(object?.positions)
-        ? object.positions.map((e: any) => PositionArgs.fromJSON(e))
+        ? object.positions.map((e: any) => PositionArgs.fromJSON(e) as PositionArgs & { amount: string })
         : [],
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
       zovId: isSet(object.zovId)
@@ -1640,7 +1641,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
     message.partnerId = object.partnerId ?? "";
     message.beneficiary = object.beneficiary ?? "";
     message.amount = object.amount ?? "";
-    message.positions = object.positions?.map((e) => PositionArgs.fromPartial(e)) || [];
+    message.positions = object.positions?.map((e) => PositionArgs.fromPartial(e) as PositionArgs & { amount: string }) || [];
     message.token = object.token ?? undefined;
     message.zovId = object.zovId ?? undefined;
     message.orderId = object.orderId ?? undefined;

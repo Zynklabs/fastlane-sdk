@@ -76,7 +76,8 @@ interface MetaArg {
 declare const MetaArg: MessageFns<MetaArg>;
 interface PositionArgs {
     userId: string;
-    amount: string;
+    /** Required on borrow; omit on repay. */
+    amount?: string | undefined;
     /** NCW only: vault id whose PDA holds the token delegate approval. */
     vaultId?: string | undefined;
     /** NCW only: wallet holding the source tokens. Defaults to the user PDA. */
@@ -96,7 +97,9 @@ interface BorrowRequest {
     partnerId: string;
     beneficiary: string;
     amount: string;
-    positions: PositionArgs[];
+    positions: Array<PositionArgs & {
+        amount: string;
+    }>;
     token?: Token | undefined;
     zovId?: string | undefined;
     orderId?: string | undefined;

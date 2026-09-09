@@ -94,7 +94,8 @@ message MetaArg {
 
 message PositionArgs {
   string user_id = 1;
-  string amount = 2;
+  // Required on borrow; omit on repay.
+  optional string amount = 2;
   // NCW only: vault id whose PDA holds the token delegate approval.
   optional string vault_id = 3;
   // NCW only: wallet holding the source tokens. Defaults to the user PDA.
