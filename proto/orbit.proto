@@ -84,7 +84,6 @@ message DisburseRequest {
   string amount = 4;
   optional string order_id = 5;
   optional base.Token token = 6;
-  optional string vault_id = 7;
 }
 
 message MetaArg {
@@ -94,7 +93,7 @@ message MetaArg {
 
 message PositionArgs {
   string user_id = 1;
-  // Required on borrow; omit on repay.
+  // Required for borrow. Unused on repay (settlement is proportional).
   optional string amount = 2;
   // NCW only: vault id whose PDA holds the token delegate approval.
   optional string vault_id = 3;

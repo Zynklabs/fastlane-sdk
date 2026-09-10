@@ -131,7 +131,6 @@ export interface DisburseRequest {
   amount: string;
   orderId?: string | undefined;
   token?: Token | undefined;
-  vaultId?: string | undefined;
 }
 
 export interface MetaArg {
@@ -141,8 +140,10 @@ export interface MetaArg {
 
 export interface PositionArgs {
   userId: string;
-  /** Required on borrow; omit on repay. */
-  amount?: string | undefined;
+  /** Required for borrow. Unused on repay (settlement is proportional). */
+  amount?:
+    | string
+    | undefined;
   /** NCW only: vault id whose PDA holds the token delegate approval. */
   vaultId?:
     | string
@@ -164,7 +165,7 @@ export interface BorrowRequest {
   partnerId: string;
   beneficiary: string;
   amount: string;
-  positions: Array<PositionArgs & { amount: string }>;
+  positions: PositionArgs[];
   token?: Token | undefined;
   zovId?: string | undefined;
   orderId?: string | undefined;
@@ -929,15 +930,7 @@ export const CollectRequest: MessageFns<CollectRequest> = {
 };
 
 function createBaseDisburseRequest(): DisburseRequest {
-  return {
-    requestId: "",
-    userId: "",
-    address: "",
-    amount: "",
-    orderId: undefined,
-    token: undefined,
-    vaultId: undefined,
-  };
+  return { requestId: "", userId: "", address: "", amount: "", orderId: undefined, token: undefined };
 }
 
 export const DisburseRequest: MessageFns<DisburseRequest> = {
@@ -959,9 +952,6 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
     }
     if (message.token !== undefined) {
       writer.uint32(48).int32(message.token);
-    }
-    if (message.vaultId !== undefined) {
-      writer.uint32(58).string(message.vaultId);
     }
     return writer;
   },
@@ -1021,14 +1011,6 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
           message.token = reader.int32() as any;
           continue;
         }
-        case 7: {
-          if (tag !== 58) {
-            break;
-          }
-
-          message.vaultId = reader.string();
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1058,11 +1040,6 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
         ? globalThis.String(object.order_id)
         : undefined,
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
-      vaultId: isSet(object.vaultId)
-        ? globalThis.String(object.vaultId)
-        : isSet(object.vault_id)
-        ? globalThis.String(object.vault_id)
-        : undefined,
     };
   },
 
@@ -1086,9 +1063,6 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
     if (message.token !== undefined) {
       obj.token = tokenToJSON(message.token);
     }
-    if (message.vaultId !== undefined) {
-      obj.vaultId = message.vaultId;
-    }
     return obj;
   },
 
@@ -1103,7 +1077,6 @@ export const DisburseRequest: MessageFns<DisburseRequest> = {
     message.amount = object.amount ?? "";
     message.orderId = object.orderId ?? undefined;
     message.token = object.token ?? undefined;
-    message.vaultId = object.vaultId ?? undefined;
     return message;
   },
 };
@@ -1522,7 +1495,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
             break;
           }
 
-          message.positions.push(PositionArgs.decode(reader, reader.uint32()) as PositionArgs & { amount: string });
+          message.positions.push(PositionArgs.decode(reader, reader.uint32()));
           continue;
         }
         case 6: {
@@ -1581,7 +1554,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
       beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       positions: globalThis.Array.isArray(object?.positions)
-        ? object.positions.map((e: any) => PositionArgs.fromJSON(e) as PositionArgs & { amount: string })
+        ? object.positions.map((e: any) => PositionArgs.fromJSON(e))
         : [],
       token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
       zovId: isSet(object.zovId)
@@ -1641,7 +1614,7 @@ export const BorrowRequest: MessageFns<BorrowRequest> = {
     message.partnerId = object.partnerId ?? "";
     message.beneficiary = object.beneficiary ?? "";
     message.amount = object.amount ?? "";
-    message.positions = object.positions?.map((e) => PositionArgs.fromPartial(e) as PositionArgs & { amount: string }) || [];
+    message.positions = object.positions?.map((e) => PositionArgs.fromPartial(e)) || [];
     message.token = object.token ?? undefined;
     message.zovId = object.zovId ?? undefined;
     message.orderId = object.orderId ?? undefined;

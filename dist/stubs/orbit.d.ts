@@ -66,7 +66,6 @@ interface DisburseRequest {
     amount: string;
     orderId?: string | undefined;
     token?: Token | undefined;
-    vaultId?: string | undefined;
 }
 declare const DisburseRequest: MessageFns<DisburseRequest>;
 interface MetaArg {
@@ -76,7 +75,7 @@ interface MetaArg {
 declare const MetaArg: MessageFns<MetaArg>;
 interface PositionArgs {
     userId: string;
-    /** Required on borrow; omit on repay. */
+    /** Required for borrow. Unused on repay (settlement is proportional). */
     amount?: string | undefined;
     /** NCW only: vault id whose PDA holds the token delegate approval. */
     vaultId?: string | undefined;
@@ -97,9 +96,7 @@ interface BorrowRequest {
     partnerId: string;
     beneficiary: string;
     amount: string;
-    positions: Array<PositionArgs & {
-        amount: string;
-    }>;
+    positions: PositionArgs[];
     token?: Token | undefined;
     zovId?: string | undefined;
     orderId?: string | undefined;
