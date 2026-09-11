@@ -115,6 +115,13 @@ export interface UpdateCliffPeriodRequestData {
   cliffPeriod: string;
 }
 
+export interface PositionData {
+  userId: string;
+  orderId: string;
+  pda: string;
+  data: string;
+}
+
 export interface CollectRequest {
   orderId: string;
   vaultId: string;
@@ -773,6 +780,122 @@ export const UpdateCliffPeriodRequestData: MessageFns<UpdateCliffPeriodRequestDa
     const message = createBaseUpdateCliffPeriodRequestData();
     message.userId = object.userId ?? "";
     message.cliffPeriod = object.cliffPeriod ?? "";
+    return message;
+  },
+};
+
+function createBasePositionData(): PositionData {
+  return { userId: "", orderId: "", pda: "", data: "" };
+}
+
+export const PositionData: MessageFns<PositionData> = {
+  encode(message: PositionData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(18).string(message.orderId);
+    }
+    if (message.pda !== "") {
+      writer.uint32(26).string(message.pda);
+    }
+    if (message.data !== "") {
+      writer.uint32(34).string(message.data);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PositionData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.pda = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.data = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PositionData {
+    return {
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : "",
+      pda: isSet(object.pda) ? globalThis.String(object.pda) : "",
+      data: isSet(object.data) ? globalThis.String(object.data) : "",
+    };
+  },
+
+  toJSON(message: PositionData): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.pda !== "") {
+      obj.pda = message.pda;
+    }
+    if (message.data !== "") {
+      obj.data = message.data;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PositionData>, I>>(base?: I): PositionData {
+    return PositionData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PositionData>, I>>(object: I): PositionData {
+    const message = createBasePositionData();
+    message.userId = object.userId ?? "";
+    message.orderId = object.orderId ?? "";
+    message.pda = object.pda ?? "";
+    message.data = object.data ?? "";
     return message;
   },
 };
@@ -3023,6 +3146,14 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
+    readPositionPda: {
+      name: "ReadPositionPda",
+      requestType: GetPositionPdaRequest as typeof GetPositionPdaRequest,
+      requestStream: false,
+      responseType: PositionData as typeof PositionData,
+      responseStream: false,
+      options: {},
+    },
     collect: {
       name: "Collect",
       requestType: CollectRequest as typeof CollectRequest,
@@ -3172,6 +3303,10 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
     request: GetPdaRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<UpdateCliffPeriodRequestData>>;
+  readPositionPda(
+    request: GetPositionPdaRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<PositionData>>;
   collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -3227,6 +3362,10 @@ export interface OrbitClient<CallOptionsExt = {}> {
     request: DeepPartial<GetPdaRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<UpdateCliffPeriodRequestData>;
+  readPositionPda(
+    request: DeepPartial<GetPositionPdaRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<PositionData>;
   collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
