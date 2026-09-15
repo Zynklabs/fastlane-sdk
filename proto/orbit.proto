@@ -69,11 +69,17 @@ message UpdateCliffPeriodRequestData {
   string cliff_period = 2;
 }
 
+message PositionAccountData {
+  string status = 1;
+  string amount_borrowed = 2;
+  string amount_repaid = 3;
+}
+
 message PositionData {
   string user_id = 1;
   string order_id = 2;
   string pda = 3;
-  string data = 4;
+  PositionAccountData data = 4;
 }
 
 message CollectRequest {

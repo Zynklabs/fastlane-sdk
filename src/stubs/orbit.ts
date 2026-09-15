@@ -115,11 +115,17 @@ export interface UpdateCliffPeriodRequestData {
   cliffPeriod: string;
 }
 
+export interface PositionAccountData {
+  status: string;
+  amountBorrowed: string;
+  amountRepaid: string;
+}
+
 export interface PositionData {
   userId: string;
   orderId: string;
   pda: string;
-  data: string;
+  data?: PositionAccountData | undefined;
 }
 
 export interface CollectRequest {
@@ -784,8 +790,108 @@ export const UpdateCliffPeriodRequestData: MessageFns<UpdateCliffPeriodRequestDa
   },
 };
 
+function createBasePositionAccountData(): PositionAccountData {
+  return { status: "", amountBorrowed: "", amountRepaid: "" };
+}
+
+export const PositionAccountData: MessageFns<PositionAccountData> = {
+  encode(message: PositionAccountData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== "") {
+      writer.uint32(10).string(message.status);
+    }
+    if (message.amountBorrowed !== "") {
+      writer.uint32(18).string(message.amountBorrowed);
+    }
+    if (message.amountRepaid !== "") {
+      writer.uint32(26).string(message.amountRepaid);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): PositionAccountData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionAccountData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amountBorrowed = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.amountRepaid = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PositionAccountData {
+    return {
+      status: isSet(object.status) ? globalThis.String(object.status) : "",
+      amountBorrowed: isSet(object.amountBorrowed)
+        ? globalThis.String(object.amountBorrowed)
+        : isSet(object.amount_borrowed)
+        ? globalThis.String(object.amount_borrowed)
+        : "",
+      amountRepaid: isSet(object.amountRepaid)
+        ? globalThis.String(object.amountRepaid)
+        : isSet(object.amount_repaid)
+        ? globalThis.String(object.amount_repaid)
+        : "",
+    };
+  },
+
+  toJSON(message: PositionAccountData): unknown {
+    const obj: any = {};
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.amountBorrowed !== "") {
+      obj.amountBorrowed = message.amountBorrowed;
+    }
+    if (message.amountRepaid !== "") {
+      obj.amountRepaid = message.amountRepaid;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<PositionAccountData>, I>>(base?: I): PositionAccountData {
+    return PositionAccountData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<PositionAccountData>, I>>(object: I): PositionAccountData {
+    const message = createBasePositionAccountData();
+    message.status = object.status ?? "";
+    message.amountBorrowed = object.amountBorrowed ?? "";
+    message.amountRepaid = object.amountRepaid ?? "";
+    return message;
+  },
+};
+
 function createBasePositionData(): PositionData {
-  return { userId: "", orderId: "", pda: "", data: "" };
+  return { userId: "", orderId: "", pda: "", data: undefined };
 }
 
 export const PositionData: MessageFns<PositionData> = {
@@ -799,8 +905,8 @@ export const PositionData: MessageFns<PositionData> = {
     if (message.pda !== "") {
       writer.uint32(26).string(message.pda);
     }
-    if (message.data !== "") {
-      writer.uint32(34).string(message.data);
+    if (message.data !== undefined) {
+      PositionAccountData.encode(message.data, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -841,7 +947,7 @@ export const PositionData: MessageFns<PositionData> = {
             break;
           }
 
-          message.data = reader.string();
+          message.data = PositionAccountData.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -866,7 +972,7 @@ export const PositionData: MessageFns<PositionData> = {
         ? globalThis.String(object.order_id)
         : "",
       pda: isSet(object.pda) ? globalThis.String(object.pda) : "",
-      data: isSet(object.data) ? globalThis.String(object.data) : "",
+      data: isSet(object.data) ? PositionAccountData.fromJSON(object.data) : undefined,
     };
   },
 
@@ -881,8 +987,8 @@ export const PositionData: MessageFns<PositionData> = {
     if (message.pda !== "") {
       obj.pda = message.pda;
     }
-    if (message.data !== "") {
-      obj.data = message.data;
+    if (message.data !== undefined) {
+      obj.data = PositionAccountData.toJSON(message.data);
     }
     return obj;
   },
@@ -895,7 +1001,9 @@ export const PositionData: MessageFns<PositionData> = {
     message.userId = object.userId ?? "";
     message.orderId = object.orderId ?? "";
     message.pda = object.pda ?? "";
-    message.data = object.data ?? "";
+    message.data = (object.data !== undefined && object.data !== null)
+      ? PositionAccountData.fromPartial(object.data)
+      : undefined;
     return message;
   },
 };

@@ -80,8 +80,11 @@ export type {
 
 export type {
   GetPdaRequest,
+  GetPositionPdaRequest,
   PdaResponse,
   OrderData,
+  PositionAccountData,
+  PositionData,
   CollectRequest,
   DisburseRequest,
   LPState,
