@@ -184,7 +184,7 @@ message RegisterUserRequest {
   // Unix timestamp string. Omit → i64::MAX (no lock).
   optional string cliff_period = 4;
   // u32 cap. Omit → u32::MAX (uncapped).
-  optional uint32 max_deposit  = 5;
+  optional uint64 max_deposit  = 5;
   optional string memo         = 6;
   repeated uint32 partner_ids  = 7;
 }
@@ -211,7 +211,7 @@ message UpdateWalletsRequest {
 
 message UpdateMaxPrincipalRequest {
   string  user_id     = 1;
-  uint32  max_deposit = 2;
+  uint64  max_deposit = 2;
   optional string memo = 3;
 }
 

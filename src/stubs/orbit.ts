@@ -2230,7 +2230,7 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
       writer.uint32(34).string(message.cliffPeriod);
     }
     if (message.maxDeposit !== undefined) {
-      writer.uint32(40).uint32(message.maxDeposit);
+      writer.uint32(40).uint64(message.maxDeposit);
     }
     if (message.memo !== undefined) {
       writer.uint32(50).string(message.memo);
@@ -2287,7 +2287,7 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
             break;
           }
 
-          message.maxDeposit = reader.uint32();
+          message.maxDeposit = longToNumber(reader.uint64());
           continue;
         }
         case 6: {
@@ -2703,7 +2703,7 @@ export const UpdateMaxPrincipalRequest: MessageFns<UpdateMaxPrincipalRequest> = 
       writer.uint32(10).string(message.userId);
     }
     if (message.maxDeposit !== 0) {
-      writer.uint32(16).uint32(message.maxDeposit);
+      writer.uint32(16).uint64(message.maxDeposit);
     }
     if (message.memo !== undefined) {
       writer.uint32(26).string(message.memo);
@@ -2731,7 +2731,7 @@ export const UpdateMaxPrincipalRequest: MessageFns<UpdateMaxPrincipalRequest> = 
             break;
           }
 
-          message.maxDeposit = reader.uint32();
+          message.maxDeposit = longToNumber(reader.uint64());
           continue;
         }
         case 3: {
@@ -3407,6 +3407,17 @@ export type DeepPartial<T> = T extends Builtin ? T
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function longToNumber(int64: { toString(): string }): number {
+  const num = globalThis.Number(int64.toString());
+  if (num > globalThis.Number.MAX_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  if (num < globalThis.Number.MIN_SAFE_INTEGER) {
+    throw new globalThis.Error("Value is smaller than Number.MIN_SAFE_INTEGER");
+  }
+  return num;
+}
 
 function isSet(value: any): boolean {
   return value !== null && value !== undefined;
