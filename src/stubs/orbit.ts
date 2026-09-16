@@ -200,6 +200,7 @@ export interface TxResponse {
   orderId: string;
   signature: string;
   position: number;
+  orderTracker: string;
 }
 
 export interface LPState {
@@ -2056,7 +2057,7 @@ export const RepayRequest: MessageFns<RepayRequest> = {
 };
 
 function createBaseTxResponse(): TxResponse {
-  return { orderId: "", signature: "", position: 0 };
+  return { orderId: "", signature: "", position: 0, orderTracker: "" };
 }
 
 export const TxResponse: MessageFns<TxResponse> = {
@@ -2069,6 +2070,9 @@ export const TxResponse: MessageFns<TxResponse> = {
     }
     if (message.position !== 0) {
       writer.uint32(24).uint32(message.position);
+    }
+    if (message.orderTracker !== "") {
+      writer.uint32(34).string(message.orderTracker);
     }
     return writer;
   },
@@ -2104,6 +2108,14 @@ export const TxResponse: MessageFns<TxResponse> = {
           message.position = reader.uint32();
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.orderTracker = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2122,6 +2134,11 @@ export const TxResponse: MessageFns<TxResponse> = {
         : "",
       signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
       position: isSet(object.position) ? globalThis.Number(object.position) : 0,
+      orderTracker: isSet(object.orderTracker)
+        ? globalThis.String(object.orderTracker)
+        : isSet(object.order_tracker)
+        ? globalThis.String(object.order_tracker)
+        : "",
     };
   },
 
@@ -2136,6 +2153,9 @@ export const TxResponse: MessageFns<TxResponse> = {
     if (message.position !== 0) {
       obj.position = Math.round(message.position);
     }
+    if (message.orderTracker !== "") {
+      obj.orderTracker = message.orderTracker;
+    }
     return obj;
   },
 
@@ -2147,6 +2167,7 @@ export const TxResponse: MessageFns<TxResponse> = {
     message.orderId = object.orderId ?? "";
     message.signature = object.signature ?? "";
     message.position = object.position ?? 0;
+    message.orderTracker = object.orderTracker ?? "";
     return message;
   },
 };

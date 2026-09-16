@@ -131,6 +131,7 @@ interface TxResponse {
     orderId: string;
     signature: string;
     position: number;
+    orderTracker: string;
 }
 declare const TxResponse: MessageFns<TxResponse>;
 interface LPState {

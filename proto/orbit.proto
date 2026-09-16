@@ -150,6 +150,7 @@ message TxResponse {
   string order_id = 1;
   string signature = 2;
   uint32 position = 3;
+  string order_tracker = 4;
 }
 
 message LPState {
