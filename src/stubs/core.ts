@@ -91,6 +91,18 @@ export interface ReplenishRequest {
   meta: MetaArg[];
 }
 
+export interface CloseOrdersRequest {
+  requestId: string;
+  orderTrackers: string[];
+  meta: MetaArg[];
+}
+
+export interface CloseOrdersResponse {
+  requestId: string;
+  orderTrackers: string[];
+  txPda: string;
+}
+
 export interface TransferRequest {
   requestId: string;
   from: string;
@@ -1484,6 +1496,210 @@ export const ReplenishRequest: MessageFns<ReplenishRequest> = {
   },
 };
 
+function createBaseCloseOrdersRequest(): CloseOrdersRequest {
+  return { requestId: "", orderTrackers: [], meta: [] };
+}
+
+export const CloseOrdersRequest: MessageFns<CloseOrdersRequest> = {
+  encode(message: CloseOrdersRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    for (const v of message.orderTrackers) {
+      writer.uint32(18).string(v!);
+    }
+    for (const v of message.meta) {
+      MetaArg.encode(v!, writer.uint32(26).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CloseOrdersRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCloseOrdersRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderTrackers.push(reader.string());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.meta.push(MetaArg.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CloseOrdersRequest {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      orderTrackers: globalThis.Array.isArray(object?.orderTrackers)
+        ? object.orderTrackers.map((e: any) => globalThis.String(e))
+        : globalThis.Array.isArray(object?.order_trackers)
+        ? object.order_trackers.map((e: any) => globalThis.String(e))
+        : [],
+      meta: globalThis.Array.isArray(object?.meta) ? object.meta.map((e: any) => MetaArg.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: CloseOrdersRequest): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.orderTrackers?.length) {
+      obj.orderTrackers = message.orderTrackers;
+    }
+    if (message.meta?.length) {
+      obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CloseOrdersRequest>, I>>(base?: I): CloseOrdersRequest {
+    return CloseOrdersRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CloseOrdersRequest>, I>>(object: I): CloseOrdersRequest {
+    const message = createBaseCloseOrdersRequest();
+    message.requestId = object.requestId ?? "";
+    message.orderTrackers = object.orderTrackers?.map((e) => e) || [];
+    message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseCloseOrdersResponse(): CloseOrdersResponse {
+  return { requestId: "", orderTrackers: [], txPda: "" };
+}
+
+export const CloseOrdersResponse: MessageFns<CloseOrdersResponse> = {
+  encode(message: CloseOrdersResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    for (const v of message.orderTrackers) {
+      writer.uint32(18).string(v!);
+    }
+    if (message.txPda !== "") {
+      writer.uint32(26).string(message.txPda);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CloseOrdersResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCloseOrdersResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderTrackers.push(reader.string());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txPda = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CloseOrdersResponse {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      orderTrackers: globalThis.Array.isArray(object?.orderTrackers)
+        ? object.orderTrackers.map((e: any) => globalThis.String(e))
+        : globalThis.Array.isArray(object?.order_trackers)
+        ? object.order_trackers.map((e: any) => globalThis.String(e))
+        : [],
+      txPda: isSet(object.txPda)
+        ? globalThis.String(object.txPda)
+        : isSet(object.tx_pda)
+        ? globalThis.String(object.tx_pda)
+        : "",
+    };
+  },
+
+  toJSON(message: CloseOrdersResponse): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.orderTrackers?.length) {
+      obj.orderTrackers = message.orderTrackers;
+    }
+    if (message.txPda !== "") {
+      obj.txPda = message.txPda;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CloseOrdersResponse>, I>>(base?: I): CloseOrdersResponse {
+    return CloseOrdersResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CloseOrdersResponse>, I>>(object: I): CloseOrdersResponse {
+    const message = createBaseCloseOrdersResponse();
+    message.requestId = object.requestId ?? "";
+    message.orderTrackers = object.orderTrackers?.map((e) => e) || [];
+    message.txPda = object.txPda ?? "";
+    return message;
+  },
+};
+
 function createBaseTransferRequest(): TransferRequest {
   return {
     requestId: "",
@@ -2579,6 +2795,14 @@ export const CoreDefinition = {
       responseStream: false,
       options: {},
     },
+    closeOrders: {
+      name: "CloseOrders",
+      requestType: CloseOrdersRequest as typeof CloseOrdersRequest,
+      requestStream: false,
+      responseType: CloseOrdersResponse as typeof CloseOrdersResponse,
+      responseStream: false,
+      options: {},
+    },
     transfer: {
       name: "Transfer",
       requestType: TransferRequest as typeof TransferRequest,
@@ -2662,6 +2886,10 @@ export interface CoreServiceImplementation<CallContextExt = {}> {
   ): Promise<DeepPartial<OrderTrackerData>>;
   createOrder(request: CreateOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   replenish(request: ReplenishRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  closeOrders(
+    request: CloseOrdersRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<CloseOrdersResponse>>;
   transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
@@ -2707,6 +2935,10 @@ export interface CoreClient<CallOptionsExt = {}> {
   ): Promise<OrderTrackerData>;
   createOrder(request: DeepPartial<CreateOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   replenish(request: DeepPartial<ReplenishRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  closeOrders(
+    request: DeepPartial<CloseOrdersRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<CloseOrdersResponse>;
   transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;

@@ -15,6 +15,7 @@ service Core {
   
   rpc CreateOrder (CreateOrderRequest) returns (TxResponse);
   rpc Replenish (ReplenishRequest) returns (TxResponse);
+  rpc CloseOrders (CloseOrdersRequest) returns (CloseOrdersResponse);
   rpc Transfer (TransferRequest) returns (TxResponse);
   rpc AttestOrder (AttestOrderRequest) returns (TxResponse);
 
@@ -102,6 +103,18 @@ message ReplenishRequest {
   optional bool do_not_close = 5;
   optional string kamino_amount = 6;
   repeated MetaArg meta = 7;
+}
+
+message CloseOrdersRequest {
+  string request_id = 1;
+  repeated string order_trackers = 2;
+  repeated MetaArg meta = 3;
+}
+
+message CloseOrdersResponse {
+  string request_id = 1;
+  repeated string order_trackers = 2;
+  string tx_pda = 3;
 }
 
 message TransferRequest {

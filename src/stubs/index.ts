@@ -70,6 +70,8 @@ export type {
   MetaArg,
   CreateOrderRequest,
   ReplenishRequest,
+  CloseOrdersRequest,
+  CloseOrdersResponse,
   TransferRequest as CoreTransferRequest,
   AttestOrderRequest,
   TxResponse as CoreTxResponse,

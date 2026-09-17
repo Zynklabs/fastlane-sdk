@@ -3,7 +3,7 @@ import { DeepPartial, GenerateHashedArrayRequest, HashedArrayResponse, BuildEd25
 export { Asset, BalancesItem, BalancesItem_BalancesEntry, DecodeEventRequest, EventData } from './stubs/base.mjs';
 export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.mjs';
 import { CoreClient } from './stubs/core.mjs';
-export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.mjs';
+export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, CloseOrdersRequest, CloseOrdersResponse, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.mjs';
 import { OrbitClient } from './stubs/orbit.mjs';
 export { CollectRequest, DisburseRequest, GetPdaRequest, LPRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse } from './stubs/orbit.mjs';
 import { KaminoClient } from './stubs/kamino.mjs';

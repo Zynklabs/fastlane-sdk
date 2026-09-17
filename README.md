@@ -92,6 +92,7 @@ Fastlane(<endpoint>)
 │   ├─ readOrderTrackerByIds()
 │   ├─ createOrder()
 │   ├─ replenish()
+│   ├─ closeOrders()
 │   ├─ transfer()
 │   ├─ attestOrder()
 │   └─ decodeEvent()
@@ -178,6 +179,7 @@ type KmsSignerKey =
 - [All balances - multiple owners](./examples/allBalances__multiOwners.ts)
 - [Create order](./examples/core/createOrder.ts)
 - [Replenish order](./examples/core/replenishOrder.ts)
+- [Close orders](./examples/core/closeOrders.ts)
 - [Transfer - ZOW => Beneficiary (incl. PDVs) - transient order](./examples/core/transfers/zowToBeneficiary__transient.ts)
 - [Transfer - PDV => Beneficiary (incl. PDVs) - multi asset swapr](./examples/core/transfers/pdvToBeneficiary__multiAsset.ts)
 - [Attest order - Solana ZOW => Arbitrum Beneficiary](./examples/attestations/zowToBeneficiary.ts)
@@ -189,7 +191,7 @@ type KmsSignerKey =
 The SDK is based on the following proto services:
 
 - Base Service ([proto/base.proto](./proto/base.proto)): Account utilities, token account management, transaction execution, and status queries.
-- Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, and attestation.
+- Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, closing orders, transfers, and attestation.
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
 
