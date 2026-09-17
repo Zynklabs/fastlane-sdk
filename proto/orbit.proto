@@ -28,7 +28,7 @@ service Orbit {
   // ── LP / user-management (admin-signed, published via Squads) ────────────
   rpc VerifyUser  (VerifyUserRequest)  returns (LPState);
   rpc RegisterUser (RegisterUserRequest) returns (LPState);
-  rpc RevokeLP (RevokeRequest) returns (LPState);
+  rpc RevokeLp (RevokeRequest) returns (LPState);
   rpc UpdatePartnerWhitelist (UpdatePartnerWhitelistRequest) returns (LPState);
   rpc UpdateWallets (UpdateWalletsRequest) returns (LPState);
   rpc UpdateMaxPrincipal (UpdateMaxPrincipalRequest) returns (LPState);
@@ -62,6 +62,7 @@ message WithdrawRequestData {
   string user_id = 1;
   string amount = 2;
   string destination = 3;
+  string mint = 4;
 }
 
 message UpdateCliffPeriodRequestData {

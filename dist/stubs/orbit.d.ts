@@ -43,6 +43,7 @@ interface WithdrawRequestData {
     userId: string;
     amount: string;
     destination: string;
+    mint: string;
 }
 declare const WithdrawRequestData: MessageFns<WithdrawRequestData>;
 interface UpdateCliffPeriodRequestData {
@@ -361,8 +362,8 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly revokeLP: {
-            readonly name: "RevokeLP";
+        readonly revokeLp: {
+            readonly name: "RevokeLp";
             readonly requestType: typeof RevokeRequest;
             readonly requestStream: false;
             readonly responseType: typeof LPState;
@@ -439,7 +440,7 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
     /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
     verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
     registerUser(request: RegisterUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
-    revokeLP(request: RevokeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+    revokeLp(request: RevokeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
     updatePartnerWhitelist(request: UpdatePartnerWhitelistRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
     updateWallets(request: UpdateWalletsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
     updateMaxPrincipal(request: UpdateMaxPrincipalRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
@@ -467,7 +468,7 @@ interface OrbitClient<CallOptionsExt = {}> {
     /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
     verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
     registerUser(request: DeepPartial<RegisterUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
-    revokeLP(request: DeepPartial<RevokeRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+    revokeLp(request: DeepPartial<RevokeRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
     updatePartnerWhitelist(request: DeepPartial<UpdatePartnerWhitelistRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
     updateWallets(request: DeepPartial<UpdateWalletsRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
     updateMaxPrincipal(request: DeepPartial<UpdateMaxPrincipalRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;

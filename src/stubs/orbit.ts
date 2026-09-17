@@ -108,6 +108,7 @@ export interface WithdrawRequestData {
   userId: string;
   amount: string;
   destination: string;
+  mint: string;
 }
 
 export interface UpdateCliffPeriodRequestData {
@@ -613,7 +614,7 @@ export const OrderData: MessageFns<OrderData> = {
 };
 
 function createBaseWithdrawRequestData(): WithdrawRequestData {
-  return { userId: "", amount: "", destination: "" };
+  return { userId: "", amount: "", destination: "", mint: "" };
 }
 
 export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
@@ -626,6 +627,9 @@ export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
     }
     if (message.destination !== "") {
       writer.uint32(26).string(message.destination);
+    }
+    if (message.mint !== "") {
+      writer.uint32(34).string(message.mint);
     }
     return writer;
   },
@@ -661,6 +665,14 @@ export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
           message.destination = reader.string();
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.mint = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -679,6 +691,7 @@ export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
         : "",
       amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
       destination: isSet(object.destination) ? globalThis.String(object.destination) : "",
+      mint: isSet(object.mint) ? globalThis.String(object.mint) : "",
     };
   },
 
@@ -693,6 +706,9 @@ export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
     if (message.destination !== "") {
       obj.destination = message.destination;
     }
+    if (message.mint !== "") {
+      obj.mint = message.mint;
+    }
     return obj;
   },
 
@@ -704,6 +720,7 @@ export const WithdrawRequestData: MessageFns<WithdrawRequestData> = {
     message.userId = object.userId ?? "";
     message.amount = object.amount ?? "";
     message.destination = object.destination ?? "";
+    message.mint = object.mint ?? "";
     return message;
   },
 };
@@ -3370,8 +3387,8 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
-    revokeLP: {
-      name: "RevokeLP",
+    revokeLp: {
+      name: "RevokeLp",
       requestType: RevokeRequest as typeof RevokeRequest,
       requestStream: false,
       responseType: LPState as typeof LPState,
@@ -3467,7 +3484,7 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
   /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
   verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
   registerUser(request: RegisterUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
-  revokeLP(request: RevokeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
+  revokeLp(request: RevokeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
   updatePartnerWhitelist(
     request: UpdatePartnerWhitelistRequest,
     context: CallContext & CallContextExt,
@@ -3526,7 +3543,7 @@ export interface OrbitClient<CallOptionsExt = {}> {
   /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
   verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
   registerUser(request: DeepPartial<RegisterUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
-  revokeLP(request: DeepPartial<RevokeRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+  revokeLp(request: DeepPartial<RevokeRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
   updatePartnerWhitelist(
     request: DeepPartial<UpdatePartnerWhitelistRequest>,
     options?: CallOptions & CallOptionsExt,
