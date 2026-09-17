@@ -164,6 +164,7 @@ interface RegisterUserRequest {
     memo?: string | undefined;
     partnerIds: number[];
     allowedMint?: string | undefined;
+    seedPrincipal?: number | undefined;
 }
 declare const RegisterUserRequest: MessageFns<RegisterUserRequest>;
 interface RevokeRequest {

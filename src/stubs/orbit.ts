@@ -235,6 +235,7 @@ export interface RegisterUserRequest {
   memo?: string | undefined;
   partnerIds: number[];
   allowedMint?: string | undefined;
+  seedPrincipal?: number | undefined;
 }
 
 export interface RevokeRequest {
@@ -2360,6 +2361,7 @@ function createBaseRegisterUserRequest(): RegisterUserRequest {
     memo: undefined,
     partnerIds: [],
     allowedMint: undefined,
+    seedPrincipal: undefined,
   };
 }
 
@@ -2390,6 +2392,9 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     writer.join();
     if (message.allowedMint !== undefined) {
       writer.uint32(66).string(message.allowedMint);
+    }
+    if (message.seedPrincipal !== undefined) {
+      writer.uint32(72).uint64(message.seedPrincipal);
     }
     return writer;
   },
@@ -2475,6 +2480,14 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
           message.allowedMint = reader.string();
           continue;
         }
+        case 9: {
+          if (tag !== 72) {
+            break;
+          }
+
+          message.seedPrincipal = longToNumber(reader.uint64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2518,6 +2531,11 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
         : isSet(object.allowed_mint)
         ? globalThis.String(object.allowed_mint)
         : undefined,
+      seedPrincipal: isSet(object.seedPrincipal)
+        ? globalThis.Number(object.seedPrincipal)
+        : isSet(object.seed_principal)
+        ? globalThis.Number(object.seed_principal)
+        : undefined,
     };
   },
 
@@ -2547,6 +2565,9 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     if (message.allowedMint !== undefined) {
       obj.allowedMint = message.allowedMint;
     }
+    if (message.seedPrincipal !== undefined) {
+      obj.seedPrincipal = Math.round(message.seedPrincipal);
+    }
     return obj;
   },
 
@@ -2563,6 +2584,7 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     message.memo = object.memo ?? undefined;
     message.partnerIds = object.partnerIds?.map((e) => e) || [];
     message.allowedMint = object.allowedMint ?? undefined;
+    message.seedPrincipal = object.seedPrincipal ?? undefined;
     return message;
   },
 };

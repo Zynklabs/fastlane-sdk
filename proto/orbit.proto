@@ -196,6 +196,7 @@ message RegisterUserRequest {
   optional string memo         = 6;
   repeated uint32 partner_ids  = 7;
   optional string allowed_mint = 8;
+  optional uint64 seed_principal = 9;
 }
 
 message RevokeRequest {
