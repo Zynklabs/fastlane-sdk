@@ -83,6 +83,17 @@ interface ReplenishRequest {
     meta: MetaArg[];
 }
 declare const ReplenishRequest: MessageFns<ReplenishRequest>;
+interface RecordOrderRequest {
+    requestId: string;
+    partnerId: string;
+    beneficiary: string;
+    token: Token;
+    amount: string;
+    zovId?: string | undefined;
+    meta: MetaArg[];
+    orderId?: string | undefined;
+}
+declare const RecordOrderRequest: MessageFns<RecordOrderRequest>;
 interface TransferRequest {
     requestId: string;
     from: string;
@@ -212,6 +223,14 @@ declare const CoreDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly recordOrder: {
+            readonly name: "RecordOrder";
+            readonly requestType: typeof RecordOrderRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof TxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly transfer: {
             readonly name: "Transfer";
             readonly requestType: typeof TransferRequest;
@@ -279,6 +298,7 @@ interface CoreServiceImplementation<CallContextExt = {}> {
     readOrderTrackerByIds(request: ReadOrderTrackerByIdsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTrackerData>>;
     createOrder(request: CreateOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     replenish(request: ReplenishRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    recordOrder(request: RecordOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
@@ -296,6 +316,7 @@ interface CoreClient<CallOptionsExt = {}> {
     readOrderTrackerByIds(request: DeepPartial<ReadOrderTrackerByIdsRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTrackerData>;
     createOrder(request: DeepPartial<CreateOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     replenish(request: DeepPartial<ReplenishRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    recordOrder(request: DeepPartial<RecordOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
@@ -323,4 +344,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };
+export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };

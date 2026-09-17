@@ -91,6 +91,17 @@ export interface ReplenishRequest {
   meta: MetaArg[];
 }
 
+export interface RecordOrderRequest {
+  requestId: string;
+  partnerId: string;
+  beneficiary: string;
+  token: Token;
+  amount: string;
+  zovId?: string | undefined;
+  meta: MetaArg[];
+  orderId?: string | undefined;
+}
+
 export interface TransferRequest {
   requestId: string;
   from: string;
@@ -1484,6 +1495,205 @@ export const ReplenishRequest: MessageFns<ReplenishRequest> = {
   },
 };
 
+function createBaseRecordOrderRequest(): RecordOrderRequest {
+  return {
+    requestId: "",
+    partnerId: "",
+    beneficiary: "",
+    token: 0,
+    amount: "",
+    zovId: undefined,
+    meta: [],
+    orderId: undefined,
+  };
+}
+
+export const RecordOrderRequest: MessageFns<RecordOrderRequest> = {
+  encode(message: RecordOrderRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    if (message.partnerId !== "") {
+      writer.uint32(18).string(message.partnerId);
+    }
+    if (message.beneficiary !== "") {
+      writer.uint32(26).string(message.beneficiary);
+    }
+    if (message.token !== 0) {
+      writer.uint32(32).int32(message.token);
+    }
+    if (message.amount !== "") {
+      writer.uint32(42).string(message.amount);
+    }
+    if (message.zovId !== undefined) {
+      writer.uint32(50).string(message.zovId);
+    }
+    for (const v of message.meta) {
+      MetaArg.encode(v!, writer.uint32(58).fork()).join();
+    }
+    if (message.orderId !== undefined) {
+      writer.uint32(66).string(message.orderId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RecordOrderRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRecordOrderRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.beneficiary = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.zovId = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.meta.push(MetaArg.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RecordOrderRequest {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      beneficiary: isSet(object.beneficiary) ? globalThis.String(object.beneficiary) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      zovId: isSet(object.zovId)
+        ? globalThis.String(object.zovId)
+        : isSet(object.zov_id)
+        ? globalThis.String(object.zov_id)
+        : undefined,
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : undefined,
+    };
+  },
+
+  toJSON(message: RecordOrderRequest): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.beneficiary !== "") {
+      obj.beneficiary = message.beneficiary;
+    }
+    if (message.token !== 0) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.zovId !== undefined) {
+      obj.zovId = message.zovId;
+    }
+    if (message.meta?.length) {
+      obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
+    }
+    if (message.orderId !== undefined) {
+      obj.orderId = message.orderId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RecordOrderRequest>, I>>(base?: I): RecordOrderRequest {
+    return RecordOrderRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RecordOrderRequest>, I>>(object: I): RecordOrderRequest {
+    const message = createBaseRecordOrderRequest();
+    message.requestId = object.requestId ?? "";
+    message.partnerId = object.partnerId ?? "";
+    message.beneficiary = object.beneficiary ?? "";
+    message.token = object.token ?? 0;
+    message.amount = object.amount ?? "";
+    message.zovId = object.zovId ?? undefined;
+    message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
+    message.orderId = object.orderId ?? undefined;
+    return message;
+  },
+};
+
 function createBaseTransferRequest(): TransferRequest {
   return {
     requestId: "",
@@ -2579,6 +2789,14 @@ export const CoreDefinition = {
       responseStream: false,
       options: {},
     },
+    recordOrder: {
+      name: "RecordOrder",
+      requestType: RecordOrderRequest as typeof RecordOrderRequest,
+      requestStream: false,
+      responseType: TxResponse as typeof TxResponse,
+      responseStream: false,
+      options: {},
+    },
     transfer: {
       name: "Transfer",
       requestType: TransferRequest as typeof TransferRequest,
@@ -2662,6 +2880,7 @@ export interface CoreServiceImplementation<CallContextExt = {}> {
   ): Promise<DeepPartial<OrderTrackerData>>;
   createOrder(request: CreateOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   replenish(request: ReplenishRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  recordOrder(request: RecordOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
@@ -2707,6 +2926,7 @@ export interface CoreClient<CallOptionsExt = {}> {
   ): Promise<OrderTrackerData>;
   createOrder(request: DeepPartial<CreateOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   replenish(request: DeepPartial<ReplenishRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  recordOrder(request: DeepPartial<RecordOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;

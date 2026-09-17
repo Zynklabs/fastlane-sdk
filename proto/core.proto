@@ -15,6 +15,7 @@ service Core {
   
   rpc CreateOrder (CreateOrderRequest) returns (TxResponse);
   rpc Replenish (ReplenishRequest) returns (TxResponse);
+  rpc RecordOrder (RecordOrderRequest) returns (TxResponse);
   rpc Transfer (TransferRequest) returns (TxResponse);
   rpc AttestOrder (AttestOrderRequest) returns (TxResponse);
 
@@ -102,6 +103,17 @@ message ReplenishRequest {
   optional bool do_not_close = 5;
   optional string kamino_amount = 6;
   repeated MetaArg meta = 7;
+}
+
+message RecordOrderRequest {
+  string request_id = 1;
+  string partner_id = 2;
+  string beneficiary = 3;
+  base.Token token = 4;
+  string amount = 5;
+  optional string zov_id = 6;
+  repeated MetaArg meta = 7;
+  optional string order_id = 8;
 }
 
 message TransferRequest {
