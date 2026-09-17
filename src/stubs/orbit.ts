@@ -233,6 +233,7 @@ export interface RegisterUserRequest {
   maxDeposit?: number | undefined;
   memo?: string | undefined;
   partnerIds: number[];
+  allowedMint?: string | undefined;
 }
 
 export interface RevokeRequest {
@@ -2341,6 +2342,7 @@ function createBaseRegisterUserRequest(): RegisterUserRequest {
     maxDeposit: undefined,
     memo: undefined,
     partnerIds: [],
+    allowedMint: undefined,
   };
 }
 
@@ -2369,6 +2371,9 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
       writer.uint32(v);
     }
     writer.join();
+    if (message.allowedMint !== undefined) {
+      writer.uint32(66).string(message.allowedMint);
+    }
     return writer;
   },
 
@@ -2445,6 +2450,14 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
 
           break;
         }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.allowedMint = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2483,6 +2496,11 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
         : globalThis.Array.isArray(object?.partner_ids)
         ? object.partner_ids.map((e: any) => globalThis.Number(e))
         : [],
+      allowedMint: isSet(object.allowedMint)
+        ? globalThis.String(object.allowedMint)
+        : isSet(object.allowed_mint)
+        ? globalThis.String(object.allowed_mint)
+        : undefined,
     };
   },
 
@@ -2509,6 +2527,9 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     if (message.partnerIds?.length) {
       obj.partnerIds = message.partnerIds.map((e) => Math.round(e));
     }
+    if (message.allowedMint !== undefined) {
+      obj.allowedMint = message.allowedMint;
+    }
     return obj;
   },
 
@@ -2524,6 +2545,7 @@ export const RegisterUserRequest: MessageFns<RegisterUserRequest> = {
     message.maxDeposit = object.maxDeposit ?? undefined;
     message.memo = object.memo ?? undefined;
     message.partnerIds = object.partnerIds?.map((e) => e) || [];
+    message.allowedMint = object.allowedMint ?? undefined;
     return message;
   },
 };

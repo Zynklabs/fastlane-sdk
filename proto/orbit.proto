@@ -194,6 +194,7 @@ message RegisterUserRequest {
   optional uint64 max_deposit  = 5;
   optional string memo         = 6;
   repeated uint32 partner_ids  = 7;
+  optional string allowed_mint = 8;
 }
 
 message RevokeRequest {

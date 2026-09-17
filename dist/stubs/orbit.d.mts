@@ -162,6 +162,7 @@ interface RegisterUserRequest {
     maxDeposit?: number | undefined;
     memo?: string | undefined;
     partnerIds: number[];
+    allowedMint?: string | undefined;
 }
 declare const RegisterUserRequest: MessageFns<RegisterUserRequest>;
 interface RevokeRequest {
