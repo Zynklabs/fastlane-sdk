@@ -5,25 +5,25 @@ package core;
 import "base.proto";
 
 service Core {
-  rpc DomainSeparator (DomainSeparatorRequest) returns (DomainSeparatorResponse);
-  rpc GetPdv (GetPdvRequest) returns (PdvResponse);
+  rpc DomainSeparator(DomainSeparatorRequest) returns (DomainSeparatorResponse);
+  rpc GetPdv(GetPdvRequest) returns (PdvResponse);
 
-  rpc GenerateOrderId (GenerateOrderIdRequest) returns (OrderIdResponse);
-  rpc DeriveOrderTracker (DeriveOrderTrackerRequest) returns (OrderTrackerResponse);
-  rpc ReadOrderTrackerByAddress (ReadOrderTrackerByAddressRequest) returns (OrderTrackerData);
-  rpc ReadOrderTrackerByIds (ReadOrderTrackerByIdsRequest) returns (OrderTrackerData);
-  
-  rpc CreateOrder (CreateOrderRequest) returns (TxResponse);
-  rpc Replenish (ReplenishRequest) returns (TxResponse);
-  rpc Transfer (TransferRequest) returns (TxResponse);
-  rpc AttestOrder (AttestOrderRequest) returns (TxResponse);
+  rpc GenerateOrderId(GenerateOrderIdRequest) returns (OrderIdResponse);
+  rpc DeriveOrderTracker(DeriveOrderTrackerRequest) returns (OrderTrackerResponse);
+  rpc ReadOrderTrackerByAddress(ReadOrderTrackerByAddressRequest) returns (OrderTrackerData);
+  rpc ReadOrderTrackerByIds(ReadOrderTrackerByIdsRequest) returns (OrderTrackerData);
 
-  rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
+  rpc CreateOrder(CreateOrderRequest) returns (TxResponse);
+  rpc Replenish(ReplenishRequest) returns (TxResponse);
+  rpc CloseOrders(CloseOrdersRequest) returns (CloseOrdersResponse);
+  rpc Transfer(TransferRequest) returns (TxResponse);
 
-  rpc VerifyBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
-  rpc WhitelistBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
-  rpc ToggleBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
-  rpc RevokeBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc DecodeEvent(base.DecodeEventRequest) returns (base.EventData);
+
+  rpc VerifyBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
+  rpc WhitelistBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
+  rpc ToggleBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
+  rpc RevokeBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
 }
 
 message DomainSeparatorRequest {}
@@ -104,6 +104,18 @@ message ReplenishRequest {
   repeated MetaArg meta = 7;
 }
 
+message CloseOrdersRequest {
+  string request_id = 1;
+  repeated string order_trackers = 2;
+  repeated MetaArg meta = 3;
+}
+
+message CloseOrdersResponse {
+  string request_id = 1;
+  repeated string order_trackers = 2;
+  string tx_pda = 3;
+}
+
 message TransferRequest {
   string request_id = 1;
   string from = 2;
@@ -115,22 +127,6 @@ message TransferRequest {
   optional base.Ed25519Pair ed25519_pair = 8;
   repeated MetaArg meta = 9;
   optional string proxy = 10;
-}
-
-message AttestOrderRequest {
-  string order_id = 1;
-  string origin_chain = 2;
-  string target_chain = 3;
-  string origin = 4;
-  string proxy = 5;
-  string target = 6;
-  string txn = 7;
-  base.Token asset = 8;
-  string amount = 9;
-  base.Ed25519Pair ed25519_pair = 10;
-  optional string proxy_txn = 11;
-  optional base.Token proxy_asset = 12;
-  repeated MetaArg meta = 13;
 }
 
 message TxResponse {

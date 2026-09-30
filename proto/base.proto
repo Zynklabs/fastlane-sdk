@@ -18,39 +18,35 @@ enum Denom {
 }
 
 service Base {
-  rpc GenerateHashedArray (GenerateHashedArrayRequest) returns (HashedArrayResponse);
+  rpc GenerateHashedArray(GenerateHashedArrayRequest) returns (HashedArrayResponse);
 
-  rpc BuildEd25519Ix (BuildEd25519IxRequest) returns (Ed25519Pair);
+  rpc GetBalance(GetBalanceRequest) returns (Balance);
+  rpc GetBalances(GetBalancesRequest) returns (Balances);
 
-  rpc GetBalance (GetBalanceRequest) returns (Balance);
-  rpc GetBalances (GetBalancesRequest) returns (Balances);
+  rpc GetAddress(GetAddressRequest) returns (AddressResponse);
+  rpc GetTokenAddress(GetTokenAddressRequest) returns (AddressResponse);
 
-  rpc GetAddress (GetAddressRequest) returns (AddressResponse);
-  rpc GetTokenAddress (GetTokenAddressRequest) returns (AddressResponse);
+  rpc GetAccountInfo(GetAccountInfoRequest) returns (AccountInfoResponse);
+  rpc GetOwner(GetOwnerRequest) returns (GetOwnerResponse);
+  rpc GetTokenAccountOwner(GetTokenAccountOwnerRequest) returns (TokenAccountOwnerResponse);
 
-  rpc GetAccountInfo (GetAccountInfoRequest) returns (AccountInfoResponse);
-  rpc GetOwner (GetOwnerRequest) returns (GetOwnerResponse);
-  rpc GetTokenAccountOwner (GetTokenAccountOwnerRequest) returns (TokenAccountOwnerResponse);
-
-  rpc GetAtaAddress (GetAtaAddressRequest) returns (AtaAddressResponse);
+  rpc GetAtaAddress(GetAtaAddressRequest) returns (AtaAddressResponse);
   rpc GetAta(GetAtaRequest) returns (AtaResponse);
   rpc GetAtaByMint(GetAtaByMintRequest) returns (AtaResponse);
-  rpc GetOrCreateAta (GetOrCreateAtaRequest) returns (GetOrCreateAtaResponse);
+  rpc GetOrCreateAta(GetOrCreateAtaRequest) returns (GetOrCreateAtaResponse);
 
-  rpc ExecuteTx (ExecuteTxRequest) returns (ExecuteTxResponse);
-  rpc Transfer (TransferRequest) returns (TxResponse);
+  rpc Transfer(TransferRequest) returns (TxResponse);
 
-  rpc GetVaults (GetVaultsRequest) returns (VaultsResponse);
+  rpc GetVaults(GetVaultsRequest) returns (VaultsResponse);
 
-  rpc GetTxStatus (GetTxStatusRequest) returns (TxStatus);
-  rpc GetTxDetails (GetTxDetailsRequest) returns (TxDetails);
-  rpc GetTxCost (GetTxCostRequest) returns (TxCost);
+  rpc GetTxStatus(GetTxStatusRequest) returns (TxStatus);
+  rpc GetTxDetails(GetTxDetailsRequest) returns (TxDetails);
+  rpc GetTxCost(GetTxCostRequest) returns (TxCost);
 
-  rpc GetAssetPrice (GetAssetPriceRequest) returns (AssetPrice);
+  rpc GetAssetPrice(GetAssetPriceRequest) returns (AssetPrice);
 
-  rpc Faucet (FaucetRequest) returns (ExecuteTxResponse);
+  rpc Faucet(FaucetRequest) returns (FaucetResponse);
 }
-
 
 message TxIxAccount {
   string pubkey = 1;
@@ -70,11 +66,6 @@ message GenerateHashedArrayRequest {
 
 message HashedArrayResponse {
   bytes hashed = 1;
-}
-
-message BuildEd25519IxRequest {
-  string message = 1;
-  string signer = 2;
 }
 
 message Ed25519Pair {
@@ -195,17 +186,6 @@ message GetOrCreateAtaResponse {
   optional string signature = 3;
 }
 
-message ExecuteTxRequest {
-  string request_id = 1;
-  repeated TxIx ixs = 2;
-  repeated string signers = 3;
-}
-
-message ExecuteTxResponse {
-  string request_id = 1;
-  string signature = 2;
-}
-
 message MetaArg {
   string key = 1;
   string value = 2;
@@ -301,4 +281,9 @@ message FaucetRequest {
   string address = 1;
   string amount = 2;
   Token token = 3;
+}
+
+message FaucetResponse {
+  string request_id = 1;
+  string signature = 2;
 }

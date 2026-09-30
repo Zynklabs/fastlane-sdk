@@ -7,21 +7,43 @@ import "base.proto";
 service Orbit {
   rpc GetVaultPda (GetPdaRequest) returns (PdaResponse);
   rpc GetOrderPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetUserPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetWithdrawRequestPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetUpdateCliffPeriodRequestPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetPositionPda (GetPositionPdaRequest) returns (PdaResponse);
 
   rpc ReadOrderPda (GetPdaRequest) returns (OrderData);
+  rpc ReadWithdrawRequestPda (GetPdaRequest) returns (WithdrawRequestData);
+  rpc ReadUpdateCliffPeriodRequestPda (GetPdaRequest) returns (UpdateCliffPeriodRequestData);
+  rpc ReadPositionPda (GetPositionPdaRequest) returns (PositionData);
 
   rpc Collect (CollectRequest) returns (TxResponse);
   rpc Disburse (DisburseRequest) returns (TxResponse);
+  rpc Pledge (PledgeRequest) returns (TxResponse);
+  rpc Borrow (BorrowRequest) returns (TxResponse);
+  rpc Repay (RepayRequest) returns (TxResponse);
 
   rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
 
-  rpc VerifyLP (LPRequest) returns (LPState);
-  rpc WhitelistLP (LPRequest) returns (LPState);
-  rpc RevokeLP (LPRequest) returns (LPState);
+  // ── LP / user-management (admin-signed, published via Squads) ────────────
+  rpc VerifyUser  (VerifyUserRequest)  returns (LPState);
+  rpc RegisterUser (RegisterUserRequest) returns (LPState);
+  rpc RevokeLp (RevokeRequest) returns (LPState);
+  rpc UpdatePartnerWhitelist (UpdatePartnerWhitelistRequest) returns (LPState);
+  rpc UpdateWallets (UpdateWalletsRequest) returns (LPState);
+  rpc UpdateMaxPrincipal (UpdateMaxPrincipalRequest) returns (LPState);
+  rpc UpdateCliffPeriod (UpdateCliffPeriodRequest) returns (LPState);
+  rpc ApproveWithdraw (ApproveWithdrawRequest) returns (LPState);
+  rpc RejectWithdraw (RejectWithdrawRequest) returns (LPState);
 }
 
 message GetPdaRequest {
   string key = 1;
+}
+
+message GetPositionPdaRequest {
+  string user_id = 1;
+  string order_id = 2;
 }
 
 message PdaResponse {
@@ -34,6 +56,31 @@ message OrderData {
   string order_id = 1;
   string amount = 2;
   string address = 3;
+}
+
+message WithdrawRequestData {
+  string user_id = 1;
+  string amount = 2;
+  string destination = 3;
+  string mint = 4;
+}
+
+message UpdateCliffPeriodRequestData {
+  string user_id = 1;
+  string cliff_period = 2;
+}
+
+message PositionAccountData {
+  string status = 1;
+  string amount_borrowed = 2;
+  string amount_repaid = 3;
+}
+
+message PositionData {
+  string user_id = 1;
+  string order_id = 2;
+  string pda = 3;
+  PositionAccountData data = 4;
 }
 
 message CollectRequest {
@@ -54,20 +101,143 @@ message DisburseRequest {
   optional base.Token token = 6;
 }
 
+message MetaArg {
+  string key = 1;
+  string value = 2;
+}
+
+message PositionArgs {
+  string user_id = 1;
+  // Required for borrow. Unused on repay (settlement is proportional).
+  optional string amount = 2;
+  // NCW only: vault id whose PDA holds the token delegate approval.
+  optional string vault_id = 3;
+  // NCW only: wallet holding the source tokens. Defaults to the user PDA.
+  optional string address = 4;
+}
+
+message PledgeRequest {
+  string user_id = 1;
+  string address = 2;
+  string amount = 3;
+  optional base.Token token = 4;
+  optional string request_id = 5;
+}
+
+message BorrowRequest {
+  string request_id = 1;
+  string partner_id = 2;
+  string beneficiary = 3;
+  string amount = 4;
+  repeated PositionArgs positions = 5;
+  optional base.Token token = 6;
+  optional string zov_id = 7;
+  optional string order_id = 8;
+  repeated MetaArg meta = 9;
+}
+
+message RepayRequest {
+  string request_id = 1;
+  string partner_id = 2;
+  string amount = 3;
+  string order_id = 4;
+  repeated PositionArgs positions = 5;
+  optional base.Token token = 6;
+  optional string zov_id = 7;
+  repeated MetaArg meta = 8;
+}
+
 message TxResponse {
   string order_id = 1;
   string signature = 2;
   uint32 position = 3;
-}
-
-message LPRequest {
-  string user_id = 1;
-  string address = 2;
-  optional string memo = 3;
+  string order_tracker = 4;
 }
 
 message LPState {
   string status = 1;
   string pda = 2;
   optional string tx_pda = 3;
+}
+
+// ── User-management enums ─────────────────────────────────────────────────────
+
+enum UserType {
+  LP  = 0;
+  NCW = 1;
+  ICV = 2;
+}
+
+enum WhitelistAction {
+  ADD    = 0;
+  REMOVE = 1;
+}
+
+// ── Request messages ──────────────────────────────────────────────────────────
+
+/**
+ * VerifyUser: read-only check – returns LPState for the user's Record PDA.
+ * status = "active" when the user record exists, "unavailable" otherwise.
+ */
+message VerifyUserRequest {
+  string user_id = 1;
+}
+
+message RegisterUserRequest {
+  string    user_id   = 1;
+  UserType  user_type = 2;
+  // 1 to 3 authorised wallet addresses. Missing slots are padded with the
+  // system public key (11111111111111111111111111111111) on-chain.
+  repeated string wallets = 3;
+  // Unix timestamp string. Omit → i64::MAX (no lock).
+  optional string cliff_period = 4;
+  // u32 cap. Omit → u32::MAX (uncapped).
+  optional uint64 max_deposit  = 5;
+  optional string memo         = 6;
+  repeated uint32 partner_ids  = 7;
+  optional string allowed_mint = 8;
+}
+
+message RevokeRequest {
+  string user_id = 1;
+  optional string memo = 2;
+}
+
+message UpdatePartnerWhitelistRequest {
+  string          user_id    = 1;
+  WhitelistAction action     = 2;
+  uint32          partner_id = 3;
+  optional string memo       = 4;
+}
+
+message UpdateWalletsRequest {
+  string user_id = 1;
+  // 1 to 3 replacement wallet addresses. Missing slots are padded with the
+  // system public key (11111111111111111111111111111111) on-chain.
+  repeated string wallets = 2;
+  optional string memo    = 3;
+}
+
+message UpdateMaxPrincipalRequest {
+  string  user_id     = 1;
+  uint64  max_deposit = 2;
+  optional string memo = 3;
+}
+
+message UpdateCliffPeriodRequest {
+  string user_id = 1;
+  // Unix timestamp string. Omit → preserves existing cliff on-chain.
+  optional string cliff_period = 2;
+  optional string memo         = 3;
+}
+
+message ApproveWithdrawRequest {
+  string          user_id = 1;
+  optional base.Token token = 2;
+  optional string memo    = 3;
+}
+
+message RejectWithdrawRequest {
+  string user_id = 1;
+  optional string memo = 2;
 }

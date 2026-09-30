@@ -1,11 +1,11 @@
 import * as nice_grpc from 'nice-grpc';
-import { DeepPartial, GenerateHashedArrayRequest, HashedArrayResponse, BuildEd25519IxRequest, Ed25519Pair, GetBalanceRequest, Balance, GetBalancesRequest, Balances, GetAddressRequest, AddressResponse, GetTokenAddressRequest, GetAccountInfoRequest, AccountInfoResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, TokenAccountOwnerResponse, GetAtaAddressRequest, AtaAddressResponse, GetAtaRequest, AtaResponse, GetAtaByMintRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, ExecuteTxRequest, ExecuteTxResponse, TransferRequest, TxResponse, GetVaultsRequest, VaultsResponse, GetTxStatusRequest, TxStatus, GetTxDetailsRequest, TxDetails, GetTxCostRequest, TxCost, GetAssetPriceRequest, AssetPrice, FaucetRequest, BaseClient, Token, Denom } from './stubs/base.js';
+import { DeepPartial, GenerateHashedArrayRequest, HashedArrayResponse, GetBalanceRequest, Balance, GetBalancesRequest, Balances, GetAddressRequest, AddressResponse, GetTokenAddressRequest, GetAccountInfoRequest, AccountInfoResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, TokenAccountOwnerResponse, GetAtaAddressRequest, AtaAddressResponse, GetAtaRequest, AtaResponse, GetAtaByMintRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, TransferRequest, TxResponse, GetVaultsRequest, VaultsResponse, GetTxStatusRequest, TxStatus, GetTxDetailsRequest, TxDetails, GetTxCostRequest, TxCost, GetAssetPriceRequest, AssetPrice, FaucetRequest, FaucetResponse, BaseClient, Token, Denom } from './stubs/base.js';
 export { Asset, BalancesItem, BalancesItem_BalancesEntry, DecodeEventRequest, EventData } from './stubs/base.js';
 export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.js';
 import { CoreClient } from './stubs/core.js';
-export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.js';
+export { BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.js';
 import { OrbitClient } from './stubs/orbit.js';
-export { CollectRequest, DisburseRequest, GetPdaRequest, LPRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse } from './stubs/orbit.js';
+export { CollectRequest, DisburseRequest, GetPdaRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse } from './stubs/orbit.js';
 import { KaminoClient } from './stubs/kamino.js';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.js';
 import { IOptions } from './interfaces.js';
@@ -18,7 +18,6 @@ import '@grpc/grpc-js';
 
 declare const _default: (endpoint: string, options?: IOptions) => {
     generateHashedArray(request: DeepPartial<GenerateHashedArrayRequest>, options?: nice_grpc.CallOptions | undefined): Promise<HashedArrayResponse>;
-    buildEd25519Ix(request: DeepPartial<BuildEd25519IxRequest>, options?: nice_grpc.CallOptions | undefined): Promise<Ed25519Pair>;
     getBalance(request: DeepPartial<GetBalanceRequest>, options?: nice_grpc.CallOptions | undefined): Promise<Balance>;
     getBalances(request: DeepPartial<GetBalancesRequest>, options?: nice_grpc.CallOptions | undefined): Promise<Balances>;
     getAddress(request: DeepPartial<GetAddressRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AddressResponse>;
@@ -30,14 +29,13 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     getAta(request: DeepPartial<GetAtaRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AtaResponse>;
     getAtaByMint(request: DeepPartial<GetAtaByMintRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AtaResponse>;
     getOrCreateAta(request: DeepPartial<GetOrCreateAtaRequest>, options?: nice_grpc.CallOptions | undefined): Promise<GetOrCreateAtaResponse>;
-    executeTx(request: DeepPartial<ExecuteTxRequest>, options?: nice_grpc.CallOptions | undefined): Promise<ExecuteTxResponse>;
     transfer(request: DeepPartial<TransferRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxResponse>;
     getVaults(request: DeepPartial<GetVaultsRequest>, options?: nice_grpc.CallOptions | undefined): Promise<VaultsResponse>;
     getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxStatus>;
     getTxDetails(request: DeepPartial<GetTxDetailsRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxDetails>;
     getTxCost(request: DeepPartial<GetTxCostRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxCost>;
     getAssetPrice(request: DeepPartial<GetAssetPriceRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AssetPrice>;
-    faucet(request: DeepPartial<FaucetRequest>, options?: nice_grpc.CallOptions | undefined): Promise<ExecuteTxResponse>;
+    faucet(request: DeepPartial<FaucetRequest>, options?: nice_grpc.CallOptions | undefined): Promise<FaucetResponse>;
     base: BaseClient<{}>;
     core: CoreClient<{}>;
     orbit: OrbitClient<{}>;
@@ -47,4 +45,4 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     Denom: typeof Denom;
 };
 
-export { AccountInfoResponse, AddressResponse, AssetPrice, AtaAddressResponse, Balance, Balances, BuildEd25519IxRequest, Denom, ExecuteTxResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxResponse, TxStatus, VaultsResponse, _default as default };
+export { AccountInfoResponse, AddressResponse, AssetPrice, AtaAddressResponse, Balance, Balances, Denom, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxResponse, TxStatus, VaultsResponse, _default as default };
