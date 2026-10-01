@@ -55,6 +55,7 @@ The returned object exposes these primary namespaces:
 - fastlane.core: for zynk-core operations like creating orders, replenishing orders, closing order and one-time transfers (transient orders), along with other peripherals.
 - fastlane.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
 - fastlane.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
+- fastlane.tr: for zynk-tr operations like creating pools and anchoring batch merkle roots, along with reading pools and batches.
 
 ### Quick Start
 
@@ -119,6 +120,11 @@ Fastlane(<endpoint>)
 │   ├─ getTokenDetails()
 │   ├─ getAllChains()
 │   └─ getAllTokens()
+├─ tr
+│   ├─ createPool()
+│   ├─ readPool()
+│   ├─ anchorBatch()
+│   └─ readBatch()
 └─ base
     ├─ generateHashedArray()
     ├─ buildEd25519Ix()
@@ -183,6 +189,7 @@ type KmsSignerKey =
 - [Transfer - ZOW => Beneficiary (incl. PDVs) - transient order](./examples/core/transfers/zowToBeneficiary__transient.ts)
 - [Transfer - PDV => Beneficiary (incl. PDVs) - multi asset swapr](./examples/core/transfers/pdvToBeneficiary__multiAsset.ts)
 - [Attest order - Solana ZOW => Arbitrum Beneficiary](./examples/attestations/zowToBeneficiary.ts)
+- [Read TR pool and batch](./examples/tr/readPoolAndBatch.ts)
 - [Arbitrary transaction/instructions requiring Zynk signers](./examples/arbitrary.ts)
 - [Tx details](./examples/txDetails.ts)
 
@@ -194,6 +201,7 @@ The SDK is based on the following proto services:
 - Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, and attestation.
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
+- Tr Service ([proto/tr.proto](./proto/tr.proto)): TR pools and batch merkle root anchoring.
 
 ## Development
 

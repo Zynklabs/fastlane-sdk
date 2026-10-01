@@ -11,6 +11,8 @@ export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrReques
 import { IOptions } from './interfaces.js';
 import { EvmClient } from './stubs/evm.js';
 export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.js';
+import { TrClient } from './stubs/tr.js';
+export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './stubs/tr.js';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
 import '@solana/web3.js';
@@ -43,6 +45,7 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     orbit: OrbitClient<{}>;
     kamino: KaminoClient<{}>;
     evm: EvmClient<{}>;
+    tr: TrClient<{}>;
     Token: typeof Token;
     Denom: typeof Denom;
 };

@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package tr;
+
+service Tr {
+  rpc CreatePool (CreatePoolRequest) returns (PoolData);
+  rpc ReadPool (ReadPoolRequest) returns (ReadPoolResponse);
+
+  rpc AnchorBatch (AnchorBatchRequest) returns (BatchData);
+  rpc ReadBatch (ReadBatchRequest) returns (ReadBatchResponse);
+}
+
+message CreatePoolRequest {
+  string pool_id = 1;
+  string partner_id = 2;
+  // BATCH or REALTIME.
+  string model = 3;
+}
+
+message ReadPoolRequest {
+  string pool_id = 1;
+}
+
+// `pool_id` and `partner_id` are the ids the account stores: the first 32 hex
+// characters of the SHA-256 of the backend's ids.
+message PoolData {
+  string address = 1;
+  string pool_id = 2;
+  string partner_id = 3;
+  string model = 4;
+  uint64 last_sequence = 5;
+  uint64 batch_count = 6;
+  int64 created_at = 7;
+  // The creating transaction, when this call made it.
+  optional string signature = 8;
+}
+
+message ReadPoolResponse {
+  optional PoolData pool = 1;
+}
+
+message AnchorBatchRequest {
+  // The pool's address.
+  string pool = 1;
+  string batch_id = 2;
+  // 64 hex characters.
+  string merkle_root = 3;
+  uint64 sequence_from = 4;
+  uint64 sequence_to = 5;
+}
+
+message ReadBatchRequest {
+  // The pool's address.
+  string pool = 1;
+  uint64 sequence_from = 2;
+}
+
+// `batch_id` is the id the account stores: the first 32 hex characters of the
+// SHA-256 of the backend's id.
+message BatchData {
+  string address = 1;
+  string pool = 2;
+  string batch_id = 3;
+  string merkle_root = 4;
+  uint64 sequence_from = 5;
+  uint64 sequence_to = 6;
+  int64 anchored_at = 7;
+  // The anchoring transaction.
+  optional string signature = 8;
+}
+
+message ReadBatchResponse {
+  optional BatchData batch = 1;
+}
