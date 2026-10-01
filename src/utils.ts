@@ -12,6 +12,8 @@ export const nonRetryables = new Set([
   "SpendTokens",
   "TransferToLp",
   "TransferPdaToWallet",
+  "CreatePool",
+  "AnchorBatch",
 ]);
 
 export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));

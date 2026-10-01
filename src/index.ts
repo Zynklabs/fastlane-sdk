@@ -12,6 +12,7 @@ import {
 } from "./middlewares";
 import { IOptions } from "./interfaces";
 import { EvmClient, EvmDefinition } from "./stubs/evm";
+import { TrClient, TrDefinition } from "./stubs/tr";
 
 export default (endpoint: string, options?: IOptions) => {
   const { overrides, extensions, retryPolicy } = options || {};
@@ -29,8 +30,9 @@ export default (endpoint: string, options?: IOptions) => {
   const orbit: OrbitClient = clientFactory.create(OrbitDefinition, channel);
   const kamino: KaminoClient = clientFactory.create(KaminoDefinition, channel);
   const evm: EvmClient = clientFactory.create(EvmDefinition, channel);
+  const tr: TrClient = clientFactory.create(TrDefinition, channel);
 
-  return { base, core, orbit, kamino, evm, Token, Denom, ...base };
+  return { base, core, orbit, kamino, evm, tr, Token, Denom, ...base };
 };
 
 export * from "./stubs";

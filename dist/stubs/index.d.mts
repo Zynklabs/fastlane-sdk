@@ -5,6 +5,7 @@ export { BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRe
 export { DisburseRequest, GetPdaRequest, GetPositionPdaRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse, PositionAccountData, PositionData } from './orbit.mjs';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './kamino.mjs';
 export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './evm.mjs';
+export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './tr.mjs';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
 

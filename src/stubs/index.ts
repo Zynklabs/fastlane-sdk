@@ -117,3 +117,14 @@ export type {
   GetAllTokensRequest,
   AllTokens,
 } from "./evm";
+
+export type {
+  CreatePoolRequest,
+  ReadPoolRequest,
+  PoolData,
+  ReadPoolResponse,
+  AnchorBatchRequest,
+  ReadBatchRequest,
+  BatchData,
+  ReadBatchResponse,
+} from "./tr";
