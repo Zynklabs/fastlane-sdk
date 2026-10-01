@@ -79,7 +79,6 @@ export type {
   GetPdaRequest,
   PdaResponse,
   OrderData,
-  CollectRequest,
   DisburseRequest,
   LPState,
   TxResponse as OrbitTxResponse,

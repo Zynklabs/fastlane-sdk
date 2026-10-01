@@ -129,15 +129,6 @@ export interface PositionData {
   data?: PositionAccountData | undefined;
 }
 
-export interface CollectRequest {
-  orderId: string;
-  vaultId: string;
-  userId: string;
-  address: string;
-  amount: string;
-  token?: Token | undefined;
-}
-
 export interface DisburseRequest {
   requestId: string;
   userId: string;
@@ -1023,158 +1014,6 @@ export const PositionData: MessageFns<PositionData> = {
     message.data = (object.data !== undefined && object.data !== null)
       ? PositionAccountData.fromPartial(object.data)
       : undefined;
-    return message;
-  },
-};
-
-function createBaseCollectRequest(): CollectRequest {
-  return { orderId: "", vaultId: "", userId: "", address: "", amount: "", token: undefined };
-}
-
-export const CollectRequest: MessageFns<CollectRequest> = {
-  encode(message: CollectRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
-    }
-    if (message.vaultId !== "") {
-      writer.uint32(18).string(message.vaultId);
-    }
-    if (message.userId !== "") {
-      writer.uint32(26).string(message.userId);
-    }
-    if (message.address !== "") {
-      writer.uint32(34).string(message.address);
-    }
-    if (message.amount !== "") {
-      writer.uint32(42).string(message.amount);
-    }
-    if (message.token !== undefined) {
-      writer.uint32(48).int32(message.token);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CollectRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCollectRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.orderId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.vaultId = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.userId = reader.string();
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.address = reader.string();
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.amount = reader.string();
-          continue;
-        }
-        case 6: {
-          if (tag !== 48) {
-            break;
-          }
-
-          message.token = reader.int32() as any;
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): CollectRequest {
-    return {
-      orderId: isSet(object.orderId)
-        ? globalThis.String(object.orderId)
-        : isSet(object.order_id)
-        ? globalThis.String(object.order_id)
-        : "",
-      vaultId: isSet(object.vaultId)
-        ? globalThis.String(object.vaultId)
-        : isSet(object.vault_id)
-        ? globalThis.String(object.vault_id)
-        : "",
-      userId: isSet(object.userId)
-        ? globalThis.String(object.userId)
-        : isSet(object.user_id)
-        ? globalThis.String(object.user_id)
-        : "",
-      address: isSet(object.address) ? globalThis.String(object.address) : "",
-      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
-      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
-    };
-  },
-
-  toJSON(message: CollectRequest): unknown {
-    const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
-    }
-    if (message.vaultId !== "") {
-      obj.vaultId = message.vaultId;
-    }
-    if (message.userId !== "") {
-      obj.userId = message.userId;
-    }
-    if (message.address !== "") {
-      obj.address = message.address;
-    }
-    if (message.amount !== "") {
-      obj.amount = message.amount;
-    }
-    if (message.token !== undefined) {
-      obj.token = tokenToJSON(message.token);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<CollectRequest>, I>>(base?: I): CollectRequest {
-    return CollectRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<CollectRequest>, I>>(object: I): CollectRequest {
-    const message = createBaseCollectRequest();
-    message.orderId = object.orderId ?? "";
-    message.vaultId = object.vaultId ?? "";
-    message.userId = object.userId ?? "";
-    message.address = object.address ?? "";
-    message.amount = object.amount ?? "";
-    message.token = object.token ?? undefined;
     return message;
   },
 };
@@ -3322,14 +3161,6 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
-    collect: {
-      name: "Collect",
-      requestType: CollectRequest as typeof CollectRequest,
-      requestStream: false,
-      responseType: TxResponse as typeof TxResponse,
-      responseStream: false,
-      options: {},
-    },
     disburse: {
       name: "Disburse",
       requestType: DisburseRequest as typeof DisburseRequest,
@@ -3475,7 +3306,6 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
     request: GetPositionPdaRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<PositionData>>;
-  collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -3534,7 +3364,6 @@ export interface OrbitClient<CallOptionsExt = {}> {
     request: DeepPartial<GetPositionPdaRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<PositionData>;
-  collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;

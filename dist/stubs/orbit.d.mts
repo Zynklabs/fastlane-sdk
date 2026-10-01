@@ -64,15 +64,6 @@ interface PositionData {
     data?: PositionAccountData | undefined;
 }
 declare const PositionData: MessageFns<PositionData>;
-interface CollectRequest {
-    orderId: string;
-    vaultId: string;
-    userId: string;
-    address: string;
-    amount: string;
-    token?: Token | undefined;
-}
-declare const CollectRequest: MessageFns<CollectRequest>;
 interface DisburseRequest {
     requestId: string;
     userId: string;
@@ -297,14 +288,6 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly collect: {
-            readonly name: "Collect";
-            readonly requestType: typeof CollectRequest;
-            readonly requestStream: false;
-            readonly responseType: typeof TxResponse;
-            readonly responseStream: false;
-            readonly options: {};
-        };
         readonly disburse: {
             readonly name: "Disburse";
             readonly requestType: typeof DisburseRequest;
@@ -431,7 +414,6 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
     readWithdrawRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<WithdrawRequestData>>;
     readUpdateCliffPeriodRequestPda(request: GetPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<UpdateCliffPeriodRequestData>>;
     readPositionPda(request: GetPositionPdaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PositionData>>;
-    collect(request: CollectRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
@@ -459,7 +441,6 @@ interface OrbitClient<CallOptionsExt = {}> {
     readWithdrawRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<WithdrawRequestData>;
     readUpdateCliffPeriodRequestPda(request: DeepPartial<GetPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<UpdateCliffPeriodRequestData>;
     readPositionPda(request: DeepPartial<GetPositionPdaRequest>, options?: CallOptions & CallOptionsExt): Promise<PositionData>;
-    collect(request: DeepPartial<CollectRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
@@ -495,4 +476,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { ApproveWithdrawRequest, BorrowRequest, CollectRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionAccountData, PositionArgs, PositionData, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { ApproveWithdrawRequest, BorrowRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionAccountData, PositionArgs, PositionData, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
