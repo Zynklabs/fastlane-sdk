@@ -9,6 +9,8 @@ import { KaminoClient } from './stubs/kamino.mjs';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.mjs';
 import { EvmClient } from './stubs/evm.mjs';
 export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.mjs';
+import { TrClient } from './stubs/tr.mjs';
+export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './stubs/tr.mjs';
 import { IOptions } from './interfaces.mjs';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
@@ -39,6 +41,7 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     orbit: OrbitClient<{}>;
     kamino: KaminoClient<{}>;
     evm: EvmClient<{}>;
+    tr: TrClient<{}>;
     Token: typeof Token;
     Denom: typeof Denom;
 };
