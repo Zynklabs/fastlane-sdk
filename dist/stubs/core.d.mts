@@ -83,17 +83,18 @@ interface ReplenishRequest {
     meta: MetaArg[];
 }
 declare const ReplenishRequest: MessageFns<ReplenishRequest>;
-interface RecordOrderRequest {
+interface CloseOrdersRequest {
     requestId: string;
-    partnerId: string;
-    beneficiary: string;
-    token: Token;
-    amount: string;
-    zovId?: string | undefined;
+    orderTrackers: string[];
     meta: MetaArg[];
-    orderId?: string | undefined;
 }
-declare const RecordOrderRequest: MessageFns<RecordOrderRequest>;
+declare const CloseOrdersRequest: MessageFns<CloseOrdersRequest>;
+interface CloseOrdersResponse {
+    requestId: string;
+    orderTrackers: string[];
+    txPda: string;
+}
+declare const CloseOrdersResponse: MessageFns<CloseOrdersResponse>;
 interface TransferRequest {
     requestId: string;
     from: string;
@@ -107,22 +108,6 @@ interface TransferRequest {
     proxy?: string | undefined;
 }
 declare const TransferRequest: MessageFns<TransferRequest>;
-interface AttestOrderRequest {
-    orderId: string;
-    originChain: string;
-    targetChain: string;
-    origin: string;
-    proxy: string;
-    target: string;
-    txn: string;
-    asset: Token;
-    amount: string;
-    ed25519Pair?: Ed25519Pair | undefined;
-    proxyTxn?: string | undefined;
-    proxyAsset?: Token | undefined;
-    meta: MetaArg[];
-}
-declare const AttestOrderRequest: MessageFns<AttestOrderRequest>;
 interface TxResponse {
     requestId: string;
     orderTracker: string;
@@ -223,25 +208,17 @@ declare const CoreDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly recordOrder: {
-            readonly name: "RecordOrder";
-            readonly requestType: typeof RecordOrderRequest;
+        readonly closeOrders: {
+            readonly name: "CloseOrders";
+            readonly requestType: typeof CloseOrdersRequest;
             readonly requestStream: false;
-            readonly responseType: typeof TxResponse;
+            readonly responseType: typeof CloseOrdersResponse;
             readonly responseStream: false;
             readonly options: {};
         };
         readonly transfer: {
             readonly name: "Transfer";
             readonly requestType: typeof TransferRequest;
-            readonly requestStream: false;
-            readonly responseType: typeof TxResponse;
-            readonly responseStream: false;
-            readonly options: {};
-        };
-        readonly attestOrder: {
-            readonly name: "AttestOrder";
-            readonly requestType: typeof AttestOrderRequest;
             readonly requestStream: false;
             readonly responseType: typeof TxResponse;
             readonly responseStream: false;
@@ -298,9 +275,8 @@ interface CoreServiceImplementation<CallContextExt = {}> {
     readOrderTrackerByIds(request: ReadOrderTrackerByIdsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTrackerData>>;
     createOrder(request: CreateOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     replenish(request: ReplenishRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
-    recordOrder(request: RecordOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    closeOrders(request: CloseOrdersRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CloseOrdersResponse>>;
     transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
-    attestOrder(request: AttestOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
     verifyBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
     whitelistBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
@@ -316,9 +292,8 @@ interface CoreClient<CallOptionsExt = {}> {
     readOrderTrackerByIds(request: DeepPartial<ReadOrderTrackerByIdsRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTrackerData>;
     createOrder(request: DeepPartial<CreateOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     replenish(request: DeepPartial<ReplenishRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
-    recordOrder(request: DeepPartial<RecordOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    closeOrders(request: DeepPartial<CloseOrdersRequest>, options?: CallOptions & CallOptionsExt): Promise<CloseOrdersResponse>;
     transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
-    attestOrder(request: DeepPartial<AttestOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
     verifyBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
     whitelistBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
@@ -344,4 +319,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AttestOrderRequest, BeneficiaryRequest, BeneficiaryState, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };
+export { BeneficiaryRequest, BeneficiaryState, CloseOrdersRequest, CloseOrdersResponse, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };

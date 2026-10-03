@@ -39,11 +39,6 @@ interface HashedArrayResponse {
     hashed: Buffer;
 }
 declare const HashedArrayResponse: MessageFns<HashedArrayResponse>;
-interface BuildEd25519IxRequest {
-    message: string;
-    signer: string;
-}
-declare const BuildEd25519IxRequest: MessageFns<BuildEd25519IxRequest>;
 interface Ed25519Pair {
     ed25519Sig: Buffer;
     ed25519Ix?: TxIx | undefined;
@@ -173,17 +168,6 @@ interface GetOrCreateAtaResponse {
     signature?: string | undefined;
 }
 declare const GetOrCreateAtaResponse: MessageFns<GetOrCreateAtaResponse>;
-interface ExecuteTxRequest {
-    requestId: string;
-    ixs: TxIx[];
-    signers: string[];
-}
-declare const ExecuteTxRequest: MessageFns<ExecuteTxRequest>;
-interface ExecuteTxResponse {
-    requestId: string;
-    signature: string;
-}
-declare const ExecuteTxResponse: MessageFns<ExecuteTxResponse>;
 interface MetaArg {
     key: string;
     value: string;
@@ -292,6 +276,11 @@ interface FaucetRequest {
     token: Token;
 }
 declare const FaucetRequest: MessageFns<FaucetRequest>;
+interface FaucetResponse {
+    requestId: string;
+    signature: string;
+}
+declare const FaucetResponse: MessageFns<FaucetResponse>;
 type BaseDefinition = typeof BaseDefinition;
 declare const BaseDefinition: {
     readonly name: "Base";
@@ -302,14 +291,6 @@ declare const BaseDefinition: {
             readonly requestType: typeof GenerateHashedArrayRequest;
             readonly requestStream: false;
             readonly responseType: typeof HashedArrayResponse;
-            readonly responseStream: false;
-            readonly options: {};
-        };
-        readonly buildEd25519Ix: {
-            readonly name: "BuildEd25519Ix";
-            readonly requestType: typeof BuildEd25519IxRequest;
-            readonly requestStream: false;
-            readonly responseType: typeof Ed25519Pair;
             readonly responseStream: false;
             readonly options: {};
         };
@@ -401,14 +382,6 @@ declare const BaseDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
-        readonly executeTx: {
-            readonly name: "ExecuteTx";
-            readonly requestType: typeof ExecuteTxRequest;
-            readonly requestStream: false;
-            readonly responseType: typeof ExecuteTxResponse;
-            readonly responseStream: false;
-            readonly options: {};
-        };
         readonly transfer: {
             readonly name: "Transfer";
             readonly requestType: typeof TransferRequest;
@@ -461,7 +434,7 @@ declare const BaseDefinition: {
             readonly name: "Faucet";
             readonly requestType: typeof FaucetRequest;
             readonly requestStream: false;
-            readonly responseType: typeof ExecuteTxResponse;
+            readonly responseType: typeof FaucetResponse;
             readonly responseStream: false;
             readonly options: {};
         };
@@ -469,7 +442,6 @@ declare const BaseDefinition: {
 };
 interface BaseServiceImplementation<CallContextExt = {}> {
     generateHashedArray(request: GenerateHashedArrayRequest, context: CallContext & CallContextExt): Promise<DeepPartial<HashedArrayResponse>>;
-    buildEd25519Ix(request: BuildEd25519IxRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Ed25519Pair>>;
     getBalance(request: GetBalanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balance>>;
     getBalances(request: GetBalancesRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Balances>>;
     getAddress(request: GetAddressRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AddressResponse>>;
@@ -481,18 +453,16 @@ interface BaseServiceImplementation<CallContextExt = {}> {
     getAta(request: GetAtaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaResponse>>;
     getAtaByMint(request: GetAtaByMintRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AtaResponse>>;
     getOrCreateAta(request: GetOrCreateAtaRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GetOrCreateAtaResponse>>;
-    executeTx(request: ExecuteTxRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ExecuteTxResponse>>;
     transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     getVaults(request: GetVaultsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<VaultsResponse>>;
     getTxStatus(request: GetTxStatusRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxStatus>>;
     getTxDetails(request: GetTxDetailsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxDetails>>;
     getTxCost(request: GetTxCostRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxCost>>;
     getAssetPrice(request: GetAssetPriceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AssetPrice>>;
-    faucet(request: FaucetRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ExecuteTxResponse>>;
+    faucet(request: FaucetRequest, context: CallContext & CallContextExt): Promise<DeepPartial<FaucetResponse>>;
 }
 interface BaseClient<CallOptionsExt = {}> {
     generateHashedArray(request: DeepPartial<GenerateHashedArrayRequest>, options?: CallOptions & CallOptionsExt): Promise<HashedArrayResponse>;
-    buildEd25519Ix(request: DeepPartial<BuildEd25519IxRequest>, options?: CallOptions & CallOptionsExt): Promise<Ed25519Pair>;
     getBalance(request: DeepPartial<GetBalanceRequest>, options?: CallOptions & CallOptionsExt): Promise<Balance>;
     getBalances(request: DeepPartial<GetBalancesRequest>, options?: CallOptions & CallOptionsExt): Promise<Balances>;
     getAddress(request: DeepPartial<GetAddressRequest>, options?: CallOptions & CallOptionsExt): Promise<AddressResponse>;
@@ -504,14 +474,13 @@ interface BaseClient<CallOptionsExt = {}> {
     getAta(request: DeepPartial<GetAtaRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaResponse>;
     getAtaByMint(request: DeepPartial<GetAtaByMintRequest>, options?: CallOptions & CallOptionsExt): Promise<AtaResponse>;
     getOrCreateAta(request: DeepPartial<GetOrCreateAtaRequest>, options?: CallOptions & CallOptionsExt): Promise<GetOrCreateAtaResponse>;
-    executeTx(request: DeepPartial<ExecuteTxRequest>, options?: CallOptions & CallOptionsExt): Promise<ExecuteTxResponse>;
     transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     getVaults(request: DeepPartial<GetVaultsRequest>, options?: CallOptions & CallOptionsExt): Promise<VaultsResponse>;
     getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: CallOptions & CallOptionsExt): Promise<TxStatus>;
     getTxDetails(request: DeepPartial<GetTxDetailsRequest>, options?: CallOptions & CallOptionsExt): Promise<TxDetails>;
     getTxCost(request: DeepPartial<GetTxCostRequest>, options?: CallOptions & CallOptionsExt): Promise<TxCost>;
     getAssetPrice(request: DeepPartial<GetAssetPriceRequest>, options?: CallOptions & CallOptionsExt): Promise<AssetPrice>;
-    faucet(request: DeepPartial<FaucetRequest>, options?: CallOptions & CallOptionsExt): Promise<ExecuteTxResponse>;
+    faucet(request: DeepPartial<FaucetRequest>, options?: CallOptions & CallOptionsExt): Promise<FaucetResponse>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 type DeepPartial<T> = T extends Builtin ? T : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
@@ -532,4 +501,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, AtaResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, BuildEd25519IxRequest, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, ExecuteTxRequest, ExecuteTxResponse, FaucetRequest, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetAtaByMintRequest, GetAtaRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, type MessageFns, MetaArg, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxIx, TxIxAccount, TxResponse, TxResponse_MetaEntry, TxStatus, VaultResponse, VaultsResponse, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
+export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, AtaResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, FaucetRequest, FaucetResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetAtaByMintRequest, GetAtaRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, type MessageFns, MetaArg, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxIx, TxIxAccount, TxResponse, TxResponse_MetaEntry, TxStatus, VaultResponse, VaultsResponse, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
