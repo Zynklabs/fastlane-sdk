@@ -1,6 +1,6 @@
 import { BinaryWriter, BinaryReader } from '@bufbuild/protobuf/wire';
 import { CallOptions, CallContext } from 'nice-grpc-common';
-import { Token, Ed25519Pair, DecodeEventRequest, EventData } from './base.js';
+import { Token, DecodeEventRequest, EventData } from './base.js';
 
 declare const protobufPackage = "core";
 interface DomainSeparatorRequest {
@@ -114,7 +114,6 @@ interface TransferRequest {
     token: Token;
     partnerId?: string | undefined;
     toToken?: Token | undefined;
-    ed25519Pair?: Ed25519Pair | undefined;
     meta: MetaArg[];
     proxy?: string | undefined;
 }

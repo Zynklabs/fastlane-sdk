@@ -1,10 +1,15 @@
 import * as nice_grpc from 'nice-grpc';
 import { DeepPartial, GenerateHashedArrayRequest, HashedArrayResponse, GetBalanceRequest, Balance, GetBalancesRequest, Balances, GetAddressRequest, AddressResponse, GetTokenAddressRequest, GetAccountInfoRequest, AccountInfoResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, TokenAccountOwnerResponse, GetAtaAddressRequest, AtaAddressResponse, GetAtaRequest, AtaResponse, GetAtaByMintRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, TransferRequest, TxResponse, GetVaultsRequest, VaultsResponse, GetTxStatusRequest, TxStatus, GetTxDetailsRequest, TxDetails, GetTxCostRequest, TxCost, GetAssetPriceRequest, AssetPrice, FaucetRequest, FaucetResponse, BaseClient, Token, Denom } from './stubs/base.js';
+export { Asset, BalancesItem, BalancesItem_BalancesEntry, DecodeEventRequest, EventData } from './stubs/base.js';
 import { CoreClient } from './stubs/core.js';
+export { BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.js';
 import { OrbitClient } from './stubs/orbit.js';
+export { DisburseRequest, GetPdaRequest, GetPositionPdaRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse, PositionAccountData, PositionData } from './stubs/orbit.js';
 import { KaminoClient } from './stubs/kamino.js';
-import { IOptions } from './interfaces.js';
+export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.js';
 import { EvmClient } from './stubs/evm.js';
+export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.js';
+import { IOptions } from './interfaces.js';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
 import '@grpc/grpc-js';
@@ -38,4 +43,4 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     Denom: typeof Denom;
 };
 
-export { _default as default };
+export { AccountInfoResponse, AddressResponse, AssetPrice, AtaAddressResponse, Balance, Balances, Denom, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxResponse, TxStatus, VaultsResponse, _default as default };
