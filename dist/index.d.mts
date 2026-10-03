@@ -1,21 +1,19 @@
 import * as nice_grpc from 'nice-grpc';
 import { DeepPartial, GenerateHashedArrayRequest, HashedArrayResponse, GetBalanceRequest, Balance, GetBalancesRequest, Balances, GetAddressRequest, AddressResponse, GetTokenAddressRequest, GetAccountInfoRequest, AccountInfoResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, TokenAccountOwnerResponse, GetAtaAddressRequest, AtaAddressResponse, GetAtaRequest, AtaResponse, GetAtaByMintRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, TransferRequest, TxResponse, GetVaultsRequest, VaultsResponse, GetTxStatusRequest, TxStatus, GetTxDetailsRequest, TxDetails, GetTxCostRequest, TxCost, GetAssetPriceRequest, AssetPrice, FaucetRequest, FaucetResponse, BaseClient, Token, Denom } from './stubs/base.mjs';
 export { Asset, BalancesItem, BalancesItem_BalancesEntry, DecodeEventRequest, EventData } from './stubs/base.mjs';
-export { Ed25519Pair, ExecuteTxRequest } from './stubs/index.mjs';
 import { CoreClient } from './stubs/core.mjs';
 export { BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TxResponse_MetaEntry } from './stubs/core.mjs';
 import { OrbitClient } from './stubs/orbit.mjs';
 export { DisburseRequest, GetPdaRequest, GetPositionPdaRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse, PositionAccountData, PositionData } from './stubs/orbit.mjs';
 import { KaminoClient } from './stubs/kamino.mjs';
 export { BorrowCapacityRequest, BorrowCapacityResponse, BorrowRequest, CbrRequest, CbrResponse, DepositCollateralRequest, DepositRequest, EstimateYieldRequest, EstimateYieldResponse, GetStatsRequest, KaminoTx, RefreshStatsRequest, RepayRequest, StatsResponse, WithdrawRequest } from './stubs/kamino.mjs';
-import { IOptions } from './interfaces.mjs';
 import { EvmClient } from './stubs/evm.mjs';
 export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.mjs';
 import { TrClient } from './stubs/tr.mjs';
 export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './stubs/tr.mjs';
+import { IOptions } from './interfaces.mjs';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
-import '@solana/web3.js';
 import '@grpc/grpc-js';
 
 declare const _default: (endpoint: string, options?: IOptions) => {

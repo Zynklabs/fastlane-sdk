@@ -136,9 +136,8 @@ message TransferRequest {
   base.Token token = 5;
   optional string partner_id = 6;
   optional base.Token to_token = 7;
-  optional base.Ed25519Pair ed25519_pair = 8;
-  repeated MetaArg meta = 9;
-  optional string proxy = 10;
+  repeated MetaArg meta = 8;
+  optional string proxy = 9;
 }
 
 message TxResponse {

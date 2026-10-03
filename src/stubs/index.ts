@@ -1,17 +1,3 @@
-import { TransactionInstruction } from "@solana/web3.js";
-import { TxIx } from "./base";
-
-export interface ExecuteTxRequest {
-  requestId: string;
-  ixs: Array<TxIx | TransactionInstruction>;
-  signers: string[];
-}
-
-export interface Ed25519Pair {
-  ed25519Sig: Buffer;
-  ed25519Ix?: TxIx | TransactionInstruction | undefined;
-}
-
 export type {
   Token,
   Asset,

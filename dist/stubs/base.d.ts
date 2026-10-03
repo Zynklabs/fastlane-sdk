@@ -36,11 +36,6 @@ interface HashedArrayResponse {
     hashed: Buffer;
 }
 declare const HashedArrayResponse: MessageFns<HashedArrayResponse>;
-interface Ed25519Pair {
-    ed25519Sig: Buffer;
-    ed25519Ix?: TxIx | undefined;
-}
-declare const Ed25519Pair: MessageFns<Ed25519Pair>;
 interface GetBalanceRequest {
     of: string;
     token?: Token | undefined;
@@ -178,7 +173,6 @@ interface TransferRequest {
     token: Token;
     partnerId?: string | undefined;
     toToken?: Token | undefined;
-    ed25519Pair?: Ed25519Pair | undefined;
     meta: MetaArg[];
     proxy?: string | undefined;
 }
@@ -498,4 +492,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, AtaResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, DecodeEventRequest, type DeepPartial, Denom, Ed25519Pair, EventData, type Exact, FaucetRequest, FaucetResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetAtaByMintRequest, GetAtaRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, type MessageFns, MetaArg, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxIx, TxIxAccount, TxResponse, TxResponse_MetaEntry, TxStatus, VaultResponse, VaultsResponse, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };
+export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, AtaResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, type BaseClient, BaseDefinition, type BaseServiceImplementation, DecodeEventRequest, type DeepPartial, Denom, EventData, type Exact, FaucetRequest, FaucetResponse, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetAtaByMintRequest, GetAtaRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, type MessageFns, MetaArg, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxIx, TxIxAccount, TxResponse, TxResponse_MetaEntry, TxStatus, VaultResponse, VaultsResponse, denomFromJSON, denomToJSON, protobufPackage, tokenFromJSON, tokenToJSON };

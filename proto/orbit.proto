@@ -17,7 +17,6 @@ service Orbit {
   rpc ReadUpdateCliffPeriodRequestPda (GetPdaRequest) returns (UpdateCliffPeriodRequestData);
   rpc ReadPositionPda (GetPositionPdaRequest) returns (PositionData);
 
-  rpc Collect (CollectRequest) returns (TxResponse);
   rpc Disburse (DisburseRequest) returns (TxResponse);
   rpc Pledge (PledgeRequest) returns (TxResponse);
   rpc Borrow (BorrowRequest) returns (TxResponse);
@@ -81,15 +80,6 @@ message PositionData {
   string order_id = 2;
   string pda = 3;
   PositionAccountData data = 4;
-}
-
-message CollectRequest {
-  string order_id = 1;
-  string vault_id = 2;
-  string user_id = 3;
-  string address = 4;
-  string amount = 5;
-  optional base.Token token = 6;
 }
 
 message DisburseRequest {

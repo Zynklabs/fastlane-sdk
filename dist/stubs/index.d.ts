@@ -1,5 +1,3 @@
-import { TransactionInstruction } from '@solana/web3.js';
-import { TxIx } from './base.js';
 export { AccountInfoResponse, AddressResponse, Asset, AssetPrice, AtaAddressResponse, Balance, Balances, BalancesItem, BalancesItem_BalancesEntry, DecodeEventRequest, Denom, EventData, GenerateHashedArrayRequest, GetAccountInfoRequest, GetAddressRequest, GetAssetPriceRequest, GetAtaAddressRequest, GetBalanceRequest, GetBalancesRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, GetTokenAddressRequest, GetTxCostRequest, GetTxDetailsRequest, GetTxStatusRequest, GetVaultsRequest, HashedArrayResponse, Token, TokenAccountOwnerResponse, TransferRequest, TxCost, TxDetails, TxResponse, TxStatus, VaultsResponse } from './base.js';
 export { BeneficiaryRequest, BeneficiaryState, TransferRequest as CoreTransferRequest, TxResponse as CoreTxResponse, CreateOrderRequest, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, GenerateOrderIdRequest, GetPdvRequest, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TxResponse_MetaEntry } from './core.js';
 export { DisburseRequest, GetPdaRequest, GetPositionPdaRequest, LPState, TxResponse as OrbitTxResponse, OrderData, PdaResponse, PositionAccountData, PositionData } from './orbit.js';
@@ -8,15 +6,3 @@ export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRe
 export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './tr.js';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
-
-interface ExecuteTxRequest {
-    requestId: string;
-    ixs: Array<TxIx | TransactionInstruction>;
-    signers: string[];
-}
-interface Ed25519Pair {
-    ed25519Sig: Buffer;
-    ed25519Ix?: TxIx | TransactionInstruction | undefined;
-}
-
-export type { Ed25519Pair, ExecuteTxRequest };
