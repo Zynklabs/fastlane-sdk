@@ -1,0 +1,41 @@
+import * as nice_grpc from 'nice-grpc';
+import { DeepPartial, GenerateHashedArrayRequest, HashedArrayResponse, GetBalanceRequest, Balance, GetBalancesRequest, Balances, GetAddressRequest, AddressResponse, GetTokenAddressRequest, GetAccountInfoRequest, AccountInfoResponse, GetOwnerRequest, GetOwnerResponse, GetTokenAccountOwnerRequest, TokenAccountOwnerResponse, GetAtaAddressRequest, AtaAddressResponse, GetAtaRequest, AtaResponse, GetAtaByMintRequest, GetOrCreateAtaRequest, GetOrCreateAtaResponse, TransferRequest, TxResponse, GetVaultsRequest, VaultsResponse, GetTxStatusRequest, TxStatus, GetTxDetailsRequest, TxDetails, GetTxCostRequest, TxCost, GetAssetPriceRequest, AssetPrice, FaucetRequest, FaucetResponse, BaseClient, Token, Denom } from './stubs/base.mjs';
+import { CoreClient } from './stubs/core.mjs';
+import { OrbitClient } from './stubs/orbit.mjs';
+import { KaminoClient } from './stubs/kamino.mjs';
+import { IOptions } from './interfaces.mjs';
+import { EvmClient } from './stubs/evm.mjs';
+import '@bufbuild/protobuf/wire';
+import 'nice-grpc-common';
+import '@grpc/grpc-js';
+
+declare const _default: (endpoint: string, options?: IOptions) => {
+    generateHashedArray(request: DeepPartial<GenerateHashedArrayRequest>, options?: nice_grpc.CallOptions | undefined): Promise<HashedArrayResponse>;
+    getBalance(request: DeepPartial<GetBalanceRequest>, options?: nice_grpc.CallOptions | undefined): Promise<Balance>;
+    getBalances(request: DeepPartial<GetBalancesRequest>, options?: nice_grpc.CallOptions | undefined): Promise<Balances>;
+    getAddress(request: DeepPartial<GetAddressRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AddressResponse>;
+    getTokenAddress(request: DeepPartial<GetTokenAddressRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AddressResponse>;
+    getAccountInfo(request: DeepPartial<GetAccountInfoRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AccountInfoResponse>;
+    getOwner(request: DeepPartial<GetOwnerRequest>, options?: nice_grpc.CallOptions | undefined): Promise<GetOwnerResponse>;
+    getTokenAccountOwner(request: DeepPartial<GetTokenAccountOwnerRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TokenAccountOwnerResponse>;
+    getAtaAddress(request: DeepPartial<GetAtaAddressRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AtaAddressResponse>;
+    getAta(request: DeepPartial<GetAtaRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AtaResponse>;
+    getAtaByMint(request: DeepPartial<GetAtaByMintRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AtaResponse>;
+    getOrCreateAta(request: DeepPartial<GetOrCreateAtaRequest>, options?: nice_grpc.CallOptions | undefined): Promise<GetOrCreateAtaResponse>;
+    transfer(request: DeepPartial<TransferRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxResponse>;
+    getVaults(request: DeepPartial<GetVaultsRequest>, options?: nice_grpc.CallOptions | undefined): Promise<VaultsResponse>;
+    getTxStatus(request: DeepPartial<GetTxStatusRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxStatus>;
+    getTxDetails(request: DeepPartial<GetTxDetailsRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxDetails>;
+    getTxCost(request: DeepPartial<GetTxCostRequest>, options?: nice_grpc.CallOptions | undefined): Promise<TxCost>;
+    getAssetPrice(request: DeepPartial<GetAssetPriceRequest>, options?: nice_grpc.CallOptions | undefined): Promise<AssetPrice>;
+    faucet(request: DeepPartial<FaucetRequest>, options?: nice_grpc.CallOptions | undefined): Promise<FaucetResponse>;
+    base: BaseClient<{}>;
+    core: CoreClient<{}>;
+    orbit: OrbitClient<{}>;
+    kamino: KaminoClient<{}>;
+    evm: EvmClient<{}>;
+    Token: typeof Token;
+    Denom: typeof Denom;
+};
+
+export { _default as default };
