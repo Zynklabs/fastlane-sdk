@@ -5,9 +5,6 @@ declare const protobufPackage = "base";
 declare enum Token {
     USDC = 0,
     USDT = 1,
-    PYUSD = 2,
-    USD1 = 3,
-    RLUSD = 4,
     UNRECOGNIZED = -1
 }
 declare function tokenFromJSON(object: any): Token;

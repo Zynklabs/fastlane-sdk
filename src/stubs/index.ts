@@ -68,6 +68,7 @@ export type {
   MetaArg,
   CreateOrderRequest,
   ReplenishRequest,
+  RecordOrderRequest,
   TransferRequest as CoreTransferRequest,
   TxResponse as CoreTxResponse,
   BeneficiaryRequest,
@@ -77,9 +78,11 @@ export type {
 
 export type {
   GetPdaRequest,
+  GetPositionPdaRequest,
   PdaResponse,
   OrderData,
-  CollectRequest,
+  PositionAccountData,
+  PositionData,
   DisburseRequest,
   LPState,
   TxResponse as OrbitTxResponse,
