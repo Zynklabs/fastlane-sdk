@@ -120,11 +120,10 @@ message RequestActionRequest {
 }
 
 // `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
-// instruction the wallet signs (`ix`).
+// instruction the wallet signs (`ix`). `address` is the request's.
 message RequestState {
   string status = 1;
-  // The request's address.
-  string request = 2;
+  string address = 2;
   optional string tx_pda = 3;
   optional base.TxIx ix = 4;
 }

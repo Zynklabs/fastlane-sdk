@@ -116,12 +116,11 @@ interface RequestActionRequest {
 declare const RequestActionRequest: MessageFns<RequestActionRequest>;
 /**
  * `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
- * instruction the wallet signs (`ix`).
+ * instruction the wallet signs (`ix`). `address` is the request's.
  */
 interface RequestState {
     status: string;
-    /** The request's address. */
-    request: string;
+    address: string;
     txPda?: string | undefined;
     ix?: TxIx | undefined;
 }

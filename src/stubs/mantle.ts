@@ -122,12 +122,11 @@ export interface RequestActionRequest {
 
 /**
  * `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
- * instruction the wallet signs (`ix`).
+ * instruction the wallet signs (`ix`). `address` is the request's.
  */
 export interface RequestState {
   status: string;
-  /** The request's address. */
-  request: string;
+  address: string;
   txPda?: string | undefined;
   ix?: TxIx | undefined;
 }
@@ -1608,7 +1607,7 @@ export const RequestActionRequest: MessageFns<RequestActionRequest> = {
 };
 
 function createBaseRequestState(): RequestState {
-  return { status: "", request: "", txPda: undefined, ix: undefined };
+  return { status: "", address: "", txPda: undefined, ix: undefined };
 }
 
 export const RequestState: MessageFns<RequestState> = {
@@ -1616,8 +1615,8 @@ export const RequestState: MessageFns<RequestState> = {
     if (message.status !== "") {
       writer.uint32(10).string(message.status);
     }
-    if (message.request !== "") {
-      writer.uint32(18).string(message.request);
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
     }
     if (message.txPda !== undefined) {
       writer.uint32(26).string(message.txPda);
@@ -1648,7 +1647,7 @@ export const RequestState: MessageFns<RequestState> = {
             break;
           }
 
-          message.request = reader.string();
+          message.address = reader.string();
           continue;
         }
         case 3: {
@@ -1679,7 +1678,7 @@ export const RequestState: MessageFns<RequestState> = {
   fromJSON(object: any): RequestState {
     return {
       status: isSet(object.status) ? globalThis.String(object.status) : "",
-      request: isSet(object.request) ? globalThis.String(object.request) : "",
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
       txPda: isSet(object.txPda)
         ? globalThis.String(object.txPda)
         : isSet(object.tx_pda)
@@ -1694,8 +1693,8 @@ export const RequestState: MessageFns<RequestState> = {
     if (message.status !== "") {
       obj.status = message.status;
     }
-    if (message.request !== "") {
-      obj.request = message.request;
+    if (message.address !== "") {
+      obj.address = message.address;
     }
     if (message.txPda !== undefined) {
       obj.txPda = message.txPda;
@@ -1712,7 +1711,7 @@ export const RequestState: MessageFns<RequestState> = {
   fromPartial<I extends Exact<DeepPartial<RequestState>, I>>(object: I): RequestState {
     const message = createBaseRequestState();
     message.status = object.status ?? "";
-    message.request = object.request ?? "";
+    message.address = object.address ?? "";
     message.txPda = object.txPda ?? undefined;
     message.ix = (object.ix !== undefined && object.ix !== null) ? TxIx.fromPartial(object.ix) : undefined;
     return message;
