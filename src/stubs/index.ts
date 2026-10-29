@@ -114,3 +114,23 @@ export type {
   BatchData,
   ReadBatchResponse,
 } from "./tr";
+
+export type {
+  InitializeRequest,
+  ReadMvaultRequest,
+  Obligation,
+  TokenAccount,
+  MvaultData,
+  MvaultData_PdvsEntry,
+  ReadMvaultResponse,
+  ExecuteRequest,
+  Settlement,
+  ExecuteResponse,
+  WalletsUpdateRequest,
+  SuffixesUpdateRequest,
+  RequestActionRequest,
+  RequestState,
+  ReadRequestsRequest,
+  RequestData,
+  ReadRequestsResponse,
+} from "./mantle";

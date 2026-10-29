@@ -11,6 +11,7 @@ import { EvmClient } from './stubs/evm.js';
 export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.js';
 import { TrClient } from './stubs/tr.js';
 export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './stubs/tr.js';
+export { ExecuteRequest, ExecuteResponse, InitializeRequest, MvaultData, MvaultData_PdvsEntry, Obligation, ReadMvaultRequest, ReadMvaultResponse, ReadRequestsRequest, ReadRequestsResponse, RequestActionRequest, RequestData, RequestState, Settlement, SuffixesUpdateRequest, TokenAccount, WalletsUpdateRequest } from './stubs/mantle.js';
 import { IOptions } from './interfaces.js';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
