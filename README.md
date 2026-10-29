@@ -56,6 +56,7 @@ The returned object exposes these primary namespaces:
 - fastlane.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
 - fastlane.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
 - fastlane.tr: for zynk-tr operations like creating pools and anchoring batch merkle roots, along with reading pools and batches.
+- fastlane.mantle: for zynk-mantle operations like initializing a partner's mvault and executing splits to its PDVs, along with wallet and suffix change requests and reads.
 
 ### Quick Start
 
@@ -125,6 +126,16 @@ Fastlane(<endpoint>)
 │   ├─ readPool()
 │   ├─ anchorBatch()
 │   └─ readBatch()
+├─ mantle
+│   ├─ initialize()
+│   ├─ readMvault()
+│   ├─ execute()
+│   ├─ requestWalletsUpdate()
+│   ├─ requestSuffixesUpdate()
+│   ├─ resolveRequest()
+│   ├─ revokeRequest()
+│   ├─ readRequests()
+│   └─ decodeEvent()
 └─ base
     ├─ generateHashedArray()
     ├─ buildEd25519Ix()
@@ -190,6 +201,7 @@ type KmsSignerKey =
 - [Transfer - PDV => Beneficiary (incl. PDVs) - multi asset swapr](./examples/core/transfers/pdvToBeneficiary__multiAsset.ts)
 - [Attest order - Solana ZOW => Arbitrum Beneficiary](./examples/attestations/zowToBeneficiary.ts)
 - [Read TR pool and batch](./examples/tr/readPoolAndBatch.ts)
+- [Read mantle mvault and requests](./examples/mantle/readMvaultAndRequests.ts)
 - [Arbitrary transaction/instructions requiring Zynk signers](./examples/arbitrary.ts)
 - [Tx details](./examples/txDetails.ts)
 
@@ -202,6 +214,7 @@ The SDK is based on the following proto services:
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
 - Tr Service ([proto/tr.proto](./proto/tr.proto)): TR pools and batch merkle root anchoring.
+- Mantle Service ([proto/mantle.proto](./proto/mantle.proto)): Partner mvaults, splits to PDVs and wallet/suffix change requests.
 
 ## Development
 
