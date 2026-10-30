@@ -61,7 +61,10 @@ interface ExecuteRequest {
     requestId: string;
     /** 64 hex characters. */
     merkleRoot: string;
-    /** Only what is new since the last run: the program adds it to what is owed. */
+    /**
+     * Each listed pair's full outstanding amount: it replaces what the mvault
+     * holds for the pair, and 0 clears it. Pairs not listed keep theirs.
+     */
     obligations: Obligation[];
     /**
      * A whitelisted wallet that receives what is left; the mvault keeps it when
@@ -70,11 +73,14 @@ interface ExecuteRequest {
     surplusTo?: string | undefined;
 }
 declare const ExecuteRequest: MessageFns<ExecuteRequest>;
-/** UI amounts of `token`. */
+/**
+ * UI amounts of `token`. `obligation` is what the pair was owed before the run
+ * paid: the amount sent, or what it carried when not listed.
+ */
 interface Settlement {
     suffix: string;
     token: Token;
-    requested: string;
+    obligation: string;
     transferred: string;
     remaining: string;
 }

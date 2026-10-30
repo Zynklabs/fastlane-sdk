@@ -70,18 +70,20 @@ message ExecuteRequest {
   string request_id = 2;
   // 64 hex characters.
   string merkle_root = 3;
-  // Only what is new since the last run: the program adds it to what is owed.
+  // Each listed pair's full outstanding amount: it replaces what the mvault
+  // holds for the pair, and 0 clears it. Pairs not listed keep theirs.
   repeated Obligation obligations = 4;
   // A whitelisted wallet that receives what is left; the mvault keeps it when
   // unset.
   optional string surplus_to = 5;
 }
 
-// UI amounts of `token`.
+// UI amounts of `token`. `obligation` is what the pair was owed before the run
+// paid: the amount sent, or what it carried when not listed.
 message Settlement {
   string suffix = 1;
   base.Token token = 2;
-  string requested = 3;
+  string obligation = 3;
   string transferred = 4;
   string remaining = 5;
 }

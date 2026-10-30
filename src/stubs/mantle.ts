@@ -67,7 +67,10 @@ export interface ExecuteRequest {
   requestId: string;
   /** 64 hex characters. */
   merkleRoot: string;
-  /** Only what is new since the last run: the program adds it to what is owed. */
+  /**
+   * Each listed pair's full outstanding amount: it replaces what the mvault
+   * holds for the pair, and 0 clears it. Pairs not listed keep theirs.
+   */
   obligations: Obligation[];
   /**
    * A whitelisted wallet that receives what is left; the mvault keeps it when
@@ -76,11 +79,14 @@ export interface ExecuteRequest {
   surplusTo?: string | undefined;
 }
 
-/** UI amounts of `token`. */
+/**
+ * UI amounts of `token`. `obligation` is what the pair was owed before the run
+ * paid: the amount sent, or what it carried when not listed.
+ */
 export interface Settlement {
   suffix: string;
   token: Token;
-  requested: string;
+  obligation: string;
   transferred: string;
   remaining: string;
 }
@@ -1029,7 +1035,7 @@ export const ExecuteRequest: MessageFns<ExecuteRequest> = {
 };
 
 function createBaseSettlement(): Settlement {
-  return { suffix: "", token: 0, requested: "", transferred: "", remaining: "" };
+  return { suffix: "", token: 0, obligation: "", transferred: "", remaining: "" };
 }
 
 export const Settlement: MessageFns<Settlement> = {
@@ -1040,8 +1046,8 @@ export const Settlement: MessageFns<Settlement> = {
     if (message.token !== 0) {
       writer.uint32(16).int32(message.token);
     }
-    if (message.requested !== "") {
-      writer.uint32(26).string(message.requested);
+    if (message.obligation !== "") {
+      writer.uint32(26).string(message.obligation);
     }
     if (message.transferred !== "") {
       writer.uint32(34).string(message.transferred);
@@ -1080,7 +1086,7 @@ export const Settlement: MessageFns<Settlement> = {
             break;
           }
 
-          message.requested = reader.string();
+          message.obligation = reader.string();
           continue;
         }
         case 4: {
@@ -1112,7 +1118,7 @@ export const Settlement: MessageFns<Settlement> = {
     return {
       suffix: isSet(object.suffix) ? globalThis.String(object.suffix) : "",
       token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
-      requested: isSet(object.requested) ? globalThis.String(object.requested) : "",
+      obligation: isSet(object.obligation) ? globalThis.String(object.obligation) : "",
       transferred: isSet(object.transferred) ? globalThis.String(object.transferred) : "",
       remaining: isSet(object.remaining) ? globalThis.String(object.remaining) : "",
     };
@@ -1126,8 +1132,8 @@ export const Settlement: MessageFns<Settlement> = {
     if (message.token !== 0) {
       obj.token = tokenToJSON(message.token);
     }
-    if (message.requested !== "") {
-      obj.requested = message.requested;
+    if (message.obligation !== "") {
+      obj.obligation = message.obligation;
     }
     if (message.transferred !== "") {
       obj.transferred = message.transferred;
@@ -1145,7 +1151,7 @@ export const Settlement: MessageFns<Settlement> = {
     const message = createBaseSettlement();
     message.suffix = object.suffix ?? "";
     message.token = object.token ?? 0;
-    message.requested = object.requested ?? "";
+    message.obligation = object.obligation ?? "";
     message.transferred = object.transferred ?? "";
     message.remaining = object.remaining ?? "";
     return message;
