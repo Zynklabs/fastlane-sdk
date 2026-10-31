@@ -144,9 +144,25 @@ interface RequestData {
     suffixes: string[];
 }
 declare const RequestData: MessageFns<RequestData>;
+/**
+ * A Squads proposal of the admin multisig, still open. `action` is REQUEST
+ * when it asks for `wallets` or `suffixes`, a request that is on chain only
+ * once executed, and RESOLVE or REVOKE when it acts on the pending request of
+ * `kind`.
+ */
+interface ProposalData {
+    txPda: string;
+    /** WALLETS or SUFFIXES. */
+    kind: string;
+    action: string;
+    wallets: string[];
+    suffixes: string[];
+}
+declare const ProposalData: MessageFns<ProposalData>;
 interface ReadRequestsResponse {
     wallets?: RequestData | undefined;
     suffixes?: RequestData | undefined;
+    proposals: ProposalData[];
 }
 declare const ReadRequestsResponse: MessageFns<ReadRequestsResponse>;
 type MantleDefinition = typeof MantleDefinition;
@@ -269,4 +285,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { type DeepPartial, type Exact, ExecuteRequest, ExecuteResponse, InitializeRequest, type MantleClient, MantleDefinition, type MantleServiceImplementation, type MessageFns, MvaultData, MvaultData_PdvsEntry, Obligation, ReadMvaultRequest, ReadMvaultResponse, ReadRequestsRequest, ReadRequestsResponse, RequestActionRequest, RequestData, RequestState, Settlement, SuffixesUpdateRequest, TokenAccount, WalletsUpdateRequest, protobufPackage };
+export { type DeepPartial, type Exact, ExecuteRequest, ExecuteResponse, InitializeRequest, type MantleClient, MantleDefinition, type MantleServiceImplementation, type MessageFns, MvaultData, MvaultData_PdvsEntry, Obligation, ProposalData, ReadMvaultRequest, ReadMvaultResponse, ReadRequestsRequest, ReadRequestsResponse, RequestActionRequest, RequestData, RequestState, Settlement, SuffixesUpdateRequest, TokenAccount, WalletsUpdateRequest, protobufPackage };

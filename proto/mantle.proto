@@ -143,7 +143,21 @@ message RequestData {
   repeated string suffixes = 5;
 }
 
+// A Squads proposal of the admin multisig, still open. `action` is REQUEST
+// when it asks for `wallets` or `suffixes`, a request that is on chain only
+// once executed, and RESOLVE or REVOKE when it acts on the pending request of
+// `kind`.
+message ProposalData {
+  string tx_pda = 1;
+  // WALLETS or SUFFIXES.
+  string kind = 2;
+  string action = 3;
+  repeated string wallets = 4;
+  repeated string suffixes = 5;
+}
+
 message ReadRequestsResponse {
   optional RequestData wallets = 1;
   optional RequestData suffixes = 2;
+  repeated ProposalData proposals = 3;
 }

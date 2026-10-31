@@ -150,9 +150,25 @@ export interface RequestData {
   suffixes: string[];
 }
 
+/**
+ * A Squads proposal of the admin multisig, still open. `action` is REQUEST
+ * when it asks for `wallets` or `suffixes`, a request that is on chain only
+ * once executed, and RESOLVE or REVOKE when it acts on the pending request of
+ * `kind`.
+ */
+export interface ProposalData {
+  txPda: string;
+  /** WALLETS or SUFFIXES. */
+  kind: string;
+  action: string;
+  wallets: string[];
+  suffixes: string[];
+}
+
 export interface ReadRequestsResponse {
   wallets?: RequestData | undefined;
   suffixes?: RequestData | undefined;
+  proposals: ProposalData[];
 }
 
 function createBaseInitializeRequest(): InitializeRequest {
@@ -1916,8 +1932,136 @@ export const RequestData: MessageFns<RequestData> = {
   },
 };
 
+function createBaseProposalData(): ProposalData {
+  return { txPda: "", kind: "", action: "", wallets: [], suffixes: [] };
+}
+
+export const ProposalData: MessageFns<ProposalData> = {
+  encode(message: ProposalData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.txPda !== "") {
+      writer.uint32(10).string(message.txPda);
+    }
+    if (message.kind !== "") {
+      writer.uint32(18).string(message.kind);
+    }
+    if (message.action !== "") {
+      writer.uint32(26).string(message.action);
+    }
+    for (const v of message.wallets) {
+      writer.uint32(34).string(v!);
+    }
+    for (const v of message.suffixes) {
+      writer.uint32(42).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProposalData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProposalData();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.txPda = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.kind = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.action = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.wallets.push(reader.string());
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.suffixes.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ProposalData {
+    return {
+      txPda: isSet(object.txPda)
+        ? globalThis.String(object.txPda)
+        : isSet(object.tx_pda)
+        ? globalThis.String(object.tx_pda)
+        : "",
+      kind: isSet(object.kind) ? globalThis.String(object.kind) : "",
+      action: isSet(object.action) ? globalThis.String(object.action) : "",
+      wallets: globalThis.Array.isArray(object?.wallets) ? object.wallets.map((e: any) => globalThis.String(e)) : [],
+      suffixes: globalThis.Array.isArray(object?.suffixes) ? object.suffixes.map((e: any) => globalThis.String(e)) : [],
+    };
+  },
+
+  toJSON(message: ProposalData): unknown {
+    const obj: any = {};
+    if (message.txPda !== "") {
+      obj.txPda = message.txPda;
+    }
+    if (message.kind !== "") {
+      obj.kind = message.kind;
+    }
+    if (message.action !== "") {
+      obj.action = message.action;
+    }
+    if (message.wallets?.length) {
+      obj.wallets = message.wallets;
+    }
+    if (message.suffixes?.length) {
+      obj.suffixes = message.suffixes;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ProposalData>, I>>(base?: I): ProposalData {
+    return ProposalData.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ProposalData>, I>>(object: I): ProposalData {
+    const message = createBaseProposalData();
+    message.txPda = object.txPda ?? "";
+    message.kind = object.kind ?? "";
+    message.action = object.action ?? "";
+    message.wallets = object.wallets?.map((e) => e) || [];
+    message.suffixes = object.suffixes?.map((e) => e) || [];
+    return message;
+  },
+};
+
 function createBaseReadRequestsResponse(): ReadRequestsResponse {
-  return { wallets: undefined, suffixes: undefined };
+  return { wallets: undefined, suffixes: undefined, proposals: [] };
 }
 
 export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
@@ -1927,6 +2071,9 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
     }
     if (message.suffixes !== undefined) {
       RequestData.encode(message.suffixes, writer.uint32(18).fork()).join();
+    }
+    for (const v of message.proposals) {
+      ProposalData.encode(v!, writer.uint32(26).fork()).join();
     }
     return writer;
   },
@@ -1954,6 +2101,14 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
           message.suffixes = RequestData.decode(reader, reader.uint32());
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.proposals.push(ProposalData.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1967,6 +2122,9 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
     return {
       wallets: isSet(object.wallets) ? RequestData.fromJSON(object.wallets) : undefined,
       suffixes: isSet(object.suffixes) ? RequestData.fromJSON(object.suffixes) : undefined,
+      proposals: globalThis.Array.isArray(object?.proposals)
+        ? object.proposals.map((e: any) => ProposalData.fromJSON(e))
+        : [],
     };
   },
 
@@ -1977,6 +2135,9 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
     }
     if (message.suffixes !== undefined) {
       obj.suffixes = RequestData.toJSON(message.suffixes);
+    }
+    if (message.proposals?.length) {
+      obj.proposals = message.proposals.map((e) => ProposalData.toJSON(e));
     }
     return obj;
   },
@@ -1992,6 +2153,7 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
     message.suffixes = (object.suffixes !== undefined && object.suffixes !== null)
       ? RequestData.fromPartial(object.suffixes)
       : undefined;
+    message.proposals = object.proposals?.map((e) => ProposalData.fromPartial(e)) || [];
     return message;
   },
 };

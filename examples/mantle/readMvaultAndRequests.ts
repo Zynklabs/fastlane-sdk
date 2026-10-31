@@ -36,3 +36,6 @@ const readRequestsResponse: ReadRequestsResponse =
 // each is undefined when no request of that kind is pending
 console.log("Wallets request  :", readRequestsResponse.wallets);
 console.log("Suffixes request :", readRequestsResponse.suffixes);
+// the admin multisig's Squads proposals still open: REQUEST asks for a new
+// list, RESOLVE and REVOKE act on the pending request of their kind
+console.log("Open proposals   :", readRequestsResponse.proposals);
