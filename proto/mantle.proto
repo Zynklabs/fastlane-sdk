@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+package mantle;
+
+import "base.proto";
+
+service Mantle {
+  rpc Initialize (InitializeRequest) returns (MvaultData);
+  rpc ReadMvault (ReadMvaultRequest) returns (ReadMvaultResponse);
+
+  rpc Execute (ExecuteRequest) returns (ExecuteResponse);
+
+  rpc RequestWalletsUpdate (WalletsUpdateRequest) returns (RequestState);
+  rpc RequestSuffixesUpdate (SuffixesUpdateRequest) returns (RequestState);
+  rpc ResolveRequest (RequestActionRequest) returns (RequestState);
+  rpc RevokeRequest (RequestActionRequest) returns (RequestState);
+  rpc ReadRequests (ReadRequestsRequest) returns (ReadRequestsResponse);
+
+  rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
+}
+
+// Suffixes name the partner's PDVs: "" for ALM, "::onramp" and "::offramp".
+message InitializeRequest {
+  string partner_id = 1;
+  repeated string wallets = 2;
+  repeated string suffixes = 3;
+}
+
+message ReadMvaultRequest {
+  string partner_id = 1;
+}
+
+// `amount` is a UI amount of `token`.
+message Obligation {
+  string suffix = 1;
+  base.Token token = 2;
+  string amount = 3;
+}
+
+message TokenAccount {
+  base.Token token = 1;
+  string address = 2;
+}
+
+message MvaultData {
+  string program_id = 1;
+  string address = 2;
+  repeated string wallets = 3;
+  repeated string suffixes = 4;
+  int64 last_executed_at = 5;
+  // 64 hex characters.
+  string last_merkle_root = 6;
+  // What is still owed, per suffix and token.
+  repeated Obligation state = 7;
+  // The mvault's token account per token, where the partner deposits.
+  repeated TokenAccount token_accounts = 8;
+  repeated base.Balance balances = 9;
+  // The PDV of each allowed suffix.
+  map<string, string> pdvs = 10;
+  // The creating transaction, answered by Initialize.
+  optional string signature = 11;
+}
+
+message ReadMvaultResponse {
+  optional MvaultData mvault = 1;
+}
+
+message ExecuteRequest {
+  string partner_id = 1;
+  string request_id = 2;
+  // 64 hex characters.
+  string merkle_root = 3;
+  // Each listed pair's full outstanding amount: it replaces what the mvault
+  // holds for the pair, and 0 clears it. Pairs not listed keep theirs.
+  repeated Obligation obligations = 4;
+  // A whitelisted wallet that receives what is left; the mvault keeps it when
+  // unset.
+  optional string surplus_to = 5;
+}
+
+// UI amounts of `token`. `obligation` is what the pair was owed before the run
+// paid: the amount sent, or what it carried when not listed.
+message Settlement {
+  string suffix = 1;
+  base.Token token = 2;
+  string obligation = 3;
+  string transferred = 4;
+  string remaining = 5;
+}
+
+message ExecuteResponse {
+  string signature = 1;
+  string merkle_root = 2;
+  int64 executed_at = 3;
+  repeated Settlement settlements = 4;
+}
+
+// With `wallet`, a whitelisted wallet acts for the partner and the instruction
+// comes back unsigned for it. Without it, the admin multisig acts through
+// Squads.
+message WalletsUpdateRequest {
+  string partner_id = 1;
+  repeated string wallets = 2;
+  optional string wallet = 3;
+  optional string memo = 4;
+}
+
+message SuffixesUpdateRequest {
+  string partner_id = 1;
+  repeated string suffixes = 2;
+  optional string wallet = 3;
+  optional string memo = 4;
+}
+
+// `wallet` as in WalletsUpdateRequest. Only the admin multisig revokes.
+message RequestActionRequest {
+  string partner_id = 1;
+  // WALLETS or SUFFIXES.
+  string kind = 2;
+  optional string wallet = 3;
+  optional string memo = 4;
+}
+
+// `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
+// instruction the wallet signs (`ix`). `address` is the request's.
+message RequestState {
+  string status = 1;
+  string address = 2;
+  optional string tx_pda = 3;
+  optional base.TxIx ix = 4;
+}
+
+message ReadRequestsRequest {
+  string partner_id = 1;
+}
+
+message RequestData {
+  string address = 1;
+  // WALLETS or SUFFIXES.
+  string kind = 2;
+  bool requested_by_admin = 3;
+  repeated string wallets = 4;
+  repeated string suffixes = 5;
+}
+
+// A Squads proposal of the admin multisig, still open. `action` is REQUEST
+// when it asks for `wallets` or `suffixes`, a request that is on chain only
+// once executed, and RESOLVE or REVOKE when it acts on the pending request of
+// `kind`.
+message ProposalData {
+  string tx_pda = 1;
+  // WALLETS or SUFFIXES.
+  string kind = 2;
+  string action = 3;
+  repeated string wallets = 4;
+  repeated string suffixes = 5;
+}
+
+message ReadRequestsResponse {
+  optional RequestData wallets = 1;
+  optional RequestData suffixes = 2;
+  repeated ProposalData proposals = 3;
+}
