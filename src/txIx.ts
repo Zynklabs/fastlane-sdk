@@ -6,6 +6,9 @@ export const applicableMethods = new Set([
   "/base.Base/ExecuteTx",
   "/core.Core/Transfer",
   "/core.Core/AttestOrder",
+  "/mantle.Mantle/RequestWalletsUpdate",
+  "/mantle.Mantle/RequestSuffixesUpdate",
+  "/mantle.Mantle/ResolveRequest",
 ]);
 
 const TxIxToTransactionInstruction = (ix: TxIx) =>

@@ -13,6 +13,7 @@ import {
 import { IOptions } from "./interfaces";
 import { EvmClient, EvmDefinition } from "./stubs/evm";
 import { TrClient, TrDefinition } from "./stubs/tr";
+import { MantleClient, MantleDefinition } from "./stubs/mantle";
 
 export default (endpoint: string, options?: IOptions) => {
   const { overrides, extensions, retryPolicy } = options || {};
@@ -31,8 +32,9 @@ export default (endpoint: string, options?: IOptions) => {
   const kamino: KaminoClient = clientFactory.create(KaminoDefinition, channel);
   const evm: EvmClient = clientFactory.create(EvmDefinition, channel);
   const tr: TrClient = clientFactory.create(TrDefinition, channel);
+  const mantle: MantleClient = clientFactory.create(MantleDefinition, channel);
 
-  return { base, core, orbit, kamino, evm, tr, Token, Denom, ...base };
+  return { base, core, orbit, kamino, evm, tr, mantle, Token, Denom, ...base };
 };
 
 export * from "./stubs";

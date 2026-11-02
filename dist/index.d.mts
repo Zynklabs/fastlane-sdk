@@ -11,6 +11,8 @@ import { EvmClient } from './stubs/evm.mjs';
 export { AllChains, AllTokens, ChainDetails, GetAllChainsRequest, GetAllTokensRequest, GetChainByIdRequest, GetChainByNameRequest, GetTokenDetailsRequest, TokenDetails } from './stubs/evm.mjs';
 import { TrClient } from './stubs/tr.mjs';
 export { AnchorBatchRequest, BatchData, CreatePoolRequest, PoolData, ReadBatchRequest, ReadBatchResponse, ReadPoolRequest, ReadPoolResponse } from './stubs/tr.mjs';
+import { MantleClient } from './stubs/mantle.mjs';
+export { ExecuteRequest, ExecuteResponse, InitializeRequest, MvaultData, MvaultData_PdvsEntry, Obligation, ReadMvaultRequest, ReadMvaultResponse, ReadRequestsRequest, ReadRequestsResponse, RequestActionRequest, RequestData, RequestState, Settlement, SuffixesUpdateRequest, TokenAccount, WalletsUpdateRequest } from './stubs/mantle.mjs';
 import { IOptions } from './interfaces.mjs';
 import '@bufbuild/protobuf/wire';
 import 'nice-grpc-common';
@@ -42,6 +44,7 @@ declare const _default: (endpoint: string, options?: IOptions) => {
     kamino: KaminoClient<{}>;
     evm: EvmClient<{}>;
     tr: TrClient<{}>;
+    mantle: MantleClient<{}>;
     Token: typeof Token;
     Denom: typeof Denom;
 };
