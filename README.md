@@ -55,6 +55,7 @@ The returned object exposes these primary namespaces:
 - fastlane.core: for zynk-core operations like creating orders, replenishing orders, closing order and one-time transfers (transient orders), along with other peripherals.
 - fastlane.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
 - fastlane.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
+- fastlane.evm: for Atmos diamond calls on EVM: chain and token lookup, beneficiary and partner whitelists, CCTP recipient updates, user registration, wallet updates, orders, borrow, repay, pledge, disburse, deposit, and withdraw.
 - fastlane.tr: for zynk-tr operations like creating pools and anchoring batch merkle roots, along with reading pools and batches.
 - fastlane.mantle: for zynk-mantle operations like initializing a partner's mvault and executing splits to its PDVs, along with wallet and suffix change requests and reads.
 
@@ -120,7 +121,44 @@ Fastlane(<endpoint>)
 │   ├─ getChainById()
 │   ├─ getTokenDetails()
 │   ├─ getAllChains()
-│   └─ getAllTokens()
+│   ├─ getAllTokens()
+│   ├─ verifyBeneficiary()
+│   ├─ whitelistBeneficiary()
+│   ├─ toggleBeneficiary()
+│   ├─ revokeBeneficiary()
+│   ├─ whitelistedMints()
+│   ├─ updateWhitelistedTokenMint()
+│   ├─ updatePartnerWhitelist()
+│   ├─ requestCctpRecipientUpdate()
+│   ├─ approveCctpRecipientUpdate()
+│   ├─ rejectCctpRecipientUpdate()
+│   ├─ getCctpRecipientUpdate()
+│   ├─ addOvaultCctpRecipient()
+│   ├─ removeOvaultCctpRecipient()
+│   ├─ createOrder()
+│   ├─ replenishOrder()
+│   ├─ closeOrder()
+│   ├─ deposit()
+│   ├─ borrow()
+│   ├─ repay()
+│   ├─ requestWithdraw()
+│   ├─ approveWithdraw()
+│   ├─ rejectWithdraw()
+│   ├─ readWithdrawRequestPda()
+│   ├─ getUserPda()
+│   ├─ getVaultPda()
+│   ├─ verifyUser()
+│   ├─ decodeEvent()
+│   ├─ registerUser()
+│   ├─ updateMaxPrincipal()
+│   ├─ updateCliffPeriod()
+│   ├─ approveCliffPeriod()
+│   ├─ rejectCliffPeriod()
+│   ├─ requestWalletUpdate()
+│   ├─ approveWalletUpdate()
+│   ├─ rejectWalletUpdate()
+│   ├─ pledge()
+│   └─ disburse()
 ├─ tr
 │   ├─ createPool()
 │   ├─ readPool()
@@ -213,6 +251,7 @@ The SDK is based on the following proto services:
 - Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, and attestation.
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
+- EVM Service ([proto/evm.proto](./proto/evm.proto)): Atmos chain lookup, whitelists, user registration, wallet updates, orders, borrow, repay, pledge, disburse, deposit, withdraw, and event decoding.
 - Tr Service ([proto/tr.proto](./proto/tr.proto)): TR pools and batch merkle root anchoring.
 - Mantle Service ([proto/mantle.proto](./proto/mantle.proto)): Partner mvaults, splits to PDVs and wallet/suffix change requests.
 

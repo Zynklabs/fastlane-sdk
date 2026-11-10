@@ -12,6 +12,63 @@ service Evm {
 
   rpc GetAllChains (GetAllChainsRequest) returns (AllChains);
   rpc GetAllTokens (GetAllTokensRequest) returns (AllTokens);
+
+  // WhitelistingFacet — same beneficiary and partner flows as Core / Orbit on Solana.
+  rpc VerifyBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc WhitelistBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc ToggleBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+  rpc RevokeBeneficiary (BeneficiaryRequest) returns (BeneficiaryState);
+
+  rpc WhitelistedMints (ChainRequest) returns (TokenMintState);
+  rpc UpdateWhitelistedTokenMint (UpdateWhitelistedTokenMintRequest) returns (TokenMintState);
+
+  rpc UpdatePartnerWhitelist (UpdatePartnerWhitelistRequest) returns (WhitelistState);
+
+  rpc RequestCctpRecipientUpdate (RequestCctpRecipientUpdateRequest) returns (CctpRecipientUpdateState);
+  rpc ApproveCctpRecipientUpdate (CctpRecipientDecisionRequest) returns (CctpRecipientUpdateState);
+  rpc RejectCctpRecipientUpdate (CctpRecipientDecisionRequest) returns (CctpRecipientUpdateState);
+  rpc GetCctpRecipientUpdate (GetCctpRecipientUpdateRequest) returns (CctpRecipientUpdateState);
+
+  rpc AddOvaultCctpRecipient (OvaultCctpRecipientRequest) returns (WhitelistState);
+  rpc RemoveOvaultCctpRecipient (OvaultCctpRecipientRequest) returns (WhitelistState);
+
+  // TransactionsFacet — same order flows as Core on Solana.
+  rpc CreateOrder (CreateOrderRequest) returns (OrderTxResponse);
+  rpc ReplenishOrder (ReplenishOrderRequest) returns (OrderTxResponse);
+  rpc CloseOrder (CloseOrderRequest) returns (CloseOrderResponse);
+
+  // TransactionsFacet — Orbit borrow/repay and user liquidity.
+  rpc Deposit (DepositRequest) returns (AccountTxResponse);
+  rpc Borrow (BorrowRequest) returns (OrderTxResponse);
+  rpc Repay (RepayRequest) returns (OrderTxResponse);
+  rpc RequestWithdraw (WithdrawRequest) returns (WithdrawState);
+  rpc ApproveWithdraw (WithdrawActionRequest) returns (WithdrawState);
+  rpc RejectWithdraw (WithdrawActionRequest) returns (WithdrawState);
+  rpc ReadWithdrawRequestPda (GetWithdrawRequestRequest) returns (WithdrawState);
+
+  // Both return predictVault(UserCustody, orbitHash(key)).
+  rpc GetUserPda (GetPdaRequest) returns (PdaResponse);
+  rpc GetVaultPda (GetPdaRequest) returns (PdaResponse);
+  rpc VerifyUser (VerifyUserRequest) returns (UserState);
+
+  // UserOperationsFacet. Cliff updates stay pending until a user wallet approves them.
+  rpc RegisterUser (RegisterUserRequest) returns (AccountTxResponse);
+  rpc UpdateMaxPrincipal (UpdateMaxPrincipalRequest) returns (AccountTxResponse);
+  rpc UpdateCliffPeriod (UpdateCliffPeriodRequest) returns (CliffState);
+  rpc ApproveCliffPeriod (CliffActionRequest) returns (CliffState);
+  rpc RejectCliffPeriod (CliffActionRequest) returns (CliffState);
+
+  // UserOperationsFacet. Replaces Orbit updateWallets: the admin proposes, a current wallet approves.
+  rpc RequestWalletUpdate (RequestWalletUpdateRequest) returns (WalletUpdateState);
+  rpc ApproveWalletUpdate (WalletUpdateDecisionRequest) returns (WalletUpdateState);
+  rpc RejectWalletUpdate (WalletUpdateDecisionRequest) returns (WalletUpdateState);
+
+  // TransactionsFacet. Pledge credits principal; disburse only transfers tokens.
+  rpc Pledge (PledgeRequest) returns (AccountTxResponse);
+  rpc Disburse (DisburseRequest) returns (AccountTxResponse);
+
+  // Same result as Solana decodeEvent. `signature` is the transaction hash.
+  rpc DecodeEvent (DecodeEventRequest) returns (base.EventData);
 }
 
 message GetChainByNameRequest {
@@ -50,5 +107,354 @@ message AllChains {
 message GetAllTokensRequest {}
 message AllTokens {
   repeated TokenDetails tokens = 1;
+}
+
+enum WhitelistAction {
+  ADD = 0;
+  REMOVE = 1;
+}
+
+// Atmos UserType. LP = 0 and ICV = 1. Solana also has NCW, which this diamond does not.
+enum UserType {
+  LP = 0;
+  ICV = 1;
+}
+
+message ChainRequest {
+  uint32 chain_id = 1;
+}
+
+message BeneficiaryRequest {
+  uint32 chain_id = 1;
+  string partner_id = 2;
+  string beneficiary = 3;
+  optional string memo = 4;
+  optional bool transient = 5;
+}
+
+message BeneficiaryState {
+  string status = 1;
+  string record_key = 2;
+  optional bool transient_allowed = 3;
+  optional string tx_hash = 4;
+}
+
+message UpdateWhitelistedTokenMintRequest {
+  uint32 chain_id = 1;
+  string mint = 2;
+  WhitelistAction action = 3;
+  optional string memo = 4;
+}
+
+message TokenMintState {
+  string status = 1;
+  repeated string mints = 2;
+  optional string tx_hash = 3;
+}
+
+message UpdatePartnerWhitelistRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+  WhitelistAction action = 3;
+  uint32 partner_id = 4;
+  optional string memo = 5;
+}
+
+message WhitelistState {
+  string status = 1;
+  string record_key = 2;
+  repeated uint32 partner_ids = 3;
+  optional string tx_hash = 4;
+}
+
+message CctpRecipient {
+  uint32 destination_domain = 1;
+  string mint_recipient = 2;
+}
+
+message RequestCctpRecipientUpdateRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+  WhitelistAction action = 3;
+  CctpRecipient recipient = 4;
+  optional string memo = 5;
+}
+
+message CctpRecipientDecisionRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+  string request_hash = 3;
+  optional string memo = 4;
+}
+
+message GetCctpRecipientUpdateRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+}
+
+message CctpRecipientUpdateState {
+  string status = 1;
+  string record_key = 2;
+  bool exists = 3;
+  WhitelistAction action = 4;
+  CctpRecipient recipient = 5;
+  string request_hash = 6;
+  optional string tx_hash = 7;
+}
+
+message OvaultCctpRecipientRequest {
+  uint32 chain_id = 1;
+  CctpRecipient recipient = 2;
+  optional string memo = 3;
+}
+
+message MetaArg {
+  string key = 1;
+  string value = 2;
+}
+
+message CreateOrderRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string partner_id = 3;
+  string beneficiary = 4;
+  base.Token token = 5;
+  string amount = 6;
+  optional string zov_id = 7;
+  optional bool transient = 8;
+  optional bool pull = 9;
+  repeated MetaArg meta = 10;
+}
+
+message ReplenishOrderRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string partner_id = 3;
+  string order_id = 4;
+  base.Token token = 5;
+  string amount = 6;
+  optional bool do_not_close = 7;
+  repeated MetaArg meta = 8;
+}
+
+message OrderRef {
+  string partner_id = 1;
+  string order_id = 2;
+}
+
+message CloseOrderRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  repeated OrderRef orders = 3;
+  repeated MetaArg meta = 4;
+}
+
+message OrderTxResponse {
+  string request_id = 1;
+  string order_key = 2;
+  string order_id = 3;
+  string tx_hash = 4;
+  bool closed = 5;
+}
+
+message CloseOrderResponse {
+  string request_id = 1;
+  repeated string order_keys = 2;
+  string tx_hash = 3;
+}
+
+message DepositRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  string source = 4;
+  base.Token token = 5;
+  string amount = 6;
+}
+
+message PositionArgs {
+  string user_id = 1;
+  optional string amount = 2;
+  optional string vault_id = 3;
+  optional string address = 4;
+}
+
+message BorrowRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string partner_id = 3;
+  string beneficiary = 4;
+  string amount = 5;
+  repeated PositionArgs positions = 6;
+  optional base.Token token = 7;
+  optional string zov_id = 8;
+  optional string order_id = 9;
+  repeated MetaArg meta = 10;
+}
+
+message RepayRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string partner_id = 3;
+  string amount = 4;
+  string order_id = 5;
+  repeated PositionArgs positions = 6;
+  optional base.Token token = 7;
+  optional string zov_id = 8;
+  repeated MetaArg meta = 9;
+}
+
+message WithdrawRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  string destination = 4;
+  base.Token token = 5;
+  string amount = 6;
+}
+
+message WithdrawActionRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+}
+
+message GetWithdrawRequestRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+}
+
+message GetPdaRequest {
+  uint32 chain_id = 1;
+  string key = 2;
+}
+
+message PdaResponse {
+  string pda = 1;
+  string key = 2;
+  string type = 3;
+}
+
+message VerifyUserRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+}
+
+message UserState {
+  string status = 1;
+  string pda = 2;
+}
+
+message AccountTxResponse {
+  string request_id = 1;
+  string record_key = 2;
+  string tx_hash = 3;
+  string status = 4;
+}
+
+message WithdrawState {
+  string request_id = 1;
+  string record_key = 2;
+  string status = 3;
+  string amount = 4;
+  string destination = 5;
+  string mint = 6;
+  optional string tx_hash = 7;
+}
+
+message RegisterUserRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+  UserType user_type = 3;
+  // One to three wallets. Empty slots are stored as the zero address.
+  repeated string wallets = 4;
+  base.Token token = 5;
+  // Unix seconds. Omit for no cliff (int64 max on-chain).
+  optional string cliff_period = 6;
+  // Human token units. Omit for no cap (uint64 max on-chain).
+  optional string max_principal = 7;
+  repeated uint32 partner_ids = 8;
+  repeated CctpRecipient cctp_recipients = 9;
+  // Defaults to true. False selects the configured Solana USDC settlement route.
+  optional bool chain_bound = 10;
+  optional string solana_mint_recipient = 11;
+  optional string request_id = 12;
+}
+
+message UpdateMaxPrincipalRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  // Human token units of the user's allowed mint.
+  string max_principal = 4;
+}
+
+message UpdateCliffPeriodRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  // Unix seconds. Omit to keep the user's current cliff in the pending request.
+  optional string cliff_period = 4;
+}
+
+message CliffActionRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+}
+
+message CliffState {
+  string request_id = 1;
+  string record_key = 2;
+  string status = 3;
+  string cliff_period = 4;
+  optional string tx_hash = 5;
+}
+
+message PledgeRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  string amount = 4;
+  optional base.Token token = 5;
+}
+
+message DisburseRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  string destination = 4;
+  string amount = 5;
+  optional base.Token token = 6;
+}
+
+message RequestWalletUpdateRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  // One to three replacement wallets. Empty slots are stored as the zero address.
+  repeated string wallets = 4;
+}
+
+message WalletUpdateDecisionRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string user_id = 3;
+  string request_hash = 4;
+}
+
+message WalletUpdateState {
+  string request_id = 1;
+  string record_key = 2;
+  string status = 3;
+  string request_hash = 4;
+  repeated string wallets = 5;
+  optional string tx_hash = 6;
+}
+
+message DecodeEventRequest {
+  uint32 chain_id = 1;
+  string signature = 2;
+  optional string event_name = 3;
 }
 
