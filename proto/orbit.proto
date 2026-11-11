@@ -163,6 +163,13 @@ enum WhitelistAction {
   REMOVE = 1;
 }
 
+// ── Shared types ──────────────────────────────────────────────────────────────
+
+message CctpRecipient {
+  uint32 destination_domain = 1;
+  string mint_recipient     = 2;
+}
+
 // ── Request messages ──────────────────────────────────────────────────────────
 
 /**
@@ -186,6 +193,8 @@ message RegisterUserRequest {
   optional string memo         = 6;
   repeated uint32 partner_ids  = 7;
   optional string allowed_mint = 8;
+  // CCTP recipients to pre-allowlist at registration time.
+  repeated CctpRecipient cctp_recipients = 9;
 }
 
 message RevokeRequest {

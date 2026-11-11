@@ -132,6 +132,11 @@ interface LPState {
     txPda?: string | undefined;
 }
 declare const LPState: MessageFns<LPState>;
+interface CctpRecipient {
+    destinationDomain: number;
+    mintRecipient: string;
+}
+declare const CctpRecipient: MessageFns<CctpRecipient>;
 /**
  * VerifyUser: read-only check – returns LPState for the user's Record PDA.
  * status = "active" when the user record exists, "unavailable" otherwise.
@@ -155,6 +160,8 @@ interface RegisterUserRequest {
     memo?: string | undefined;
     partnerIds: number[];
     allowedMint?: string | undefined;
+    /** CCTP recipients to pre-allowlist at registration time. */
+    cctpRecipients: CctpRecipient[];
 }
 declare const RegisterUserRequest: MessageFns<RegisterUserRequest>;
 interface RevokeRequest {
@@ -476,4 +483,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { ApproveWithdrawRequest, BorrowRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionAccountData, PositionArgs, PositionData, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { ApproveWithdrawRequest, BorrowRequest, CctpRecipient, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionAccountData, PositionArgs, PositionData, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
