@@ -149,6 +149,7 @@ Fastlane(<endpoint>)
 │   ├─ getVaultPda()
 │   ├─ verifyUser()
 │   ├─ decodeEvent()
+│   ├─ getTxCost()
 │   ├─ registerUser()
 │   ├─ updateMaxPrincipal()
 │   ├─ updateCliffPeriod()
@@ -251,7 +252,7 @@ The SDK is based on the following proto services:
 - Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, and attestation.
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
-- EVM Service ([proto/evm.proto](./proto/evm.proto)): Atmos chain lookup, whitelists, user registration, wallet updates, orders, borrow, repay, pledge, disburse, deposit, withdraw, and event decoding.
+- EVM Service ([proto/evm.proto](./proto/evm.proto)): Atmos chain lookup, whitelists, user registration, wallet updates, orders, borrow, repay, pledge, disburse, deposit, withdraw, event decoding, and transaction cost.
 - Tr Service ([proto/tr.proto](./proto/tr.proto)): TR pools and batch merkle root anchoring.
 - Mantle Service ([proto/mantle.proto](./proto/mantle.proto)): Partner mvaults, splits to PDVs and wallet/suffix change requests.
 

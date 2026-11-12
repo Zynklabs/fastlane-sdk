@@ -1,6 +1,6 @@
 import { BinaryWriter, BinaryReader } from '@bufbuild/protobuf/wire';
 import { CallOptions, CallContext } from 'nice-grpc-common';
-import { Token, EventData } from './base.mjs';
+import { Token, TxCost, EventData } from './base.mjs';
 
 declare const protobufPackage = "evm";
 declare enum WhitelistAction {
@@ -18,6 +18,13 @@ declare enum UserType {
 }
 declare function userTypeFromJSON(object: any): UserType;
 declare function userTypeToJSON(object: UserType): string;
+declare enum FeeDenom {
+    WEI = 0,
+    ETH = 1,
+    UNRECOGNIZED = -1
+}
+declare function feeDenomFromJSON(object: any): FeeDenom;
+declare function feeDenomToJSON(object: FeeDenom): string;
 interface GetChainByNameRequest {
     name: string;
 }
@@ -392,6 +399,12 @@ interface WalletUpdateState {
     txHash?: string | undefined;
 }
 declare const WalletUpdateState: MessageFns<WalletUpdateState>;
+interface GetTxCostRequest {
+    chainId: number;
+    signature: string;
+    denom?: FeeDenom | undefined;
+}
+declare const GetTxCostRequest: MessageFns<GetTxCostRequest>;
 interface DecodeEventRequest {
     chainId: number;
     signature: string;
@@ -738,6 +751,18 @@ declare const EvmDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        /**
+         * Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+         * WEI is the raw fee; ETH is that fee divided by 1e18.
+         */
+        readonly getTxCost: {
+            readonly name: "GetTxCost";
+            readonly requestType: typeof GetTxCostRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof TxCost;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         /** Same result as Solana decodeEvent. `signature` is the transaction hash. */
         readonly decodeEvent: {
             readonly name: "DecodeEvent";
@@ -798,6 +823,11 @@ interface EvmServiceImplementation<CallContextExt = {}> {
     /** TransactionsFacet. Pledge credits principal; disburse only transfers tokens. */
     pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
     disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
+    /**
+     * Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+     * WEI is the raw fee; ETH is that fee divided by 1e18.
+     */
+    getTxCost(request: GetTxCostRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxCost>>;
     /** Same result as Solana decodeEvent. `signature` is the transaction hash. */
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
 }
@@ -850,6 +880,11 @@ interface EvmClient<CallOptionsExt = {}> {
     /** TransactionsFacet. Pledge credits principal; disburse only transfers tokens. */
     pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
     disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
+    /**
+     * Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+     * WEI is the raw fee; ETH is that fee divided by 1e18.
+     */
+    getTxCost(request: DeepPartial<GetTxCostRequest>, options?: CallOptions & CallOptionsExt): Promise<TxCost>;
     /** Same result as Solana decodeEvent. `signature` is the transaction hash. */
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
 }
@@ -872,4 +907,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountTxResponse, AllChains, AllTokens, BeneficiaryRequest, BeneficiaryState, BorrowRequest, CctpRecipient, CctpRecipientDecisionRequest, CctpRecipientUpdateState, ChainDetails, ChainRequest, CliffActionRequest, CliffState, CloseOrderRequest, CloseOrderResponse, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DepositRequest, DisburseRequest, type EvmClient, EvmDefinition, type EvmServiceImplementation, type Exact, GetAllChainsRequest, GetAllTokensRequest, GetCctpRecipientUpdateRequest, GetChainByIdRequest, GetChainByNameRequest, GetPdaRequest, GetTokenDetailsRequest, GetWithdrawRequestRequest, type MessageFns, MetaArg, OrderRef, OrderTxResponse, OvaultCctpRecipientRequest, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RepayRequest, ReplenishOrderRequest, RequestCctpRecipientUpdateRequest, RequestWalletUpdateRequest, TokenDetails, TokenMintState, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWhitelistedTokenMintRequest, UserState, UserType, VerifyUserRequest, WalletUpdateDecisionRequest, WalletUpdateState, WhitelistAction, WhitelistState, WithdrawActionRequest, WithdrawRequest, WithdrawState, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { AccountTxResponse, AllChains, AllTokens, BeneficiaryRequest, BeneficiaryState, BorrowRequest, CctpRecipient, CctpRecipientDecisionRequest, CctpRecipientUpdateState, ChainDetails, ChainRequest, CliffActionRequest, CliffState, CloseOrderRequest, CloseOrderResponse, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DepositRequest, DisburseRequest, type EvmClient, EvmDefinition, type EvmServiceImplementation, type Exact, FeeDenom, GetAllChainsRequest, GetAllTokensRequest, GetCctpRecipientUpdateRequest, GetChainByIdRequest, GetChainByNameRequest, GetPdaRequest, GetTokenDetailsRequest, GetTxCostRequest, GetWithdrawRequestRequest, type MessageFns, MetaArg, OrderRef, OrderTxResponse, OvaultCctpRecipientRequest, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RepayRequest, ReplenishOrderRequest, RequestCctpRecipientUpdateRequest, RequestWalletUpdateRequest, TokenDetails, TokenMintState, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWhitelistedTokenMintRequest, UserState, UserType, VerifyUserRequest, WalletUpdateDecisionRequest, WalletUpdateState, WhitelistAction, WhitelistState, WithdrawActionRequest, WithdrawRequest, WithdrawState, feeDenomFromJSON, feeDenomToJSON, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };

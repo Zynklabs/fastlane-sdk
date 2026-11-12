@@ -134,6 +134,7 @@ export type {
   PdaResponse as EvmPdaResponse,
   VerifyUserRequest as EvmVerifyUserRequest,
   DecodeEventRequest as EvmDecodeEventRequest,
+  GetTxCostRequest as EvmGetTxCostRequest,
   UserState,
   UserType as EvmUserType,
   RegisterUserRequest,
@@ -149,6 +150,8 @@ export type {
   AccountTxResponse,
   WithdrawState,
 } from "./evm";
+
+export { FeeDenom as EvmFeeDenom } from "./evm";
 
 export type {
   CreatePoolRequest,

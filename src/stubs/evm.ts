@@ -7,7 +7,7 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import type { CallContext, CallOptions } from "nice-grpc-common";
-import { EventData, Token, tokenFromJSON, tokenToJSON } from "./base";
+import { EventData, Token, tokenFromJSON, tokenToJSON, TxCost } from "./base";
 
 export const protobufPackage = "evm";
 
@@ -73,6 +73,39 @@ export function userTypeToJSON(object: UserType): string {
     case UserType.ICV:
       return "ICV";
     case UserType.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export enum FeeDenom {
+  WEI = 0,
+  ETH = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function feeDenomFromJSON(object: any): FeeDenom {
+  switch (object) {
+    case 0:
+    case "WEI":
+      return FeeDenom.WEI;
+    case 1:
+    case "ETH":
+      return FeeDenom.ETH;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return FeeDenom.UNRECOGNIZED;
+  }
+}
+
+export function feeDenomToJSON(object: FeeDenom): string {
+  switch (object) {
+    case FeeDenom.WEI:
+      return "WEI";
+    case FeeDenom.ETH:
+      return "ETH";
+    case FeeDenom.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -452,6 +485,12 @@ export interface WalletUpdateState {
   requestHash: string;
   wallets: string[];
   txHash?: string | undefined;
+}
+
+export interface GetTxCostRequest {
+  chainId: number;
+  signature: string;
+  denom?: FeeDenom | undefined;
 }
 
 export interface DecodeEventRequest {
@@ -6736,6 +6775,102 @@ export const WalletUpdateState: MessageFns<WalletUpdateState> = {
   },
 };
 
+function createBaseGetTxCostRequest(): GetTxCostRequest {
+  return { chainId: 0, signature: "", denom: undefined };
+}
+
+export const GetTxCostRequest: MessageFns<GetTxCostRequest> = {
+  encode(message: GetTxCostRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.chainId !== 0) {
+      writer.uint32(8).uint32(message.chainId);
+    }
+    if (message.signature !== "") {
+      writer.uint32(18).string(message.signature);
+    }
+    if (message.denom !== undefined) {
+      writer.uint32(24).int32(message.denom);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetTxCostRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetTxCostRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.chainId = reader.uint32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.signature = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.denom = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetTxCostRequest {
+    return {
+      chainId: isSet(object.chainId)
+        ? globalThis.Number(object.chainId)
+        : isSet(object.chain_id)
+        ? globalThis.Number(object.chain_id)
+        : 0,
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : "",
+      denom: isSet(object.denom) ? feeDenomFromJSON(object.denom) : undefined,
+    };
+  },
+
+  toJSON(message: GetTxCostRequest): unknown {
+    const obj: any = {};
+    if (message.chainId !== 0) {
+      obj.chainId = Math.round(message.chainId);
+    }
+    if (message.signature !== "") {
+      obj.signature = message.signature;
+    }
+    if (message.denom !== undefined) {
+      obj.denom = feeDenomToJSON(message.denom);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetTxCostRequest>, I>>(base?: I): GetTxCostRequest {
+    return GetTxCostRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetTxCostRequest>, I>>(object: I): GetTxCostRequest {
+    const message = createBaseGetTxCostRequest();
+    message.chainId = object.chainId ?? 0;
+    message.signature = object.signature ?? "";
+    message.denom = object.denom ?? undefined;
+    return message;
+  },
+};
+
 function createBaseDecodeEventRequest(): DecodeEventRequest {
   return { chainId: 0, signature: "", eventName: undefined };
 }
@@ -7176,6 +7311,18 @@ export const EvmDefinition = {
       responseStream: false,
       options: {},
     },
+    /**
+     * Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+     * WEI is the raw fee; ETH is that fee divided by 1e18.
+     */
+    getTxCost: {
+      name: "GetTxCost",
+      requestType: GetTxCostRequest as typeof GetTxCostRequest,
+      requestStream: false,
+      responseType: TxCost as typeof TxCost,
+      responseStream: false,
+      options: {},
+    },
     /** Same result as Solana decodeEvent. `signature` is the transaction hash. */
     decodeEvent: {
       name: "DecodeEvent",
@@ -7321,6 +7468,11 @@ export interface EvmServiceImplementation<CallContextExt = {}> {
   /** TransactionsFacet. Pledge credits principal; disburse only transfers tokens. */
   pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
   disburse(request: DisburseRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
+  /**
+   * Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+   * WEI is the raw fee; ETH is that fee divided by 1e18.
+   */
+  getTxCost(request: GetTxCostRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxCost>>;
   /** Same result as Solana decodeEvent. `signature` is the transaction hash. */
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
 }
@@ -7464,6 +7616,11 @@ export interface EvmClient<CallOptionsExt = {}> {
   /** TransactionsFacet. Pledge credits principal; disburse only transfers tokens. */
   pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
   disburse(request: DeepPartial<DisburseRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
+  /**
+   * Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+   * WEI is the raw fee; ETH is that fee divided by 1e18.
+   */
+  getTxCost(request: DeepPartial<GetTxCostRequest>, options?: CallOptions & CallOptionsExt): Promise<TxCost>;
   /** Same result as Solana decodeEvent. `signature` is the transaction hash. */
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
 }

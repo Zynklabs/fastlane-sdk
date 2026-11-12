@@ -67,6 +67,10 @@ service Evm {
   rpc Pledge (PledgeRequest) returns (AccountTxResponse);
   rpc Disburse (DisburseRequest) returns (AccountTxResponse);
 
+  // Same result as Solana Base.GetTxCost. `signature` is the transaction hash.
+  // WEI is the raw fee; ETH is that fee divided by 1e18.
+  rpc GetTxCost (GetTxCostRequest) returns (base.TxCost);
+
   // Same result as Solana decodeEvent. `signature` is the transaction hash.
   rpc DecodeEvent (DecodeEventRequest) returns (base.EventData);
 }
@@ -118,6 +122,11 @@ enum WhitelistAction {
 enum UserType {
   LP = 0;
   ICV = 1;
+}
+
+enum FeeDenom {
+  WEI = 0;
+  ETH = 1;
 }
 
 message ChainRequest {
@@ -450,6 +459,12 @@ message WalletUpdateState {
   string request_hash = 4;
   repeated string wallets = 5;
   optional string tx_hash = 6;
+}
+
+message GetTxCostRequest {
+  uint32 chain_id = 1;
+  string signature = 2;
+  optional FeeDenom denom = 3;
 }
 
 message DecodeEventRequest {
