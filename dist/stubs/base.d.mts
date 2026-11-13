@@ -39,11 +39,15 @@ declare const HashedArrayResponse: MessageFns<HashedArrayResponse>;
 interface GetBalanceRequest {
     of: string;
     token?: Token | undefined;
+    /** 101 and 103 are Solana. Any other id is an EVM chain. Defaults to Solana. */
+    chainId?: number | undefined;
 }
 declare const GetBalanceRequest: MessageFns<GetBalanceRequest>;
 interface GetBalancesRequest {
     of: string[];
     token?: Token | undefined;
+    /** 101 and 103 are Solana. Any other id is an EVM chain. Defaults to Solana. */
+    chainId?: number | undefined;
 }
 declare const GetBalancesRequest: MessageFns<GetBalancesRequest>;
 interface GetAddressRequest {

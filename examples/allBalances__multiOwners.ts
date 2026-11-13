@@ -12,6 +12,8 @@ const balanceRequest: GetBalancesRequest = {
     "zp_test",
   ],
   // token: fastlane.Token.USDC, // (optional) - to fetch specific token balance
+  // 101 and 103 are Solana. Any other id reads that EVM chain. Defaults to Solana.
+  chainId: 101,
 };
 const response: Balances = await fastlane.base.getBalances(balanceRequest);
 

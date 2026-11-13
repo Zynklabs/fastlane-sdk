@@ -68,11 +68,15 @@ message HashedArrayResponse {
 message GetBalanceRequest {
   string of = 1;
   optional Token token = 2;
+  // 101 and 103 are Solana. Any other id is an EVM chain. Defaults to Solana.
+  optional uint32 chain_id = 3;
 }
 
 message GetBalancesRequest {
   repeated string of = 1;
   optional Token token = 2;
+  // 101 and 103 are Solana. Any other id is an EVM chain. Defaults to Solana.
+  optional uint32 chain_id = 3;
 }
 
 message GetAddressRequest {
