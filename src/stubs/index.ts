@@ -70,6 +70,7 @@ export type {
   PositionAccountData,
   PositionData,
   DisburseRequest,
+  CctpRequest,
   LPState,
   TxResponse as OrbitTxResponse,
 } from "./orbit";

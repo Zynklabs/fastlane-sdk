@@ -21,6 +21,7 @@ service Orbit {
   rpc Pledge (PledgeRequest) returns (TxResponse);
   rpc Borrow (BorrowRequest) returns (TxResponse);
   rpc Repay (RepayRequest) returns (TxResponse);
+  rpc Cctp (CctpRequest) returns (TxResponse);
 
   rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
 
@@ -135,6 +136,28 @@ message RepayRequest {
   optional base.Token token = 6;
   optional string zov_id = 7;
   repeated MetaArg meta = 8;
+}
+
+message CctpRequest {
+  string request_id = 1;
+  string amount = 2;
+  uint32 destination_domain = 3;
+  // EVM address (0x, left-padded) or a Solana address. Stored as 32 bytes.
+  string mint_recipient = 4;
+  // Set when the tokens are burned from an ICV user PDA.
+  optional string user_id = 5;
+  // Spender vault key. Omit, with user_id unset, to burn from the Orbit vault.
+  optional string source = 6;
+  optional base.Token token = 7;
+  // Burn-token units. Omit for 0.
+  optional string max_fee = 8;
+  // Circle finality. Omit for 2000 (finalized). 1000 is the fast threshold.
+  optional uint32 min_finality_threshold = 9;
+  optional string destination_caller = 10;
+  optional bytes hook_data = 11;
+  optional string partner_id = 12;
+  optional string order_id = 13;
+  optional string zov_id = 14;
 }
 
 message TxResponse {

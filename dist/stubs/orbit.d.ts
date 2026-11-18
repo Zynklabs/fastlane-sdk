@@ -119,6 +119,28 @@ interface RepayRequest {
     meta: MetaArg[];
 }
 declare const RepayRequest: MessageFns<RepayRequest>;
+interface CctpRequest {
+    requestId: string;
+    amount: string;
+    destinationDomain: number;
+    /** EVM address (0x, left-padded) or a Solana address. Stored as 32 bytes. */
+    mintRecipient: string;
+    /** Set when the tokens are burned from an ICV user PDA. */
+    userId?: string | undefined;
+    /** Spender vault key. Omit, with user_id unset, to burn from the Orbit vault. */
+    source?: string | undefined;
+    token?: Token | undefined;
+    /** Burn-token units. Omit for 0. */
+    maxFee?: string | undefined;
+    /** Circle finality. Omit for 2000 (finalized). 1000 is the fast threshold. */
+    minFinalityThreshold?: number | undefined;
+    destinationCaller?: string | undefined;
+    hookData?: Buffer | undefined;
+    partnerId?: string | undefined;
+    orderId?: string | undefined;
+    zovId?: string | undefined;
+}
+declare const CctpRequest: MessageFns<CctpRequest>;
 interface TxResponse {
     orderId: string;
     signature: string;
@@ -327,6 +349,14 @@ declare const OrbitDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly cctp: {
+            readonly name: "Cctp";
+            readonly requestType: typeof CctpRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof TxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly decodeEvent: {
             readonly name: "DecodeEvent";
             readonly requestType: typeof DecodeEventRequest;
@@ -425,6 +455,7 @@ interface OrbitServiceImplementation<CallContextExt = {}> {
     pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     repay(request: RepayRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+    cctp(request: CctpRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
     /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
     verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
@@ -452,6 +483,7 @@ interface OrbitClient<CallOptionsExt = {}> {
     pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     repay(request: DeepPartial<RepayRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+    cctp(request: DeepPartial<CctpRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
     /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
     verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
@@ -483,4 +515,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { ApproveWithdrawRequest, BorrowRequest, CctpRecipient, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionAccountData, PositionArgs, PositionData, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { ApproveWithdrawRequest, BorrowRequest, CctpRecipient, CctpRequest, type DeepPartial, DisburseRequest, type Exact, GetPdaRequest, GetPositionPdaRequest, LPState, type MessageFns, MetaArg, type OrbitClient, OrbitDefinition, type OrbitServiceImplementation, OrderData, PdaResponse, PledgeRequest, PositionAccountData, PositionArgs, PositionData, RegisterUserRequest, RejectWithdrawRequest, RepayRequest, RevokeRequest, TxResponse, UpdateCliffPeriodRequest, UpdateCliffPeriodRequestData, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWalletsRequest, UserType, VerifyUserRequest, WhitelistAction, WithdrawRequestData, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };

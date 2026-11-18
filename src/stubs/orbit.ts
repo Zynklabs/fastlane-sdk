@@ -188,6 +188,34 @@ export interface RepayRequest {
   meta: MetaArg[];
 }
 
+export interface CctpRequest {
+  requestId: string;
+  amount: string;
+  destinationDomain: number;
+  /** EVM address (0x, left-padded) or a Solana address. Stored as 32 bytes. */
+  mintRecipient: string;
+  /** Set when the tokens are burned from an ICV user PDA. */
+  userId?:
+    | string
+    | undefined;
+  /** Spender vault key. Omit, with user_id unset, to burn from the Orbit vault. */
+  source?: string | undefined;
+  token?:
+    | Token
+    | undefined;
+  /** Burn-token units. Omit for 0. */
+  maxFee?:
+    | string
+    | undefined;
+  /** Circle finality. Omit for 2000 (finalized). 1000 is the fast threshold. */
+  minFinalityThreshold?: number | undefined;
+  destinationCaller?: string | undefined;
+  hookData?: Buffer | undefined;
+  partnerId?: string | undefined;
+  orderId?: string | undefined;
+  zovId?: string | undefined;
+}
+
 export interface TxResponse {
   orderId: string;
   signature: string;
@@ -1922,6 +1950,333 @@ export const RepayRequest: MessageFns<RepayRequest> = {
   },
 };
 
+function createBaseCctpRequest(): CctpRequest {
+  return {
+    requestId: "",
+    amount: "",
+    destinationDomain: 0,
+    mintRecipient: "",
+    userId: undefined,
+    source: undefined,
+    token: undefined,
+    maxFee: undefined,
+    minFinalityThreshold: undefined,
+    destinationCaller: undefined,
+    hookData: undefined,
+    partnerId: undefined,
+    orderId: undefined,
+    zovId: undefined,
+  };
+}
+
+export const CctpRequest: MessageFns<CctpRequest> = {
+  encode(message: CctpRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.requestId !== "") {
+      writer.uint32(10).string(message.requestId);
+    }
+    if (message.amount !== "") {
+      writer.uint32(18).string(message.amount);
+    }
+    if (message.destinationDomain !== 0) {
+      writer.uint32(24).uint32(message.destinationDomain);
+    }
+    if (message.mintRecipient !== "") {
+      writer.uint32(34).string(message.mintRecipient);
+    }
+    if (message.userId !== undefined) {
+      writer.uint32(42).string(message.userId);
+    }
+    if (message.source !== undefined) {
+      writer.uint32(50).string(message.source);
+    }
+    if (message.token !== undefined) {
+      writer.uint32(56).int32(message.token);
+    }
+    if (message.maxFee !== undefined) {
+      writer.uint32(66).string(message.maxFee);
+    }
+    if (message.minFinalityThreshold !== undefined) {
+      writer.uint32(72).uint32(message.minFinalityThreshold);
+    }
+    if (message.destinationCaller !== undefined) {
+      writer.uint32(82).string(message.destinationCaller);
+    }
+    if (message.hookData !== undefined) {
+      writer.uint32(90).bytes(message.hookData);
+    }
+    if (message.partnerId !== undefined) {
+      writer.uint32(98).string(message.partnerId);
+    }
+    if (message.orderId !== undefined) {
+      writer.uint32(106).string(message.orderId);
+    }
+    if (message.zovId !== undefined) {
+      writer.uint32(114).string(message.zovId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CctpRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCctpRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.destinationDomain = reader.uint32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.mintRecipient = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.source = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.maxFee = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 72) {
+            break;
+          }
+
+          message.minFinalityThreshold = reader.uint32();
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.destinationCaller = reader.string();
+          continue;
+        }
+        case 11: {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.hookData = Buffer.from(reader.bytes());
+          continue;
+        }
+        case 12: {
+          if (tag !== 98) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 13: {
+          if (tag !== 106) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 14: {
+          if (tag !== 114) {
+            break;
+          }
+
+          message.zovId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CctpRequest {
+    return {
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      destinationDomain: isSet(object.destinationDomain)
+        ? globalThis.Number(object.destinationDomain)
+        : isSet(object.destination_domain)
+        ? globalThis.Number(object.destination_domain)
+        : 0,
+      mintRecipient: isSet(object.mintRecipient)
+        ? globalThis.String(object.mintRecipient)
+        : isSet(object.mint_recipient)
+        ? globalThis.String(object.mint_recipient)
+        : "",
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : undefined,
+      source: isSet(object.source) ? globalThis.String(object.source) : undefined,
+      token: isSet(object.token) ? tokenFromJSON(object.token) : undefined,
+      maxFee: isSet(object.maxFee)
+        ? globalThis.String(object.maxFee)
+        : isSet(object.max_fee)
+        ? globalThis.String(object.max_fee)
+        : undefined,
+      minFinalityThreshold: isSet(object.minFinalityThreshold)
+        ? globalThis.Number(object.minFinalityThreshold)
+        : isSet(object.min_finality_threshold)
+        ? globalThis.Number(object.min_finality_threshold)
+        : undefined,
+      destinationCaller: isSet(object.destinationCaller)
+        ? globalThis.String(object.destinationCaller)
+        : isSet(object.destination_caller)
+        ? globalThis.String(object.destination_caller)
+        : undefined,
+      hookData: isSet(object.hookData)
+        ? Buffer.from(bytesFromBase64(object.hookData))
+        : isSet(object.hook_data)
+        ? Buffer.from(bytesFromBase64(object.hook_data))
+        : undefined,
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : undefined,
+      orderId: isSet(object.orderId)
+        ? globalThis.String(object.orderId)
+        : isSet(object.order_id)
+        ? globalThis.String(object.order_id)
+        : undefined,
+      zovId: isSet(object.zovId)
+        ? globalThis.String(object.zovId)
+        : isSet(object.zov_id)
+        ? globalThis.String(object.zov_id)
+        : undefined,
+    };
+  },
+
+  toJSON(message: CctpRequest): unknown {
+    const obj: any = {};
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.destinationDomain !== 0) {
+      obj.destinationDomain = Math.round(message.destinationDomain);
+    }
+    if (message.mintRecipient !== "") {
+      obj.mintRecipient = message.mintRecipient;
+    }
+    if (message.userId !== undefined) {
+      obj.userId = message.userId;
+    }
+    if (message.source !== undefined) {
+      obj.source = message.source;
+    }
+    if (message.token !== undefined) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.maxFee !== undefined) {
+      obj.maxFee = message.maxFee;
+    }
+    if (message.minFinalityThreshold !== undefined) {
+      obj.minFinalityThreshold = Math.round(message.minFinalityThreshold);
+    }
+    if (message.destinationCaller !== undefined) {
+      obj.destinationCaller = message.destinationCaller;
+    }
+    if (message.hookData !== undefined) {
+      obj.hookData = base64FromBytes(message.hookData);
+    }
+    if (message.partnerId !== undefined) {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.orderId !== undefined) {
+      obj.orderId = message.orderId;
+    }
+    if (message.zovId !== undefined) {
+      obj.zovId = message.zovId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CctpRequest>, I>>(base?: I): CctpRequest {
+    return CctpRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CctpRequest>, I>>(object: I): CctpRequest {
+    const message = createBaseCctpRequest();
+    message.requestId = object.requestId ?? "";
+    message.amount = object.amount ?? "";
+    message.destinationDomain = object.destinationDomain ?? 0;
+    message.mintRecipient = object.mintRecipient ?? "";
+    message.userId = object.userId ?? undefined;
+    message.source = object.source ?? undefined;
+    message.token = object.token ?? undefined;
+    message.maxFee = object.maxFee ?? undefined;
+    message.minFinalityThreshold = object.minFinalityThreshold ?? undefined;
+    message.destinationCaller = object.destinationCaller ?? undefined;
+    message.hookData = object.hookData ?? undefined;
+    message.partnerId = object.partnerId ?? undefined;
+    message.orderId = object.orderId ?? undefined;
+    message.zovId = object.zovId ?? undefined;
+    return message;
+  },
+};
+
 function createBaseTxResponse(): TxResponse {
   return { orderId: "", signature: "", position: 0, orderTracker: "" };
 }
@@ -3307,6 +3662,14 @@ export const OrbitDefinition = {
       responseStream: false,
       options: {},
     },
+    cctp: {
+      name: "Cctp",
+      requestType: CctpRequest as typeof CctpRequest,
+      requestStream: false,
+      responseType: TxResponse as typeof TxResponse,
+      responseStream: false,
+      options: {},
+    },
     decodeEvent: {
       name: "DecodeEvent",
       requestType: DecodeEventRequest as typeof DecodeEventRequest,
@@ -3424,6 +3787,7 @@ export interface OrbitServiceImplementation<CallContextExt = {}> {
   pledge(request: PledgeRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   repay(request: RepayRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
+  cctp(request: CctpRequest, context: CallContext & CallContextExt): Promise<DeepPartial<TxResponse>>;
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
   /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
   verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<LPState>>;
@@ -3482,6 +3846,7 @@ export interface OrbitClient<CallOptionsExt = {}> {
   pledge(request: DeepPartial<PledgeRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   repay(request: DeepPartial<RepayRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
+  cctp(request: DeepPartial<CctpRequest>, options?: CallOptions & CallOptionsExt): Promise<TxResponse>;
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
   /** ── LP / user-management (admin-signed, published via Squads) ──────────── */
   verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
@@ -3505,6 +3870,14 @@ export interface OrbitClient<CallOptionsExt = {}> {
     options?: CallOptions & CallOptionsExt,
   ): Promise<LPState>;
   rejectWithdraw(request: DeepPartial<RejectWithdrawRequest>, options?: CallOptions & CallOptionsExt): Promise<LPState>;
+}
+
+function bytesFromBase64(b64: string): Uint8Array {
+  return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+}
+
+function base64FromBytes(arr: Uint8Array): string {
+  return globalThis.Buffer.from(arr).toString("base64");
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

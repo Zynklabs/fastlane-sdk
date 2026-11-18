@@ -102,6 +102,7 @@ Fastlane(<endpoint>)
 ├─ orbit
 │   ├─ domainSeparator()
 │   ├─ getUserPda()
+│   ├─ cctp()
 │   ├─ pullFromLp()
 │   ├─ transferToLp()
 │   └─ transferFromPdaToWallet()
