@@ -37,6 +37,9 @@ service Evm {
   rpc ReplenishOrder (ReplenishOrderRequest) returns (OrderTxResponse);
   rpc CloseOrder (CloseOrderRequest) returns (CloseOrderResponse);
 
+  // Same routing as Solana Base.Transfer. Each diamond call is its own transaction.
+  rpc Transfer (TransferRequest) returns (OrderTxResponse);
+
   // TransactionsFacet — Orbit borrow/repay and user liquidity.
   rpc Deposit (DepositRequest) returns (AccountTxResponse);
   rpc Borrow (BorrowRequest) returns (OrderTxResponse);
@@ -220,6 +223,19 @@ message OvaultCctpRecipientRequest {
 message MetaArg {
   string key = 1;
   string value = 2;
+}
+
+message TransferRequest {
+  uint32 chain_id = 1;
+  string request_id = 2;
+  string from = 3;
+  string to = 4;
+  string amount = 5;
+  base.Token token = 6;
+  optional string partner_id = 7;
+  optional base.Token to_token = 8;
+  repeated MetaArg meta = 9;
+  optional string proxy = 10;
 }
 
 message CreateOrderRequest {

@@ -118,6 +118,7 @@ export type {
   OvaultCctpRecipientRequest,
   MetaArg as EvmMetaArg,
   CreateOrderRequest as EvmCreateOrderRequest,
+  TransferRequest as EvmTransferRequest,
   ReplenishOrderRequest,
   OrderRef,
   CloseOrderRequest,

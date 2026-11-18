@@ -160,6 +160,19 @@ interface MetaArg {
     value: string;
 }
 declare const MetaArg: MessageFns<MetaArg>;
+interface TransferRequest {
+    chainId: number;
+    requestId: string;
+    from: string;
+    to: string;
+    amount: string;
+    token: Token;
+    partnerId?: string | undefined;
+    toToken?: Token | undefined;
+    meta: MetaArg[];
+    proxy?: string | undefined;
+}
+declare const TransferRequest: MessageFns<TransferRequest>;
 interface CreateOrderRequest {
     chainId: number;
     requestId: string;
@@ -586,6 +599,15 @@ declare const EvmDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        /** Same routing as Solana Base.Transfer. Each diamond call is its own transaction. */
+        readonly transfer: {
+            readonly name: "Transfer";
+            readonly requestType: typeof TransferRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof OrderTxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         /** TransactionsFacet — Orbit borrow/repay and user liquidity. */
         readonly deposit: {
             readonly name: "Deposit";
@@ -798,6 +820,8 @@ interface EvmServiceImplementation<CallContextExt = {}> {
     createOrder(request: CreateOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTxResponse>>;
     replenishOrder(request: ReplenishOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTxResponse>>;
     closeOrder(request: CloseOrderRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CloseOrderResponse>>;
+    /** Same routing as Solana Base.Transfer. Each diamond call is its own transaction. */
+    transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTxResponse>>;
     /** TransactionsFacet — Orbit borrow/repay and user liquidity. */
     deposit(request: DepositRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
     borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTxResponse>>;
@@ -855,6 +879,8 @@ interface EvmClient<CallOptionsExt = {}> {
     createOrder(request: DeepPartial<CreateOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTxResponse>;
     replenishOrder(request: DeepPartial<ReplenishOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTxResponse>;
     closeOrder(request: DeepPartial<CloseOrderRequest>, options?: CallOptions & CallOptionsExt): Promise<CloseOrderResponse>;
+    /** Same routing as Solana Base.Transfer. Each diamond call is its own transaction. */
+    transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTxResponse>;
     /** TransactionsFacet — Orbit borrow/repay and user liquidity. */
     deposit(request: DeepPartial<DepositRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
     borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTxResponse>;
@@ -907,4 +933,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountTxResponse, AllChains, AllTokens, BeneficiaryRequest, BeneficiaryState, BorrowRequest, CctpRecipient, CctpRecipientDecisionRequest, CctpRecipientUpdateState, ChainDetails, ChainRequest, CliffActionRequest, CliffState, CloseOrderRequest, CloseOrderResponse, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DepositRequest, DisburseRequest, type EvmClient, EvmDefinition, type EvmServiceImplementation, type Exact, FeeDenom, GetAllChainsRequest, GetAllTokensRequest, GetCctpRecipientUpdateRequest, GetChainByIdRequest, GetChainByNameRequest, GetPdaRequest, GetTokenDetailsRequest, GetTxCostRequest, GetWithdrawRequestRequest, type MessageFns, MetaArg, OrderRef, OrderTxResponse, OvaultCctpRecipientRequest, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RepayRequest, ReplenishOrderRequest, RequestCctpRecipientUpdateRequest, RequestWalletUpdateRequest, TokenDetails, TokenMintState, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWhitelistedTokenMintRequest, UserState, UserType, VerifyUserRequest, WalletUpdateDecisionRequest, WalletUpdateState, WhitelistAction, WhitelistState, WithdrawActionRequest, WithdrawRequest, WithdrawState, feeDenomFromJSON, feeDenomToJSON, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { AccountTxResponse, AllChains, AllTokens, BeneficiaryRequest, BeneficiaryState, BorrowRequest, CctpRecipient, CctpRecipientDecisionRequest, CctpRecipientUpdateState, ChainDetails, ChainRequest, CliffActionRequest, CliffState, CloseOrderRequest, CloseOrderResponse, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DepositRequest, DisburseRequest, type EvmClient, EvmDefinition, type EvmServiceImplementation, type Exact, FeeDenom, GetAllChainsRequest, GetAllTokensRequest, GetCctpRecipientUpdateRequest, GetChainByIdRequest, GetChainByNameRequest, GetPdaRequest, GetTokenDetailsRequest, GetTxCostRequest, GetWithdrawRequestRequest, type MessageFns, MetaArg, OrderRef, OrderTxResponse, OvaultCctpRecipientRequest, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RepayRequest, ReplenishOrderRequest, RequestCctpRecipientUpdateRequest, RequestWalletUpdateRequest, TokenDetails, TokenMintState, TransferRequest, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWhitelistedTokenMintRequest, UserState, UserType, VerifyUserRequest, WalletUpdateDecisionRequest, WalletUpdateState, WhitelistAction, WhitelistState, WithdrawActionRequest, WithdrawRequest, WithdrawState, feeDenomFromJSON, feeDenomToJSON, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };

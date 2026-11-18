@@ -99,7 +99,9 @@ export interface HashedArrayResponse {
 
 export interface GetBalanceRequest {
   of: string;
-  token?: Token | undefined;
+  token?:
+    | Token
+    | undefined;
   /** 101 and 103 are Solana. Any other id is an EVM chain. Defaults to Solana. */
   chainId?: number | undefined;
 }

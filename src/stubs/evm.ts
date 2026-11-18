@@ -246,6 +246,19 @@ export interface MetaArg {
   value: string;
 }
 
+export interface TransferRequest {
+  chainId: number;
+  requestId: string;
+  from: string;
+  to: string;
+  amount: string;
+  token: Token;
+  partnerId?: string | undefined;
+  toToken?: Token | undefined;
+  meta: MetaArg[];
+  proxy?: string | undefined;
+}
+
 export interface CreateOrderRequest {
   chainId: number;
   requestId: string;
@@ -2721,6 +2734,239 @@ export const MetaArg: MessageFns<MetaArg> = {
     const message = createBaseMetaArg();
     message.key = object.key ?? "";
     message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBaseTransferRequest(): TransferRequest {
+  return {
+    chainId: 0,
+    requestId: "",
+    from: "",
+    to: "",
+    amount: "",
+    token: 0,
+    partnerId: undefined,
+    toToken: undefined,
+    meta: [],
+    proxy: undefined,
+  };
+}
+
+export const TransferRequest: MessageFns<TransferRequest> = {
+  encode(message: TransferRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.chainId !== 0) {
+      writer.uint32(8).uint32(message.chainId);
+    }
+    if (message.requestId !== "") {
+      writer.uint32(18).string(message.requestId);
+    }
+    if (message.from !== "") {
+      writer.uint32(26).string(message.from);
+    }
+    if (message.to !== "") {
+      writer.uint32(34).string(message.to);
+    }
+    if (message.amount !== "") {
+      writer.uint32(42).string(message.amount);
+    }
+    if (message.token !== 0) {
+      writer.uint32(48).int32(message.token);
+    }
+    if (message.partnerId !== undefined) {
+      writer.uint32(58).string(message.partnerId);
+    }
+    if (message.toToken !== undefined) {
+      writer.uint32(64).int32(message.toToken);
+    }
+    for (const v of message.meta) {
+      MetaArg.encode(v!, writer.uint32(74).fork()).join();
+    }
+    if (message.proxy !== undefined) {
+      writer.uint32(82).string(message.proxy);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TransferRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTransferRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.chainId = reader.uint32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.from = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.to = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.amount = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.token = reader.int32() as any;
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 64) {
+            break;
+          }
+
+          message.toToken = reader.int32() as any;
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.meta.push(MetaArg.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.proxy = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TransferRequest {
+    return {
+      chainId: isSet(object.chainId)
+        ? globalThis.Number(object.chainId)
+        : isSet(object.chain_id)
+        ? globalThis.Number(object.chain_id)
+        : 0,
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : "",
+      from: isSet(object.from) ? globalThis.String(object.from) : "",
+      to: isSet(object.to) ? globalThis.String(object.to) : "",
+      amount: isSet(object.amount) ? globalThis.String(object.amount) : "",
+      token: isSet(object.token) ? tokenFromJSON(object.token) : 0,
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : undefined,
+      toToken: isSet(object.toToken)
+        ? tokenFromJSON(object.toToken)
+        : isSet(object.to_token)
+        ? tokenFromJSON(object.to_token)
+        : undefined,
+      meta: globalThis.Array.isArray(object?.meta)
+        ? object.meta.map((e: any) => MetaArg.fromJSON(e))
+        : [],
+      proxy: isSet(object.proxy) ? globalThis.String(object.proxy) : undefined,
+    };
+  },
+
+  toJSON(message: TransferRequest): unknown {
+    const obj: any = {};
+    if (message.chainId !== 0) {
+      obj.chainId = Math.round(message.chainId);
+    }
+    if (message.requestId !== "") {
+      obj.requestId = message.requestId;
+    }
+    if (message.from !== "") {
+      obj.from = message.from;
+    }
+    if (message.to !== "") {
+      obj.to = message.to;
+    }
+    if (message.amount !== "") {
+      obj.amount = message.amount;
+    }
+    if (message.token !== 0) {
+      obj.token = tokenToJSON(message.token);
+    }
+    if (message.partnerId !== undefined) {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.toToken !== undefined) {
+      obj.toToken = tokenToJSON(message.toToken);
+    }
+    if (message.meta?.length) {
+      obj.meta = message.meta.map((e) => MetaArg.toJSON(e));
+    }
+    if (message.proxy !== undefined) {
+      obj.proxy = message.proxy;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TransferRequest>, I>>(base?: I): TransferRequest {
+    return TransferRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TransferRequest>, I>>(object: I): TransferRequest {
+    const message = createBaseTransferRequest();
+    message.chainId = object.chainId ?? 0;
+    message.requestId = object.requestId ?? "";
+    message.from = object.from ?? "";
+    message.to = object.to ?? "";
+    message.amount = object.amount ?? "";
+    message.token = object.token ?? 0;
+    message.partnerId = object.partnerId ?? undefined;
+    message.toToken = object.toToken ?? undefined;
+    message.meta = object.meta?.map((e) => MetaArg.fromPartial(e)) || [];
+    message.proxy = object.proxy ?? undefined;
     return message;
   },
 };
@@ -7146,6 +7392,15 @@ export const EvmDefinition = {
       responseStream: false,
       options: {},
     },
+    /** Same routing as Solana Base.Transfer. Each diamond call is its own transaction. */
+    transfer: {
+      name: "Transfer",
+      requestType: TransferRequest as typeof TransferRequest,
+      requestStream: false,
+      responseType: OrderTxResponse as typeof OrderTxResponse,
+      responseStream: false,
+      options: {},
+    },
     /** TransactionsFacet — Orbit borrow/repay and user liquidity. */
     deposit: {
       name: "Deposit",
@@ -7410,6 +7665,8 @@ export interface EvmServiceImplementation<CallContextExt = {}> {
     request: CloseOrderRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<CloseOrderResponse>>;
+  /** Same routing as Solana Base.Transfer. Each diamond call is its own transaction. */
+  transfer(request: TransferRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTxResponse>>;
   /** TransactionsFacet — Orbit borrow/repay and user liquidity. */
   deposit(request: DepositRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
   borrow(request: BorrowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<OrderTxResponse>>;
@@ -7555,6 +7812,8 @@ export interface EvmClient<CallOptionsExt = {}> {
     request: DeepPartial<CloseOrderRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<CloseOrderResponse>;
+  /** Same routing as Solana Base.Transfer. Each diamond call is its own transaction. */
+  transfer(request: DeepPartial<TransferRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTxResponse>;
   /** TransactionsFacet — Orbit borrow/repay and user liquidity. */
   deposit(request: DeepPartial<DepositRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
   borrow(request: DeepPartial<BorrowRequest>, options?: CallOptions & CallOptionsExt): Promise<OrderTxResponse>;
