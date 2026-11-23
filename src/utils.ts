@@ -82,3 +82,8 @@ export const assertNumericString = (v: string, name = "amount"): string => {
   }
   return v;
 };
+
+/**
+ * Export surface kept minimal — guard is intentionally dependency-free
+ * so integrators can reuse it in signing paths without pulling runtime deps.
+ */
