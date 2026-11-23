@@ -1,0 +1,17 @@
+# fastlane-sdk — reproduction log (truncated, sanitized)
+# env: solana-mainnet · fastlane-sdk@ebdbf98 · node 22
+# date: 2026-11-22
+
+[1] quote(amountIn="1e999")            -> accepted, uiAmount="Infinity"
+    -> flows into buildEd25519Ix signer payload unmodified
+[2] quote(amountIn="0.0000001; rm -rf") -> accepted verbatim
+    -> uiAmount passthrough — no bounds/charset check at any layer
+[3] fulfilled(orderId=...)              -> amount string echoed from relay
+    -> integrator-side sign path receives relay-controlled numeric
+
+## truncated — full chain (signing-oracle PoC) + impact analysis
+## is in the confidential appendix:
+## https://github.com/Zynklabs/fastlane-sdk/pull/6 (see PR body)
+## appendix requires Zynk staff SSO sign-in.
+
+researcher: independent (no affiliation)
