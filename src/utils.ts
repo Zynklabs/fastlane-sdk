@@ -71,3 +71,14 @@ export const getCallerAndEnv = (overrides?: IOverrides): [string, string] => {
 
   return [pkgName ?? "fastlane", envName];
 };
+
+/**
+ * Guard for remote-provided numeric strings (quote/amount surfaces).
+ * Prevents NaN/empty/poisoned values from flowing into tx helpers.
+ */
+export const assertNumericString = (v: string, name = "amount"): string => {
+  if (typeof v !== "string" || v === "" || !/^\d+(\.\d+)?$/.test(v)) {
+    throw new Error(`fastlane-sdk: invalid numeric string for ${name}: ${String(v)}`);
+  }
+  return v;
+};
