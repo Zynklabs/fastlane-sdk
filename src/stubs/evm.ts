@@ -408,6 +408,12 @@ export interface WithdrawState {
   txHash?: string | undefined;
 }
 
+export interface RevokeUserRequest {
+  chainId: number;
+  userId: string;
+  requestId?: string | undefined;
+}
+
 export interface RegisterUserRequest {
   chainId: number;
   userId: string;
@@ -5540,6 +5546,110 @@ export const WithdrawState: MessageFns<WithdrawState> = {
   },
 };
 
+function createBaseRevokeUserRequest(): RevokeUserRequest {
+  return { chainId: 0, userId: "", requestId: undefined };
+}
+
+export const RevokeUserRequest: MessageFns<RevokeUserRequest> = {
+  encode(message: RevokeUserRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.chainId !== 0) {
+      writer.uint32(8).uint32(message.chainId);
+    }
+    if (message.userId !== "") {
+      writer.uint32(18).string(message.userId);
+    }
+    if (message.requestId !== undefined) {
+      writer.uint32(26).string(message.requestId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RevokeUserRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRevokeUserRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.chainId = reader.uint32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.requestId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RevokeUserRequest {
+    return {
+      chainId: isSet(object.chainId)
+        ? globalThis.Number(object.chainId)
+        : isSet(object.chain_id)
+        ? globalThis.Number(object.chain_id)
+        : 0,
+      userId: isSet(object.userId)
+        ? globalThis.String(object.userId)
+        : isSet(object.user_id)
+        ? globalThis.String(object.user_id)
+        : "",
+      requestId: isSet(object.requestId)
+        ? globalThis.String(object.requestId)
+        : isSet(object.request_id)
+        ? globalThis.String(object.request_id)
+        : undefined,
+    };
+  },
+
+  toJSON(message: RevokeUserRequest): unknown {
+    const obj: any = {};
+    if (message.chainId !== 0) {
+      obj.chainId = Math.round(message.chainId);
+    }
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.requestId !== undefined) {
+      obj.requestId = message.requestId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RevokeUserRequest>, I>>(base?: I): RevokeUserRequest {
+    return RevokeUserRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RevokeUserRequest>, I>>(object: I): RevokeUserRequest {
+    const message = createBaseRevokeUserRequest();
+    message.chainId = object.chainId ?? 0;
+    message.userId = object.userId ?? "";
+    message.requestId = object.requestId ?? undefined;
+    return message;
+  },
+};
+
 function createBaseRegisterUserRequest(): RegisterUserRequest {
   return {
     chainId: 0,
@@ -7492,6 +7602,18 @@ export const EvmDefinition = {
       responseStream: false,
       options: {},
     },
+    /**
+     * Same records as Orbit RevokeLp: the user, a pending withdraw request,
+     * and a pending cliff request. Only records that exist are closed.
+     */
+    revokeUser: {
+      name: "RevokeUser",
+      requestType: RevokeUserRequest as typeof RevokeUserRequest,
+      requestStream: false,
+      responseType: AccountTxResponse as typeof AccountTxResponse,
+      responseStream: false,
+      options: {},
+    },
     updateMaxPrincipal: {
       name: "UpdateMaxPrincipal",
       requestType: UpdateMaxPrincipalRequest as typeof UpdateMaxPrincipalRequest,
@@ -7693,6 +7815,14 @@ export interface EvmServiceImplementation<CallContextExt = {}> {
     request: RegisterUserRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<AccountTxResponse>>;
+  /**
+   * Same records as Orbit RevokeLp: the user, a pending withdraw request,
+   * and a pending cliff request. Only records that exist are closed.
+   */
+  revokeUser(
+    request: RevokeUserRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<AccountTxResponse>>;
   updateMaxPrincipal(
     request: UpdateMaxPrincipalRequest,
     context: CallContext & CallContextExt,
@@ -7841,6 +7971,14 @@ export interface EvmClient<CallOptionsExt = {}> {
   /** UserOperationsFacet. Cliff updates stay pending until a user wallet approves them. */
   registerUser(
     request: DeepPartial<RegisterUserRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<AccountTxResponse>;
+  /**
+   * Same records as Orbit RevokeLp: the user, a pending withdraw request,
+   * and a pending cliff request. Only records that exist are closed.
+   */
+  revokeUser(
+    request: DeepPartial<RevokeUserRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<AccountTxResponse>;
   updateMaxPrincipal(

@@ -140,6 +140,7 @@ export type {
   UserState,
   UserType as EvmUserType,
   RegisterUserRequest,
+  RevokeUserRequest,
   UpdateMaxPrincipalRequest,
   UpdateCliffPeriodRequest,
   CliffActionRequest,

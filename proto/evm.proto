@@ -56,6 +56,9 @@ service Evm {
 
   // UserOperationsFacet. Cliff updates stay pending until a user wallet approves them.
   rpc RegisterUser (RegisterUserRequest) returns (AccountTxResponse);
+  // Same records as Orbit RevokeLp: the user, a pending withdraw request,
+  // and a pending cliff request. Only records that exist are closed.
+  rpc RevokeUser (RevokeUserRequest) returns (AccountTxResponse);
   rpc UpdateMaxPrincipal (UpdateMaxPrincipalRequest) returns (AccountTxResponse);
   rpc UpdateCliffPeriod (UpdateCliffPeriodRequest) returns (CliffState);
   rpc ApproveCliffPeriod (CliffActionRequest) returns (CliffState);
@@ -385,6 +388,12 @@ message WithdrawState {
   string destination = 5;
   string mint = 6;
   optional string tx_hash = 7;
+}
+
+message RevokeUserRequest {
+  uint32 chain_id = 1;
+  string user_id = 2;
+  optional string request_id = 3;
 }
 
 message RegisterUserRequest {

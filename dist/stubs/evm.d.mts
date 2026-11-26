@@ -322,6 +322,12 @@ interface WithdrawState {
     txHash?: string | undefined;
 }
 declare const WithdrawState: MessageFns<WithdrawState>;
+interface RevokeUserRequest {
+    chainId: number;
+    userId: string;
+    requestId?: string | undefined;
+}
+declare const RevokeUserRequest: MessageFns<RevokeUserRequest>;
 interface RegisterUserRequest {
     chainId: number;
     userId: string;
@@ -699,6 +705,18 @@ declare const EvmDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        /**
+         * Same records as Orbit RevokeLp: the user, a pending withdraw request,
+         * and a pending cliff request. Only records that exist are closed.
+         */
+        readonly revokeUser: {
+            readonly name: "RevokeUser";
+            readonly requestType: typeof RevokeUserRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof AccountTxResponse;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly updateMaxPrincipal: {
             readonly name: "UpdateMaxPrincipal";
             readonly requestType: typeof UpdateMaxPrincipalRequest;
@@ -836,6 +854,11 @@ interface EvmServiceImplementation<CallContextExt = {}> {
     verifyUser(request: VerifyUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<UserState>>;
     /** UserOperationsFacet. Cliff updates stay pending until a user wallet approves them. */
     registerUser(request: RegisterUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
+    /**
+     * Same records as Orbit RevokeLp: the user, a pending withdraw request,
+     * and a pending cliff request. Only records that exist are closed.
+     */
+    revokeUser(request: RevokeUserRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
     updateMaxPrincipal(request: UpdateMaxPrincipalRequest, context: CallContext & CallContextExt): Promise<DeepPartial<AccountTxResponse>>;
     updateCliffPeriod(request: UpdateCliffPeriodRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CliffState>>;
     approveCliffPeriod(request: CliffActionRequest, context: CallContext & CallContextExt): Promise<DeepPartial<CliffState>>;
@@ -895,6 +918,11 @@ interface EvmClient<CallOptionsExt = {}> {
     verifyUser(request: DeepPartial<VerifyUserRequest>, options?: CallOptions & CallOptionsExt): Promise<UserState>;
     /** UserOperationsFacet. Cliff updates stay pending until a user wallet approves them. */
     registerUser(request: DeepPartial<RegisterUserRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
+    /**
+     * Same records as Orbit RevokeLp: the user, a pending withdraw request,
+     * and a pending cliff request. Only records that exist are closed.
+     */
+    revokeUser(request: DeepPartial<RevokeUserRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
     updateMaxPrincipal(request: DeepPartial<UpdateMaxPrincipalRequest>, options?: CallOptions & CallOptionsExt): Promise<AccountTxResponse>;
     updateCliffPeriod(request: DeepPartial<UpdateCliffPeriodRequest>, options?: CallOptions & CallOptionsExt): Promise<CliffState>;
     approveCliffPeriod(request: DeepPartial<CliffActionRequest>, options?: CallOptions & CallOptionsExt): Promise<CliffState>;
@@ -933,4 +961,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { AccountTxResponse, AllChains, AllTokens, BeneficiaryRequest, BeneficiaryState, BorrowRequest, CctpRecipient, CctpRecipientDecisionRequest, CctpRecipientUpdateState, ChainDetails, ChainRequest, CliffActionRequest, CliffState, CloseOrderRequest, CloseOrderResponse, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DepositRequest, DisburseRequest, type EvmClient, EvmDefinition, type EvmServiceImplementation, type Exact, FeeDenom, GetAllChainsRequest, GetAllTokensRequest, GetCctpRecipientUpdateRequest, GetChainByIdRequest, GetChainByNameRequest, GetPdaRequest, GetTokenDetailsRequest, GetTxCostRequest, GetWithdrawRequestRequest, type MessageFns, MetaArg, OrderRef, OrderTxResponse, OvaultCctpRecipientRequest, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RepayRequest, ReplenishOrderRequest, RequestCctpRecipientUpdateRequest, RequestWalletUpdateRequest, TokenDetails, TokenMintState, TransferRequest, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWhitelistedTokenMintRequest, UserState, UserType, VerifyUserRequest, WalletUpdateDecisionRequest, WalletUpdateState, WhitelistAction, WhitelistState, WithdrawActionRequest, WithdrawRequest, WithdrawState, feeDenomFromJSON, feeDenomToJSON, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
+export { AccountTxResponse, AllChains, AllTokens, BeneficiaryRequest, BeneficiaryState, BorrowRequest, CctpRecipient, CctpRecipientDecisionRequest, CctpRecipientUpdateState, ChainDetails, ChainRequest, CliffActionRequest, CliffState, CloseOrderRequest, CloseOrderResponse, CreateOrderRequest, DecodeEventRequest, type DeepPartial, DepositRequest, DisburseRequest, type EvmClient, EvmDefinition, type EvmServiceImplementation, type Exact, FeeDenom, GetAllChainsRequest, GetAllTokensRequest, GetCctpRecipientUpdateRequest, GetChainByIdRequest, GetChainByNameRequest, GetPdaRequest, GetTokenDetailsRequest, GetTxCostRequest, GetWithdrawRequestRequest, type MessageFns, MetaArg, OrderRef, OrderTxResponse, OvaultCctpRecipientRequest, PdaResponse, PledgeRequest, PositionArgs, RegisterUserRequest, RepayRequest, ReplenishOrderRequest, RequestCctpRecipientUpdateRequest, RequestWalletUpdateRequest, RevokeUserRequest, TokenDetails, TokenMintState, TransferRequest, UpdateCliffPeriodRequest, UpdateMaxPrincipalRequest, UpdatePartnerWhitelistRequest, UpdateWhitelistedTokenMintRequest, UserState, UserType, VerifyUserRequest, WalletUpdateDecisionRequest, WalletUpdateState, WhitelistAction, WhitelistState, WithdrawActionRequest, WithdrawRequest, WithdrawState, feeDenomFromJSON, feeDenomToJSON, protobufPackage, userTypeFromJSON, userTypeToJSON, whitelistActionFromJSON, whitelistActionToJSON };
