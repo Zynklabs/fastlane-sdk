@@ -16,6 +16,7 @@ export const nonRetryables = new Set([
   "AnchorBatch",
   "Initialize",
   "Execute",
+  "RevokeTimelock",
 ]);
 
 export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));

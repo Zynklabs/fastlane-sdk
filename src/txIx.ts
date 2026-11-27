@@ -9,6 +9,8 @@ export const applicableMethods = new Set([
   "/mantle.Mantle/RequestWalletsUpdate",
   "/mantle.Mantle/RequestSuffixesUpdate",
   "/mantle.Mantle/ResolveRequest",
+  "/mantle.Mantle/RequestTimelock",
+  "/mantle.Mantle/RevokeTimelock",
 ]);
 
 const TxIxToTransactionInstruction = (ix: TxIx) =>

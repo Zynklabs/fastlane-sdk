@@ -12,18 +12,25 @@ service Mantle {
 
   rpc RequestWalletsUpdate (WalletsUpdateRequest) returns (RequestState);
   rpc RequestSuffixesUpdate (SuffixesUpdateRequest) returns (RequestState);
+  rpc RequestTimelockDurationUpdate (TimelockDurationUpdateRequest) returns (RequestState);
   rpc ResolveRequest (RequestActionRequest) returns (RequestState);
   rpc RevokeRequest (RequestActionRequest) returns (RequestState);
   rpc ReadRequests (ReadRequestsRequest) returns (ReadRequestsResponse);
+
+  rpc RequestTimelock (TimelockRequest) returns (RequestState);
+  rpc RevokeTimelock (TimelockRequest) returns (RequestState);
 
   rpc DecodeEvent (base.DecodeEventRequest) returns (base.EventData);
 }
 
 // Suffixes name the partner's PDVs: "" for ALM, "::onramp" and "::offramp".
+// `timelock_duration` is required: the seconds a partner waits between
+// requesting a timelock and withdrawing, 0 for no wait.
 message InitializeRequest {
   string partner_id = 1;
   repeated string wallets = 2;
   repeated string suffixes = 3;
+  optional int64 timelock_duration = 4;
 }
 
 message ReadMvaultRequest {
@@ -59,6 +66,17 @@ message MvaultData {
   map<string, string> pdvs = 10;
   // The creating transaction, answered by Initialize.
   optional string signature = 11;
+  int64 timelock_duration = 12;
+  // The partner's scheduled withdrawal, if a wallet requested one.
+  optional Timelock timelock = 13;
+}
+
+// A whitelisted wallet's request to withdraw, which it may do from `eta`, a
+// unix time. A manager run closes it, matured or not.
+message Timelock {
+  string address = 1;
+  int64 eta = 2;
+  string authority = 3;
 }
 
 message ReadMvaultResponse {
@@ -68,18 +86,21 @@ message ReadMvaultResponse {
 message ExecuteRequest {
   string partner_id = 1;
   string request_id = 2;
-  // 64 hex characters.
+  // 64 hex characters. The program refuses the mvault's last root, so a repeat
+  // of it is answered with the run that wrote it.
   string merkle_root = 3;
   // Each listed pair's full outstanding amount: it replaces what the mvault
   // holds for the pair, and 0 clears it. Pairs not listed keep theirs.
   repeated Obligation obligations = 4;
-  // A whitelisted wallet that receives what is left; the mvault keeps it when
-  // unset.
+  // A whitelisted wallet that receives what is left of each token in the run:
+  // one the mvault still owes in, or listed, even with 0. The mvault keeps it
+  // when unset.
   optional string surplus_to = 5;
 }
 
-// UI amounts of `token`. `obligation` is what the pair was owed before the run
-// paid: the amount sent, or what it carried when not listed.
+// UI amounts of `token`, for each pair the run changed: paid, set or cleared.
+// `obligation` is what the pair was owed before the run paid: the amount sent,
+// or what it carried when not listed.
 message Settlement {
   string suffix = 1;
   base.Token token = 2;
@@ -112,22 +133,39 @@ message SuffixesUpdateRequest {
   optional string memo = 4;
 }
 
+// Only the admin multisig asks for a new timelock duration, through Squads; a
+// whitelisted wallet resolves it.
+message TimelockDurationUpdateRequest {
+  string partner_id = 1;
+  optional int64 timelock_duration = 2;
+  optional string memo = 3;
+}
+
 // `wallet` as in WalletsUpdateRequest. Only the admin multisig revokes.
 message RequestActionRequest {
   string partner_id = 1;
-  // WALLETS or SUFFIXES.
+  // WALLETS, SUFFIXES or TIMELOCK_DURATION.
   string kind = 2;
   optional string wallet = 3;
   optional string memo = 4;
 }
 
-// `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
-// instruction the wallet signs (`ix`). `address` is the request's.
+// `status` is "pending" for a Squads proposal (`tx_pda`), "unsigned" for an
+// instruction the wallet signs (`ix`) and "revoked" for a timelock the manager
+// revoked (`signature`). `address` is the request's, or the timelock's.
 message RequestState {
   string status = 1;
   string address = 2;
   optional string tx_pda = 3;
   optional base.TxIx ix = 4;
+  optional string signature = 5;
+}
+
+// `wallet` as in WalletsUpdateRequest. Only a wallet requests a timelock;
+// without one, the manager revokes it.
+message TimelockRequest {
+  string partner_id = 1;
+  optional string wallet = 2;
 }
 
 message ReadRequestsRequest {
@@ -136,28 +174,36 @@ message ReadRequestsRequest {
 
 message RequestData {
   string address = 1;
-  // WALLETS or SUFFIXES.
+  // WALLETS, SUFFIXES or TIMELOCK_DURATION.
   string kind = 2;
   bool requested_by_admin = 3;
   repeated string wallets = 4;
   repeated string suffixes = 5;
+  optional int64 timelock_duration = 6;
+  // 64 hex characters over the request's contents, which a resolution names:
+  // it cannot approve a request that replaced this one.
+  string hash = 7;
 }
 
 // A Squads proposal of the admin multisig, still open. `action` is REQUEST
-// when it asks for `wallets` or `suffixes`, a request that is on chain only
-// once executed, and RESOLVE or REVOKE when it acts on the pending request of
-// `kind`.
+// when it asks for `wallets`, `suffixes` or `timelock_duration`, a request
+// that is on chain only once executed, and RESOLVE or REVOKE when it acts on
+// the pending request of `kind`. A RESOLVE names the `request_hash` it
+// approves, so it cannot execute once the pending request's differs.
 message ProposalData {
   string tx_pda = 1;
-  // WALLETS or SUFFIXES.
+  // WALLETS, SUFFIXES or TIMELOCK_DURATION.
   string kind = 2;
   string action = 3;
   repeated string wallets = 4;
   repeated string suffixes = 5;
+  optional int64 timelock_duration = 6;
+  optional string request_hash = 7;
 }
 
 message ReadRequestsResponse {
   optional RequestData wallets = 1;
   optional RequestData suffixes = 2;
   repeated ProposalData proposals = 3;
+  optional RequestData timelock_duration = 4;
 }
