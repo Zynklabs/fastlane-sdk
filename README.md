@@ -56,7 +56,7 @@ The returned object exposes these primary namespaces:
 - fastlane.orbit: for zynk-orbit operations like pulling funds from LPs, transferring funds from fiat user PDA to wallets, enabling yield and principal withdrawals.
 - fastlane.kamino: for kamino operations like borrowing funds, repaying funds, depositing collateral and withdrawing collateral, along with other peripherals.
 - fastlane.tr: for zynk-tr operations like creating pools and anchoring batch merkle roots, along with reading pools and batches.
-- fastlane.mantle: for zynk-mantle operations like initializing a partner's mvault and executing splits to its PDVs, along with wallet and suffix change requests and reads.
+- fastlane.mantle: for zynk-mantle operations like initializing a partner's mvault and executing splits to its PDVs, along with wallet, suffix and timelock duration change requests, the partner's withdrawal timelock and reads.
 
 ### Quick Start
 
@@ -132,9 +132,12 @@ Fastlane(<endpoint>)
 │   ├─ execute()
 │   ├─ requestWalletsUpdate()
 │   ├─ requestSuffixesUpdate()
+│   ├─ requestTimelockDurationUpdate()
 │   ├─ resolveRequest()
 │   ├─ revokeRequest()
 │   ├─ readRequests()
+│   ├─ requestTimelock()
+│   ├─ revokeTimelock()
 │   └─ decodeEvent()
 └─ base
     ├─ generateHashedArray()
@@ -214,7 +217,7 @@ The SDK is based on the following proto services:
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
 - Tr Service ([proto/tr.proto](./proto/tr.proto)): TR pools and batch merkle root anchoring.
-- Mantle Service ([proto/mantle.proto](./proto/mantle.proto)): Partner mvaults, splits to PDVs and wallet/suffix change requests.
+- Mantle Service ([proto/mantle.proto](./proto/mantle.proto)): Partner mvaults, splits to PDVs, wallet/suffix/timelock duration change requests and withdrawal timelocks.
 
 ## Development
 

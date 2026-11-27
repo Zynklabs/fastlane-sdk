@@ -3,11 +3,16 @@ import { CallOptions, CallContext } from 'nice-grpc-common';
 import { Token, Balance, TxIx, DecodeEventRequest, EventData } from './base.mjs';
 
 declare const protobufPackage = "mantle";
-/** Suffixes name the partner's PDVs: "" for ALM, "::onramp" and "::offramp". */
+/**
+ * Suffixes name the partner's PDVs: "" for ALM, "::onramp" and "::offramp".
+ * `timelock_duration` is required: the seconds a partner waits between
+ * requesting a timelock and withdrawing, 0 for no wait.
+ */
 interface InitializeRequest {
     partnerId: string;
     wallets: string[];
     suffixes: string[];
+    timelockDuration?: number | undefined;
 }
 declare const InitializeRequest: MessageFns<InitializeRequest>;
 interface ReadMvaultRequest {
@@ -45,6 +50,9 @@ interface MvaultData {
     };
     /** The creating transaction, answered by Initialize. */
     signature?: string | undefined;
+    timelockDuration: number;
+    /** The partner's scheduled withdrawal, if a wallet requested one. */
+    timelock?: Timelock | undefined;
 }
 declare const MvaultData: MessageFns<MvaultData>;
 interface MvaultData_PdvsEntry {
@@ -52,6 +60,16 @@ interface MvaultData_PdvsEntry {
     value: string;
 }
 declare const MvaultData_PdvsEntry: MessageFns<MvaultData_PdvsEntry>;
+/**
+ * A whitelisted wallet's request to withdraw, which it may do from `eta`, a
+ * unix time. A manager run closes it, matured or not.
+ */
+interface Timelock {
+    address: string;
+    eta: number;
+    authority: string;
+}
+declare const Timelock: MessageFns<Timelock>;
 interface ReadMvaultResponse {
     mvault?: MvaultData | undefined;
 }
@@ -59,7 +77,10 @@ declare const ReadMvaultResponse: MessageFns<ReadMvaultResponse>;
 interface ExecuteRequest {
     partnerId: string;
     requestId: string;
-    /** 64 hex characters. */
+    /**
+     * 64 hex characters. The program refuses the mvault's last root, so a repeat
+     * of it is answered with the run that wrote it.
+     */
     merkleRoot: string;
     /**
      * Each listed pair's full outstanding amount: it replaces what the mvault
@@ -67,15 +88,17 @@ interface ExecuteRequest {
      */
     obligations: Obligation[];
     /**
-     * A whitelisted wallet that receives what is left; the mvault keeps it when
-     * unset.
+     * A whitelisted wallet that receives what is left of each token in the run:
+     * one the mvault still owes in, or listed, even with 0. The mvault keeps it
+     * when unset.
      */
     surplusTo?: string | undefined;
 }
 declare const ExecuteRequest: MessageFns<ExecuteRequest>;
 /**
- * UI amounts of `token`. `obligation` is what the pair was owed before the run
- * paid: the amount sent, or what it carried when not listed.
+ * UI amounts of `token`, for each pair the run changed: paid, set or cleared.
+ * `obligation` is what the pair was owed before the run paid: the amount sent,
+ * or what it carried when not listed.
  */
 interface Settlement {
     suffix: string;
@@ -111,58 +134,89 @@ interface SuffixesUpdateRequest {
     memo?: string | undefined;
 }
 declare const SuffixesUpdateRequest: MessageFns<SuffixesUpdateRequest>;
+/**
+ * Only the admin multisig asks for a new timelock duration, through Squads; a
+ * whitelisted wallet resolves it.
+ */
+interface TimelockDurationUpdateRequest {
+    partnerId: string;
+    timelockDuration?: number | undefined;
+    memo?: string | undefined;
+}
+declare const TimelockDurationUpdateRequest: MessageFns<TimelockDurationUpdateRequest>;
 /** `wallet` as in WalletsUpdateRequest. Only the admin multisig revokes. */
 interface RequestActionRequest {
     partnerId: string;
-    /** WALLETS or SUFFIXES. */
+    /** WALLETS, SUFFIXES or TIMELOCK_DURATION. */
     kind: string;
     wallet?: string | undefined;
     memo?: string | undefined;
 }
 declare const RequestActionRequest: MessageFns<RequestActionRequest>;
 /**
- * `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
- * instruction the wallet signs (`ix`). `address` is the request's.
+ * `status` is "pending" for a Squads proposal (`tx_pda`), "unsigned" for an
+ * instruction the wallet signs (`ix`) and "revoked" for a timelock the manager
+ * revoked (`signature`). `address` is the request's, or the timelock's.
  */
 interface RequestState {
     status: string;
     address: string;
     txPda?: string | undefined;
     ix?: TxIx | undefined;
+    signature?: string | undefined;
 }
 declare const RequestState: MessageFns<RequestState>;
+/**
+ * `wallet` as in WalletsUpdateRequest. Only a wallet requests a timelock;
+ * without one, the manager revokes it.
+ */
+interface TimelockRequest {
+    partnerId: string;
+    wallet?: string | undefined;
+}
+declare const TimelockRequest: MessageFns<TimelockRequest>;
 interface ReadRequestsRequest {
     partnerId: string;
 }
 declare const ReadRequestsRequest: MessageFns<ReadRequestsRequest>;
 interface RequestData {
     address: string;
-    /** WALLETS or SUFFIXES. */
+    /** WALLETS, SUFFIXES or TIMELOCK_DURATION. */
     kind: string;
     requestedByAdmin: boolean;
     wallets: string[];
     suffixes: string[];
+    timelockDuration?: number | undefined;
+    /**
+     * 64 hex characters over the request's contents, which a resolution names:
+     * it cannot approve a request that replaced this one.
+     */
+    hash: string;
 }
 declare const RequestData: MessageFns<RequestData>;
 /**
  * A Squads proposal of the admin multisig, still open. `action` is REQUEST
- * when it asks for `wallets` or `suffixes`, a request that is on chain only
- * once executed, and RESOLVE or REVOKE when it acts on the pending request of
- * `kind`.
+ * when it asks for `wallets`, `suffixes` or `timelock_duration`, a request
+ * that is on chain only once executed, and RESOLVE or REVOKE when it acts on
+ * the pending request of `kind`. A RESOLVE names the `request_hash` it
+ * approves, so it cannot execute once the pending request's differs.
  */
 interface ProposalData {
     txPda: string;
-    /** WALLETS or SUFFIXES. */
+    /** WALLETS, SUFFIXES or TIMELOCK_DURATION. */
     kind: string;
     action: string;
     wallets: string[];
     suffixes: string[];
+    timelockDuration?: number | undefined;
+    requestHash?: string | undefined;
 }
 declare const ProposalData: MessageFns<ProposalData>;
 interface ReadRequestsResponse {
     wallets?: RequestData | undefined;
     suffixes?: RequestData | undefined;
     proposals: ProposalData[];
+    timelockDuration?: RequestData | undefined;
 }
 declare const ReadRequestsResponse: MessageFns<ReadRequestsResponse>;
 type MantleDefinition = typeof MantleDefinition;
@@ -210,6 +264,14 @@ declare const MantleDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly requestTimelockDurationUpdate: {
+            readonly name: "RequestTimelockDurationUpdate";
+            readonly requestType: typeof TimelockDurationUpdateRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof RequestState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly resolveRequest: {
             readonly name: "ResolveRequest";
             readonly requestType: typeof RequestActionRequest;
@@ -234,6 +296,22 @@ declare const MantleDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        readonly requestTimelock: {
+            readonly name: "RequestTimelock";
+            readonly requestType: typeof TimelockRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof RequestState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        readonly revokeTimelock: {
+            readonly name: "RevokeTimelock";
+            readonly requestType: typeof TimelockRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof RequestState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
         readonly decodeEvent: {
             readonly name: "DecodeEvent";
             readonly requestType: typeof DecodeEventRequest;
@@ -250,9 +328,12 @@ interface MantleServiceImplementation<CallContextExt = {}> {
     execute(request: ExecuteRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ExecuteResponse>>;
     requestWalletsUpdate(request: WalletsUpdateRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
     requestSuffixesUpdate(request: SuffixesUpdateRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
+    requestTimelockDurationUpdate(request: TimelockDurationUpdateRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
     resolveRequest(request: RequestActionRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
     revokeRequest(request: RequestActionRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
     readRequests(request: ReadRequestsRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ReadRequestsResponse>>;
+    requestTimelock(request: TimelockRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
+    revokeTimelock(request: TimelockRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
     decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
 }
 interface MantleClient<CallOptionsExt = {}> {
@@ -261,9 +342,12 @@ interface MantleClient<CallOptionsExt = {}> {
     execute(request: DeepPartial<ExecuteRequest>, options?: CallOptions & CallOptionsExt): Promise<ExecuteResponse>;
     requestWalletsUpdate(request: DeepPartial<WalletsUpdateRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
     requestSuffixesUpdate(request: DeepPartial<SuffixesUpdateRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
+    requestTimelockDurationUpdate(request: DeepPartial<TimelockDurationUpdateRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
     resolveRequest(request: DeepPartial<RequestActionRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
     revokeRequest(request: DeepPartial<RequestActionRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
     readRequests(request: DeepPartial<ReadRequestsRequest>, options?: CallOptions & CallOptionsExt): Promise<ReadRequestsResponse>;
+    requestTimelock(request: DeepPartial<TimelockRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
+    revokeTimelock(request: DeepPartial<TimelockRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
     decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
@@ -285,4 +369,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { type DeepPartial, type Exact, ExecuteRequest, ExecuteResponse, InitializeRequest, type MantleClient, MantleDefinition, type MantleServiceImplementation, type MessageFns, MvaultData, MvaultData_PdvsEntry, Obligation, ProposalData, ReadMvaultRequest, ReadMvaultResponse, ReadRequestsRequest, ReadRequestsResponse, RequestActionRequest, RequestData, RequestState, Settlement, SuffixesUpdateRequest, TokenAccount, WalletsUpdateRequest, protobufPackage };
+export { type DeepPartial, type Exact, ExecuteRequest, ExecuteResponse, InitializeRequest, type MantleClient, MantleDefinition, type MantleServiceImplementation, type MessageFns, MvaultData, MvaultData_PdvsEntry, Obligation, ProposalData, ReadMvaultRequest, ReadMvaultResponse, ReadRequestsRequest, ReadRequestsResponse, RequestActionRequest, RequestData, RequestState, Settlement, SuffixesUpdateRequest, Timelock, TimelockDurationUpdateRequest, TimelockRequest, TokenAccount, WalletsUpdateRequest, protobufPackage };

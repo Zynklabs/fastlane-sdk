@@ -11,11 +11,16 @@ import { Balance, DecodeEventRequest, EventData, Token, tokenFromJSON, tokenToJS
 
 export const protobufPackage = "mantle";
 
-/** Suffixes name the partner's PDVs: "" for ALM, "::onramp" and "::offramp". */
+/**
+ * Suffixes name the partner's PDVs: "" for ALM, "::onramp" and "::offramp".
+ * `timelock_duration` is required: the seconds a partner waits between
+ * requesting a timelock and withdrawing, 0 for no wait.
+ */
 export interface InitializeRequest {
   partnerId: string;
   wallets: string[];
   suffixes: string[];
+  timelockDuration?: number | undefined;
 }
 
 export interface ReadMvaultRequest {
@@ -51,11 +56,24 @@ export interface MvaultData {
   pdvs: { [key: string]: string };
   /** The creating transaction, answered by Initialize. */
   signature?: string | undefined;
+  timelockDuration: number;
+  /** The partner's scheduled withdrawal, if a wallet requested one. */
+  timelock?: Timelock | undefined;
 }
 
 export interface MvaultData_PdvsEntry {
   key: string;
   value: string;
+}
+
+/**
+ * A whitelisted wallet's request to withdraw, which it may do from `eta`, a
+ * unix time. A manager run closes it, matured or not.
+ */
+export interface Timelock {
+  address: string;
+  eta: number;
+  authority: string;
 }
 
 export interface ReadMvaultResponse {
@@ -65,7 +83,10 @@ export interface ReadMvaultResponse {
 export interface ExecuteRequest {
   partnerId: string;
   requestId: string;
-  /** 64 hex characters. */
+  /**
+   * 64 hex characters. The program refuses the mvault's last root, so a repeat
+   * of it is answered with the run that wrote it.
+   */
   merkleRoot: string;
   /**
    * Each listed pair's full outstanding amount: it replaces what the mvault
@@ -73,15 +94,17 @@ export interface ExecuteRequest {
    */
   obligations: Obligation[];
   /**
-   * A whitelisted wallet that receives what is left; the mvault keeps it when
-   * unset.
+   * A whitelisted wallet that receives what is left of each token in the run:
+   * one the mvault still owes in, or listed, even with 0. The mvault keeps it
+   * when unset.
    */
   surplusTo?: string | undefined;
 }
 
 /**
- * UI amounts of `token`. `obligation` is what the pair was owed before the run
- * paid: the amount sent, or what it carried when not listed.
+ * UI amounts of `token`, for each pair the run changed: paid, set or cleared.
+ * `obligation` is what the pair was owed before the run paid: the amount sent,
+ * or what it carried when not listed.
  */
 export interface Settlement {
   suffix: string;
@@ -117,24 +140,45 @@ export interface SuffixesUpdateRequest {
   memo?: string | undefined;
 }
 
+/**
+ * Only the admin multisig asks for a new timelock duration, through Squads; a
+ * whitelisted wallet resolves it.
+ */
+export interface TimelockDurationUpdateRequest {
+  partnerId: string;
+  timelockDuration?: number | undefined;
+  memo?: string | undefined;
+}
+
 /** `wallet` as in WalletsUpdateRequest. Only the admin multisig revokes. */
 export interface RequestActionRequest {
   partnerId: string;
-  /** WALLETS or SUFFIXES. */
+  /** WALLETS, SUFFIXES or TIMELOCK_DURATION. */
   kind: string;
   wallet?: string | undefined;
   memo?: string | undefined;
 }
 
 /**
- * `status` is "pending" for a Squads proposal (`tx_pda`) and "unsigned" for an
- * instruction the wallet signs (`ix`). `address` is the request's.
+ * `status` is "pending" for a Squads proposal (`tx_pda`), "unsigned" for an
+ * instruction the wallet signs (`ix`) and "revoked" for a timelock the manager
+ * revoked (`signature`). `address` is the request's, or the timelock's.
  */
 export interface RequestState {
   status: string;
   address: string;
   txPda?: string | undefined;
   ix?: TxIx | undefined;
+  signature?: string | undefined;
+}
+
+/**
+ * `wallet` as in WalletsUpdateRequest. Only a wallet requests a timelock;
+ * without one, the manager revokes it.
+ */
+export interface TimelockRequest {
+  partnerId: string;
+  wallet?: string | undefined;
 }
 
 export interface ReadRequestsRequest {
@@ -143,36 +187,48 @@ export interface ReadRequestsRequest {
 
 export interface RequestData {
   address: string;
-  /** WALLETS or SUFFIXES. */
+  /** WALLETS, SUFFIXES or TIMELOCK_DURATION. */
   kind: string;
   requestedByAdmin: boolean;
   wallets: string[];
   suffixes: string[];
+  timelockDuration?:
+    | number
+    | undefined;
+  /**
+   * 64 hex characters over the request's contents, which a resolution names:
+   * it cannot approve a request that replaced this one.
+   */
+  hash: string;
 }
 
 /**
  * A Squads proposal of the admin multisig, still open. `action` is REQUEST
- * when it asks for `wallets` or `suffixes`, a request that is on chain only
- * once executed, and RESOLVE or REVOKE when it acts on the pending request of
- * `kind`.
+ * when it asks for `wallets`, `suffixes` or `timelock_duration`, a request
+ * that is on chain only once executed, and RESOLVE or REVOKE when it acts on
+ * the pending request of `kind`. A RESOLVE names the `request_hash` it
+ * approves, so it cannot execute once the pending request's differs.
  */
 export interface ProposalData {
   txPda: string;
-  /** WALLETS or SUFFIXES. */
+  /** WALLETS, SUFFIXES or TIMELOCK_DURATION. */
   kind: string;
   action: string;
   wallets: string[];
   suffixes: string[];
+  timelockDuration?: number | undefined;
+  requestHash?: string | undefined;
 }
 
 export interface ReadRequestsResponse {
   wallets?: RequestData | undefined;
   suffixes?: RequestData | undefined;
   proposals: ProposalData[];
+  timelockDuration?: RequestData | undefined;
 }
 
 function createBaseInitializeRequest(): InitializeRequest {
-  return { partnerId: "", wallets: [], suffixes: [] };
+  return { partnerId: "", wallets: [], suffixes: [], timelockDuration: undefined };
 }
 
 export const InitializeRequest: MessageFns<InitializeRequest> = {
@@ -185,6 +241,9 @@ export const InitializeRequest: MessageFns<InitializeRequest> = {
     }
     for (const v of message.suffixes) {
       writer.uint32(26).string(v!);
+    }
+    if (message.timelockDuration !== undefined) {
+      writer.uint32(32).int64(message.timelockDuration);
     }
     return writer;
   },
@@ -220,6 +279,14 @@ export const InitializeRequest: MessageFns<InitializeRequest> = {
           message.suffixes.push(reader.string());
           continue;
         }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.timelockDuration = longToNumber(reader.int64());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -238,6 +305,11 @@ export const InitializeRequest: MessageFns<InitializeRequest> = {
         : "",
       wallets: globalThis.Array.isArray(object?.wallets) ? object.wallets.map((e: any) => globalThis.String(e)) : [],
       suffixes: globalThis.Array.isArray(object?.suffixes) ? object.suffixes.map((e: any) => globalThis.String(e)) : [],
+      timelockDuration: isSet(object.timelockDuration)
+        ? globalThis.Number(object.timelockDuration)
+        : isSet(object.timelock_duration)
+        ? globalThis.Number(object.timelock_duration)
+        : undefined,
     };
   },
 
@@ -252,6 +324,9 @@ export const InitializeRequest: MessageFns<InitializeRequest> = {
     if (message.suffixes?.length) {
       obj.suffixes = message.suffixes;
     }
+    if (message.timelockDuration !== undefined) {
+      obj.timelockDuration = Math.round(message.timelockDuration);
+    }
     return obj;
   },
 
@@ -263,6 +338,7 @@ export const InitializeRequest: MessageFns<InitializeRequest> = {
     message.partnerId = object.partnerId ?? "";
     message.wallets = object.wallets?.map((e) => e) || [];
     message.suffixes = object.suffixes?.map((e) => e) || [];
+    message.timelockDuration = object.timelockDuration ?? undefined;
     return message;
   },
 };
@@ -512,6 +588,8 @@ function createBaseMvaultData(): MvaultData {
     balances: [],
     pdvs: {},
     signature: undefined,
+    timelockDuration: 0,
+    timelock: undefined,
   };
 }
 
@@ -549,6 +627,12 @@ export const MvaultData: MessageFns<MvaultData> = {
     });
     if (message.signature !== undefined) {
       writer.uint32(90).string(message.signature);
+    }
+    if (message.timelockDuration !== 0) {
+      writer.uint32(96).int64(message.timelockDuration);
+    }
+    if (message.timelock !== undefined) {
+      Timelock.encode(message.timelock, writer.uint32(106).fork()).join();
     }
     return writer;
   },
@@ -651,6 +735,22 @@ export const MvaultData: MessageFns<MvaultData> = {
           message.signature = reader.string();
           continue;
         }
+        case 12: {
+          if (tag !== 96) {
+            break;
+          }
+
+          message.timelockDuration = longToNumber(reader.int64());
+          continue;
+        }
+        case 13: {
+          if (tag !== 106) {
+            break;
+          }
+
+          message.timelock = Timelock.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -697,6 +797,12 @@ export const MvaultData: MessageFns<MvaultData> = {
         )
         : {},
       signature: isSet(object.signature) ? globalThis.String(object.signature) : undefined,
+      timelockDuration: isSet(object.timelockDuration)
+        ? globalThis.Number(object.timelockDuration)
+        : isSet(object.timelock_duration)
+        ? globalThis.Number(object.timelock_duration)
+        : 0,
+      timelock: isSet(object.timelock) ? Timelock.fromJSON(object.timelock) : undefined,
     };
   },
 
@@ -741,6 +847,12 @@ export const MvaultData: MessageFns<MvaultData> = {
     if (message.signature !== undefined) {
       obj.signature = message.signature;
     }
+    if (message.timelockDuration !== 0) {
+      obj.timelockDuration = Math.round(message.timelockDuration);
+    }
+    if (message.timelock !== undefined) {
+      obj.timelock = Timelock.toJSON(message.timelock);
+    }
     return obj;
   },
 
@@ -768,6 +880,10 @@ export const MvaultData: MessageFns<MvaultData> = {
       {},
     );
     message.signature = object.signature ?? undefined;
+    message.timelockDuration = object.timelockDuration ?? 0;
+    message.timelock = (object.timelock !== undefined && object.timelock !== null)
+      ? Timelock.fromPartial(object.timelock)
+      : undefined;
     return message;
   },
 };
@@ -844,6 +960,98 @@ export const MvaultData_PdvsEntry: MessageFns<MvaultData_PdvsEntry> = {
     const message = createBaseMvaultData_PdvsEntry();
     message.key = object.key ?? "";
     message.value = object.value ?? "";
+    return message;
+  },
+};
+
+function createBaseTimelock(): Timelock {
+  return { address: "", eta: 0, authority: "" };
+}
+
+export const Timelock: MessageFns<Timelock> = {
+  encode(message: Timelock, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
+    if (message.eta !== 0) {
+      writer.uint32(16).int64(message.eta);
+    }
+    if (message.authority !== "") {
+      writer.uint32(26).string(message.authority);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Timelock {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTimelock();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.eta = longToNumber(reader.int64());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.authority = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Timelock {
+    return {
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      eta: isSet(object.eta) ? globalThis.Number(object.eta) : 0,
+      authority: isSet(object.authority) ? globalThis.String(object.authority) : "",
+    };
+  },
+
+  toJSON(message: Timelock): unknown {
+    const obj: any = {};
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.eta !== 0) {
+      obj.eta = Math.round(message.eta);
+    }
+    if (message.authority !== "") {
+      obj.authority = message.authority;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Timelock>, I>>(base?: I): Timelock {
+    return Timelock.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Timelock>, I>>(object: I): Timelock {
+    const message = createBaseTimelock();
+    message.address = object.address ?? "";
+    message.eta = object.eta ?? 0;
+    message.authority = object.authority ?? "";
     return message;
   },
 };
@@ -1516,6 +1724,108 @@ export const SuffixesUpdateRequest: MessageFns<SuffixesUpdateRequest> = {
   },
 };
 
+function createBaseTimelockDurationUpdateRequest(): TimelockDurationUpdateRequest {
+  return { partnerId: "", timelockDuration: undefined, memo: undefined };
+}
+
+export const TimelockDurationUpdateRequest: MessageFns<TimelockDurationUpdateRequest> = {
+  encode(message: TimelockDurationUpdateRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.partnerId !== "") {
+      writer.uint32(10).string(message.partnerId);
+    }
+    if (message.timelockDuration !== undefined) {
+      writer.uint32(16).int64(message.timelockDuration);
+    }
+    if (message.memo !== undefined) {
+      writer.uint32(26).string(message.memo);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TimelockDurationUpdateRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTimelockDurationUpdateRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.timelockDuration = longToNumber(reader.int64());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.memo = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TimelockDurationUpdateRequest {
+    return {
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      timelockDuration: isSet(object.timelockDuration)
+        ? globalThis.Number(object.timelockDuration)
+        : isSet(object.timelock_duration)
+        ? globalThis.Number(object.timelock_duration)
+        : undefined,
+      memo: isSet(object.memo) ? globalThis.String(object.memo) : undefined,
+    };
+  },
+
+  toJSON(message: TimelockDurationUpdateRequest): unknown {
+    const obj: any = {};
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.timelockDuration !== undefined) {
+      obj.timelockDuration = Math.round(message.timelockDuration);
+    }
+    if (message.memo !== undefined) {
+      obj.memo = message.memo;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TimelockDurationUpdateRequest>, I>>(base?: I): TimelockDurationUpdateRequest {
+    return TimelockDurationUpdateRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TimelockDurationUpdateRequest>, I>>(
+    object: I,
+  ): TimelockDurationUpdateRequest {
+    const message = createBaseTimelockDurationUpdateRequest();
+    message.partnerId = object.partnerId ?? "";
+    message.timelockDuration = object.timelockDuration ?? undefined;
+    message.memo = object.memo ?? undefined;
+    return message;
+  },
+};
+
 function createBaseRequestActionRequest(): RequestActionRequest {
   return { partnerId: "", kind: "", wallet: undefined, memo: undefined };
 }
@@ -1629,7 +1939,7 @@ export const RequestActionRequest: MessageFns<RequestActionRequest> = {
 };
 
 function createBaseRequestState(): RequestState {
-  return { status: "", address: "", txPda: undefined, ix: undefined };
+  return { status: "", address: "", txPda: undefined, ix: undefined, signature: undefined };
 }
 
 export const RequestState: MessageFns<RequestState> = {
@@ -1645,6 +1955,9 @@ export const RequestState: MessageFns<RequestState> = {
     }
     if (message.ix !== undefined) {
       TxIx.encode(message.ix, writer.uint32(34).fork()).join();
+    }
+    if (message.signature !== undefined) {
+      writer.uint32(42).string(message.signature);
     }
     return writer;
   },
@@ -1688,6 +2001,14 @@ export const RequestState: MessageFns<RequestState> = {
           message.ix = TxIx.decode(reader, reader.uint32());
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.signature = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1707,6 +2028,7 @@ export const RequestState: MessageFns<RequestState> = {
         ? globalThis.String(object.tx_pda)
         : undefined,
       ix: isSet(object.ix) ? TxIx.fromJSON(object.ix) : undefined,
+      signature: isSet(object.signature) ? globalThis.String(object.signature) : undefined,
     };
   },
 
@@ -1724,6 +2046,9 @@ export const RequestState: MessageFns<RequestState> = {
     if (message.ix !== undefined) {
       obj.ix = TxIx.toJSON(message.ix);
     }
+    if (message.signature !== undefined) {
+      obj.signature = message.signature;
+    }
     return obj;
   },
 
@@ -1736,6 +2061,87 @@ export const RequestState: MessageFns<RequestState> = {
     message.address = object.address ?? "";
     message.txPda = object.txPda ?? undefined;
     message.ix = (object.ix !== undefined && object.ix !== null) ? TxIx.fromPartial(object.ix) : undefined;
+    message.signature = object.signature ?? undefined;
+    return message;
+  },
+};
+
+function createBaseTimelockRequest(): TimelockRequest {
+  return { partnerId: "", wallet: undefined };
+}
+
+export const TimelockRequest: MessageFns<TimelockRequest> = {
+  encode(message: TimelockRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.partnerId !== "") {
+      writer.uint32(10).string(message.partnerId);
+    }
+    if (message.wallet !== undefined) {
+      writer.uint32(18).string(message.wallet);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TimelockRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTimelockRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.partnerId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.wallet = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TimelockRequest {
+    return {
+      partnerId: isSet(object.partnerId)
+        ? globalThis.String(object.partnerId)
+        : isSet(object.partner_id)
+        ? globalThis.String(object.partner_id)
+        : "",
+      wallet: isSet(object.wallet) ? globalThis.String(object.wallet) : undefined,
+    };
+  },
+
+  toJSON(message: TimelockRequest): unknown {
+    const obj: any = {};
+    if (message.partnerId !== "") {
+      obj.partnerId = message.partnerId;
+    }
+    if (message.wallet !== undefined) {
+      obj.wallet = message.wallet;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TimelockRequest>, I>>(base?: I): TimelockRequest {
+    return TimelockRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TimelockRequest>, I>>(object: I): TimelockRequest {
+    const message = createBaseTimelockRequest();
+    message.partnerId = object.partnerId ?? "";
+    message.wallet = object.wallet ?? undefined;
     return message;
   },
 };
@@ -1805,7 +2211,15 @@ export const ReadRequestsRequest: MessageFns<ReadRequestsRequest> = {
 };
 
 function createBaseRequestData(): RequestData {
-  return { address: "", kind: "", requestedByAdmin: false, wallets: [], suffixes: [] };
+  return {
+    address: "",
+    kind: "",
+    requestedByAdmin: false,
+    wallets: [],
+    suffixes: [],
+    timelockDuration: undefined,
+    hash: "",
+  };
 }
 
 export const RequestData: MessageFns<RequestData> = {
@@ -1824,6 +2238,12 @@ export const RequestData: MessageFns<RequestData> = {
     }
     for (const v of message.suffixes) {
       writer.uint32(42).string(v!);
+    }
+    if (message.timelockDuration !== undefined) {
+      writer.uint32(48).int64(message.timelockDuration);
+    }
+    if (message.hash !== "") {
+      writer.uint32(58).string(message.hash);
     }
     return writer;
   },
@@ -1875,6 +2295,22 @@ export const RequestData: MessageFns<RequestData> = {
           message.suffixes.push(reader.string());
           continue;
         }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.timelockDuration = longToNumber(reader.int64());
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.hash = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1895,6 +2331,12 @@ export const RequestData: MessageFns<RequestData> = {
         : false,
       wallets: globalThis.Array.isArray(object?.wallets) ? object.wallets.map((e: any) => globalThis.String(e)) : [],
       suffixes: globalThis.Array.isArray(object?.suffixes) ? object.suffixes.map((e: any) => globalThis.String(e)) : [],
+      timelockDuration: isSet(object.timelockDuration)
+        ? globalThis.Number(object.timelockDuration)
+        : isSet(object.timelock_duration)
+        ? globalThis.Number(object.timelock_duration)
+        : undefined,
+      hash: isSet(object.hash) ? globalThis.String(object.hash) : "",
     };
   },
 
@@ -1915,6 +2357,12 @@ export const RequestData: MessageFns<RequestData> = {
     if (message.suffixes?.length) {
       obj.suffixes = message.suffixes;
     }
+    if (message.timelockDuration !== undefined) {
+      obj.timelockDuration = Math.round(message.timelockDuration);
+    }
+    if (message.hash !== "") {
+      obj.hash = message.hash;
+    }
     return obj;
   },
 
@@ -1928,12 +2376,22 @@ export const RequestData: MessageFns<RequestData> = {
     message.requestedByAdmin = object.requestedByAdmin ?? false;
     message.wallets = object.wallets?.map((e) => e) || [];
     message.suffixes = object.suffixes?.map((e) => e) || [];
+    message.timelockDuration = object.timelockDuration ?? undefined;
+    message.hash = object.hash ?? "";
     return message;
   },
 };
 
 function createBaseProposalData(): ProposalData {
-  return { txPda: "", kind: "", action: "", wallets: [], suffixes: [] };
+  return {
+    txPda: "",
+    kind: "",
+    action: "",
+    wallets: [],
+    suffixes: [],
+    timelockDuration: undefined,
+    requestHash: undefined,
+  };
 }
 
 export const ProposalData: MessageFns<ProposalData> = {
@@ -1952,6 +2410,12 @@ export const ProposalData: MessageFns<ProposalData> = {
     }
     for (const v of message.suffixes) {
       writer.uint32(42).string(v!);
+    }
+    if (message.timelockDuration !== undefined) {
+      writer.uint32(48).int64(message.timelockDuration);
+    }
+    if (message.requestHash !== undefined) {
+      writer.uint32(58).string(message.requestHash);
     }
     return writer;
   },
@@ -2003,6 +2467,22 @@ export const ProposalData: MessageFns<ProposalData> = {
           message.suffixes.push(reader.string());
           continue;
         }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.timelockDuration = longToNumber(reader.int64());
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.requestHash = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2023,6 +2503,16 @@ export const ProposalData: MessageFns<ProposalData> = {
       action: isSet(object.action) ? globalThis.String(object.action) : "",
       wallets: globalThis.Array.isArray(object?.wallets) ? object.wallets.map((e: any) => globalThis.String(e)) : [],
       suffixes: globalThis.Array.isArray(object?.suffixes) ? object.suffixes.map((e: any) => globalThis.String(e)) : [],
+      timelockDuration: isSet(object.timelockDuration)
+        ? globalThis.Number(object.timelockDuration)
+        : isSet(object.timelock_duration)
+        ? globalThis.Number(object.timelock_duration)
+        : undefined,
+      requestHash: isSet(object.requestHash)
+        ? globalThis.String(object.requestHash)
+        : isSet(object.request_hash)
+        ? globalThis.String(object.request_hash)
+        : undefined,
     };
   },
 
@@ -2043,6 +2533,12 @@ export const ProposalData: MessageFns<ProposalData> = {
     if (message.suffixes?.length) {
       obj.suffixes = message.suffixes;
     }
+    if (message.timelockDuration !== undefined) {
+      obj.timelockDuration = Math.round(message.timelockDuration);
+    }
+    if (message.requestHash !== undefined) {
+      obj.requestHash = message.requestHash;
+    }
     return obj;
   },
 
@@ -2056,12 +2552,14 @@ export const ProposalData: MessageFns<ProposalData> = {
     message.action = object.action ?? "";
     message.wallets = object.wallets?.map((e) => e) || [];
     message.suffixes = object.suffixes?.map((e) => e) || [];
+    message.timelockDuration = object.timelockDuration ?? undefined;
+    message.requestHash = object.requestHash ?? undefined;
     return message;
   },
 };
 
 function createBaseReadRequestsResponse(): ReadRequestsResponse {
-  return { wallets: undefined, suffixes: undefined, proposals: [] };
+  return { wallets: undefined, suffixes: undefined, proposals: [], timelockDuration: undefined };
 }
 
 export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
@@ -2074,6 +2572,9 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
     }
     for (const v of message.proposals) {
       ProposalData.encode(v!, writer.uint32(26).fork()).join();
+    }
+    if (message.timelockDuration !== undefined) {
+      RequestData.encode(message.timelockDuration, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -2109,6 +2610,14 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
           message.proposals.push(ProposalData.decode(reader, reader.uint32()));
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.timelockDuration = RequestData.decode(reader, reader.uint32());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2125,6 +2634,11 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
       proposals: globalThis.Array.isArray(object?.proposals)
         ? object.proposals.map((e: any) => ProposalData.fromJSON(e))
         : [],
+      timelockDuration: isSet(object.timelockDuration)
+        ? RequestData.fromJSON(object.timelockDuration)
+        : isSet(object.timelock_duration)
+        ? RequestData.fromJSON(object.timelock_duration)
+        : undefined,
     };
   },
 
@@ -2138,6 +2652,9 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
     }
     if (message.proposals?.length) {
       obj.proposals = message.proposals.map((e) => ProposalData.toJSON(e));
+    }
+    if (message.timelockDuration !== undefined) {
+      obj.timelockDuration = RequestData.toJSON(message.timelockDuration);
     }
     return obj;
   },
@@ -2154,6 +2671,9 @@ export const ReadRequestsResponse: MessageFns<ReadRequestsResponse> = {
       ? RequestData.fromPartial(object.suffixes)
       : undefined;
     message.proposals = object.proposals?.map((e) => ProposalData.fromPartial(e)) || [];
+    message.timelockDuration = (object.timelockDuration !== undefined && object.timelockDuration !== null)
+      ? RequestData.fromPartial(object.timelockDuration)
+      : undefined;
     return message;
   },
 };
@@ -2203,6 +2723,14 @@ export const MantleDefinition = {
       responseStream: false,
       options: {},
     },
+    requestTimelockDurationUpdate: {
+      name: "RequestTimelockDurationUpdate",
+      requestType: TimelockDurationUpdateRequest as typeof TimelockDurationUpdateRequest,
+      requestStream: false,
+      responseType: RequestState as typeof RequestState,
+      responseStream: false,
+      options: {},
+    },
     resolveRequest: {
       name: "ResolveRequest",
       requestType: RequestActionRequest as typeof RequestActionRequest,
@@ -2224,6 +2752,22 @@ export const MantleDefinition = {
       requestType: ReadRequestsRequest as typeof ReadRequestsRequest,
       requestStream: false,
       responseType: ReadRequestsResponse as typeof ReadRequestsResponse,
+      responseStream: false,
+      options: {},
+    },
+    requestTimelock: {
+      name: "RequestTimelock",
+      requestType: TimelockRequest as typeof TimelockRequest,
+      requestStream: false,
+      responseType: RequestState as typeof RequestState,
+      responseStream: false,
+      options: {},
+    },
+    revokeTimelock: {
+      name: "RevokeTimelock",
+      requestType: TimelockRequest as typeof TimelockRequest,
+      requestStream: false,
+      responseType: RequestState as typeof RequestState,
       responseStream: false,
       options: {},
     },
@@ -2253,6 +2797,10 @@ export interface MantleServiceImplementation<CallContextExt = {}> {
     request: SuffixesUpdateRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<RequestState>>;
+  requestTimelockDurationUpdate(
+    request: TimelockDurationUpdateRequest,
+    context: CallContext & CallContextExt,
+  ): Promise<DeepPartial<RequestState>>;
   resolveRequest(
     request: RequestActionRequest,
     context: CallContext & CallContextExt,
@@ -2265,6 +2813,8 @@ export interface MantleServiceImplementation<CallContextExt = {}> {
     request: ReadRequestsRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<ReadRequestsResponse>>;
+  requestTimelock(request: TimelockRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
+  revokeTimelock(request: TimelockRequest, context: CallContext & CallContextExt): Promise<DeepPartial<RequestState>>;
   decodeEvent(request: DecodeEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<EventData>>;
 }
 
@@ -2283,6 +2833,10 @@ export interface MantleClient<CallOptionsExt = {}> {
     request: DeepPartial<SuffixesUpdateRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<RequestState>;
+  requestTimelockDurationUpdate(
+    request: DeepPartial<TimelockDurationUpdateRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): Promise<RequestState>;
   resolveRequest(
     request: DeepPartial<RequestActionRequest>,
     options?: CallOptions & CallOptionsExt,
@@ -2295,6 +2849,8 @@ export interface MantleClient<CallOptionsExt = {}> {
     request: DeepPartial<ReadRequestsRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<ReadRequestsResponse>;
+  requestTimelock(request: DeepPartial<TimelockRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
+  revokeTimelock(request: DeepPartial<TimelockRequest>, options?: CallOptions & CallOptionsExt): Promise<RequestState>;
   decodeEvent(request: DeepPartial<DecodeEventRequest>, options?: CallOptions & CallOptionsExt): Promise<EventData>;
 }
 
