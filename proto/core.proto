@@ -25,6 +25,14 @@ service Core {
   rpc WhitelistBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
   rpc ToggleBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
   rpc RevokeBeneficiary(BeneficiaryRequest) returns (BeneficiaryState);
+
+  // Immediately pauses the program. The manager signs, and the transaction is sent.
+  rpc Pause(GovernanceRequest) returns (GovernanceState);
+  // Opens the unpause timelock. The manager signs. The program stays paused
+  // until that timelock is executed.
+  rpc RequestUnpause(GovernanceRequest) returns (GovernanceState);
+  // Executes a ready unpause timelock as an admin multisig proposal.
+  rpc Unpause(GovernanceRequest) returns (GovernanceState);
 }
 
 message DomainSeparatorRequest {}
@@ -162,4 +170,20 @@ message BeneficiaryState {
   string pda = 2;
   optional bool transient_allowed = 3;
   optional string tx_pda = 4;
+}
+
+message GovernanceRequest {
+  optional string memo = 1;
+}
+
+message GovernanceState {
+  bool paused = 1;
+  // "paused", "requested", or "pending".
+  string status = 2;
+  optional string signature = 3;
+  optional string tx_pda = 4;
+  // Unpause timelock PDA. The account exists only while an unpause is open.
+  string timelock = 5;
+  // Unix time after which the timelock can execute without an acknowledgment.
+  int64 eta = 6;
 }
