@@ -149,6 +149,22 @@ interface BeneficiaryState {
     txPda?: string | undefined;
 }
 declare const BeneficiaryState: MessageFns<BeneficiaryState>;
+interface GovernanceRequest {
+    memo?: string | undefined;
+}
+declare const GovernanceRequest: MessageFns<GovernanceRequest>;
+interface GovernanceState {
+    paused: boolean;
+    /** "paused", "requested", or "pending". */
+    status: string;
+    signature?: string | undefined;
+    txPda?: string | undefined;
+    /** Unpause timelock PDA. The account exists only while an unpause is open. */
+    timelock: string;
+    /** Unix time after which the timelock can execute without an acknowledgment. */
+    eta: number;
+}
+declare const GovernanceState: MessageFns<GovernanceState>;
 type CoreDefinition = typeof CoreDefinition;
 declare const CoreDefinition: {
     readonly name: "Core";
@@ -282,6 +298,36 @@ declare const CoreDefinition: {
             readonly responseStream: false;
             readonly options: {};
         };
+        /** Immediately pauses the program. The manager signs, and the transaction is sent. */
+        readonly pause: {
+            readonly name: "Pause";
+            readonly requestType: typeof GovernanceRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof GovernanceState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        /**
+         * Opens the unpause timelock. The manager signs. The program stays paused
+         * until that timelock is executed.
+         */
+        readonly requestUnpause: {
+            readonly name: "RequestUnpause";
+            readonly requestType: typeof GovernanceRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof GovernanceState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
+        /** Executes a ready unpause timelock as an admin multisig proposal. */
+        readonly unpause: {
+            readonly name: "Unpause";
+            readonly requestType: typeof GovernanceRequest;
+            readonly requestStream: false;
+            readonly responseType: typeof GovernanceState;
+            readonly responseStream: false;
+            readonly options: {};
+        };
     };
 };
 interface CoreServiceImplementation<CallContextExt = {}> {
@@ -301,6 +347,15 @@ interface CoreServiceImplementation<CallContextExt = {}> {
     whitelistBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
     toggleBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
     revokeBeneficiary(request: BeneficiaryRequest, context: CallContext & CallContextExt): Promise<DeepPartial<BeneficiaryState>>;
+    /** Immediately pauses the program. The manager signs, and the transaction is sent. */
+    pause(request: GovernanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GovernanceState>>;
+    /**
+     * Opens the unpause timelock. The manager signs. The program stays paused
+     * until that timelock is executed.
+     */
+    requestUnpause(request: GovernanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GovernanceState>>;
+    /** Executes a ready unpause timelock as an admin multisig proposal. */
+    unpause(request: GovernanceRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GovernanceState>>;
 }
 interface CoreClient<CallOptionsExt = {}> {
     domainSeparator(request: DeepPartial<DomainSeparatorRequest>, options?: CallOptions & CallOptionsExt): Promise<DomainSeparatorResponse>;
@@ -319,6 +374,15 @@ interface CoreClient<CallOptionsExt = {}> {
     whitelistBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
     toggleBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
     revokeBeneficiary(request: DeepPartial<BeneficiaryRequest>, options?: CallOptions & CallOptionsExt): Promise<BeneficiaryState>;
+    /** Immediately pauses the program. The manager signs, and the transaction is sent. */
+    pause(request: DeepPartial<GovernanceRequest>, options?: CallOptions & CallOptionsExt): Promise<GovernanceState>;
+    /**
+     * Opens the unpause timelock. The manager signs. The program stays paused
+     * until that timelock is executed.
+     */
+    requestUnpause(request: DeepPartial<GovernanceRequest>, options?: CallOptions & CallOptionsExt): Promise<GovernanceState>;
+    /** Executes a ready unpause timelock as an admin multisig proposal. */
+    unpause(request: DeepPartial<GovernanceRequest>, options?: CallOptions & CallOptionsExt): Promise<GovernanceState>;
 }
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 type DeepPartial<T> = T extends Builtin ? T : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
@@ -339,4 +403,4 @@ interface MessageFns<T> {
     fromPartial<I extends Exact<DeepPartial<T>, I>>(object: I): T;
 }
 
-export { BeneficiaryRequest, BeneficiaryState, CloseOrdersRequest, CloseOrdersResponse, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };
+export { BeneficiaryRequest, BeneficiaryState, CloseOrdersRequest, CloseOrdersResponse, type CoreClient, CoreDefinition, type CoreServiceImplementation, CreateOrderRequest, type DeepPartial, DeriveOrderTrackerRequest, DomainSeparatorRequest, DomainSeparatorResponse, type Exact, GenerateOrderIdRequest, GetPdvRequest, GovernanceRequest, GovernanceState, type MessageFns, MetaArg, OrderIdResponse, OrderTrackerData, OrderTrackerResponse, PdvResponse, ReadOrderTrackerByAddressRequest, ReadOrderTrackerByIdsRequest, RecordOrderRequest, ReplenishRequest, TransferRequest, TxResponse, TxResponse_MetaEntry, protobufPackage };

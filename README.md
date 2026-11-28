@@ -97,7 +97,10 @@ Fastlane(<endpoint>)
 │   ├─ recordOrder()
 │   ├─ transfer()
 │   ├─ attestOrder()
-│   └─ decodeEvent()
+│   ├─ decodeEvent()
+│   ├─ pause()
+│   ├─ requestUnpause()
+│   └─ unpause()
 ├─ orbit
 │   ├─ domainSeparator()
 │   ├─ getUserPda()
@@ -210,7 +213,7 @@ type KmsSignerKey =
 The SDK is based on the following proto services:
 
 - Base Service ([proto/base.proto](./proto/base.proto)): Account utilities, token account management, transaction execution, and status queries.
-- Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, and attestation.
+- Core Service ([proto/core.proto](./proto/core.proto)): Orders management, replenishment, transfers, attestation, and pause / unpause.
 - Orbit Service ([proto/orbit.proto](./proto/orbit.proto)): LP funds management and yield/principal disbursals
 - Kamino Service ([proto/kamino.proto](./proto/kamino.proto)): Kamino borrows, repayments, deposits and withdrawals.
 - Tr Service ([proto/tr.proto](./proto/tr.proto)): TR pools and batch merkle root anchoring.

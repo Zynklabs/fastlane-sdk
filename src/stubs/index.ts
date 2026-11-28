@@ -59,6 +59,8 @@ export type {
   TxResponse as CoreTxResponse,
   BeneficiaryRequest,
   BeneficiaryState,
+  GovernanceRequest,
+  GovernanceState,
   TxResponse_MetaEntry,
 } from "./core";
 
